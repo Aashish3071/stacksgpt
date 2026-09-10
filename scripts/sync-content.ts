@@ -19,8 +19,22 @@ import {
 } from "../lib/content";
 import { matchAffiliateTool } from "../lib/affiliate-engine";
 
-const prisma = new PrismaClient();
 const dryRun = process.argv.includes("--dry");
+let prisma: PrismaClient | null = null;
+
+function getPrismaClient(): PrismaClient | null {
+  if (prisma) return prisma;
+  const url = process.env.DATABASE_URL || "";
+  if (!url.startsWith("postgres://") && !url.startsWith("postgresql://")) {
+    return null;
+  }
+  try {
+    prisma = new PrismaClient();
+    return prisma;
+  } catch {
+    return null;
+  }
+}
 
 async function main() {
   const files = listArticleFiles();
@@ -32,6 +46,13 @@ async function main() {
 
   if (files.length === 0) {
     console.log("No article files found in content/articles/. Nothing to sync.");
+    return;
+  }
+
+  const db = !dryRun ? getPrismaClient() : null;
+  if (!dryRun && !db) {
+    console.warn("\n⚠️  No valid PostgreSQL DATABASE_URL found. Skipping database sync.");
+    console.warn("   Connect your Neon database and set DATABASE_URL to enable live syncing.\n");
     return;
   }
 
@@ -52,19 +73,19 @@ async function main() {
       });
     }
 
-    const existing = await prisma.article.findUnique({
+    if (dryRun) {
+      console.log(`  valid: ${a.externalId}`);
+      created += 1;
+      continue;
+    }
+
+    const existing = await db!.article.findUnique({
       where: { externalId: a.externalId },
       select: { id: true, sourceHash: true, status: true, publishedAt: true },
     });
 
     if (existing?.sourceHash === a.sourceHash) {
       unchanged += 1;
-      continue;
-    }
-
-    if (dryRun) {
-      console.log(`  would ${existing ? "update" : "create"}: ${a.externalId}`);
-      existing ? (updated += 1) : (created += 1);
       continue;
     }
 
@@ -99,14 +120,14 @@ async function main() {
 
     if (existing) {
       // Editing a live article updates it in place; it does not un-publish.
-      await prisma.article.update({ where: { id: existing.id }, data });
+      await db!.article.update({ where: { id: existing.id }, data });
       updated += 1;
     } else {
-      await prisma.article.create({
+      await db!.article.create({
         data: {
           ...data,
           externalId: a.externalId,
-          slug: await uniqueSlug(a.slug),
+          slug: await uniqueSlug(db!, a.slug),
           // New imports always land in the review queue.
           status: "DRAFT",
           isPublished: false,
@@ -140,10 +161,10 @@ async function main() {
   }
 }
 
-async function uniqueSlug(base: string): Promise<string> {
+async function uniqueSlug(db: PrismaClient, base: string): Promise<string> {
   let candidate = base || "untitled";
   for (let n = 2; n < 50; n++) {
-    const clash = await prisma.article.findUnique({
+    const clash = await db.article.findUnique({
       where: { slug: candidate },
       select: { id: true },
     });
@@ -154,8 +175,18 @@ async function uniqueSlug(base: string): Promise<string> {
 }
 
 main()
-  .catch((e) => {
+  .catch((e: any) => {
+    if (
+      e?.code === "P2021" ||
+      e?.message?.includes("does not exist") ||
+      e?.message?.includes("Can't reach database server")
+    ) {
+      console.warn("\n⚠️  Database tables not yet initialized. Skipping article sync during build.");
+      console.warn("   Run 'npx prisma db push' once your Neon database is connected.\n");
+      process.exitCode = 0;
+      return;
+    }
     console.error(e);
     process.exitCode = 1;
   })
-  .finally(() => prisma.$disconnect());
+  .finally(() => prisma?.$disconnect());

@@ -41,26 +41,38 @@ fine for now. If it becomes a problem, move uploads to Vercel Blob and change
 `heroImage` to accept the returned URL, adding that hostname to
 `next.config.mjs`.
 
-## 1. Database (Neon)
+## 1. Database (Vercel + Neon Storage)
 
-Create a project at https://neon.tech and copy both connection strings, then:
+Stacksgpt uses Prisma with PostgreSQL for production.
+
+### Option A: Via Vercel Dashboard (Recommended)
+1. In your Vercel project, navigate to the **Storage** tab.
+2. Select **Neon** (or Vercel Postgres powered by Neon) and click **Create / Connect**.
+3. Vercel automatically creates the database and populates environment variables:
+   - `DATABASE_URL`: Set to the pooled connection string (e.g. `postgres://...@...pooler...neon.tech/neondb?sslmode=require`).
+   - `DIRECT_URL`: Set to the direct, unpooled connection string (e.g. `postgres://...@...neon.tech/neondb?sslmode=require`).
+   *(Note: If Vercel provides `POSTGRES_PRISMA_URL` and `POSTGRES_URL_NON_POOLING`, simply add `DATABASE_URL` = `$POSTGRES_PRISMA_URL` and `DIRECT_URL` = `$POSTGRES_URL_NON_POOLING` in your Vercel Environment Variables).*
+
+### Option B: Via Neon.tech Directly
+1. Create a database at [https://neon.tech](https://neon.tech).
+2. Under Connection Details, copy both:
+   - **Pooled connection string** $\rightarrow$ `DATABASE_URL`
+   - **Unpooled / Direct connection string** $\rightarrow$ `DIRECT_URL`
+3. Add both to your Vercel Project Settings $\rightarrow$ Environment Variables.
+
+### Initialize Database Tables & Seed
+Once your Neon database is connected, initialize the tables and seed the starting channels and tool registry:
 
 ```bash
-# prisma/schema.prisma
-datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")   # pooled connection
-  directUrl = env("DIRECT_URL")     # unpooled, used by migrate
-}
-```
+# Push schema tables to Neon
+npx prisma db push
 
-```bash
-npx prisma migrate dev --name init
-npx tsx prisma/seed.ts
-```
+# Seed default channels and tool registry
+npm run seed
 
-Keep SQLite for local work by leaving your local `.env` pointing at
-`file:./dev.db` and setting the Postgres URLs only in Vercel.
+# Sync articles from content/articles into Neon
+npm run sync:content
+```
 
 ## 2. Environment variables in Vercel
 
