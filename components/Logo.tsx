@@ -25,7 +25,7 @@ export default function Logo({
     return (
       <div className={`inline-flex items-center gap-2.5 ${className}`}>
         <Image
-          src="/images/logo.jpg"
+          src="/images/logos/logo.jpg"
           alt="Stacksgpt Logo"
           width={dimension}
           height={dimension}

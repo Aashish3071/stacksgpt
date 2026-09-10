@@ -49,29 +49,46 @@ async function main() {
     return;
   }
 
-  const db = !dryRun ? getPrismaClient() : null;
-  if (!dryRun && !db) {
-    console.warn("\n⚠️  No valid PostgreSQL DATABASE_URL found. Skipping database sync.");
-    console.warn("   Connect your Neon database and set DATABASE_URL to enable live syncing.\n");
+  // Validation runs FIRST and unconditionally.
+  //
+  // It used to sit behind the database check, so when the database was
+  // unreachable the parse loop never ran and a malformed article passed
+  // silently with exit code 0 — losing the safety property exactly during the
+  // deploy where something was already wrong. Content correctness has nothing
+  // to do with database availability, so it is checked either way.
+  const parsed: Array<ReturnType<typeof parseArticleFile>> = files.map(parseArticleFile);
+
+  for (const result of parsed) {
+    if (!result.ok) {
+      failures.push(result.failure);
+    } else if (result.article.seoWarnings.length > 0) {
+      warnings.push({
+        file: result.article.externalId,
+        messages: result.article.seoWarnings.map((w) => `${w.field}: ${w.message}`),
+      });
+    }
+  }
+
+  if (failures.length > 0) {
+    reportWarnings(warnings);
+    reportFailures(failures);
+    // Never write to the database when any file is invalid.
+    process.exitCode = 1;
     return;
   }
 
-  for (const file of files) {
-    const result = parseArticleFile(file);
+  const db = !dryRun ? getPrismaClient() : null;
+  if (!dryRun && !db) {
+    reportWarnings(warnings);
+    console.warn("\n⚠️  No valid PostgreSQL DATABASE_URL found. Articles validated but not synced.");
+    console.warn("   Set DATABASE_URL to enable syncing. The build's preflight step will");
+    console.warn("   stop the deploy if the database is genuinely required.\n");
+    return;
+  }
 
-    if (!result.ok) {
-      failures.push(result.failure);
-      continue;
-    }
-
+  for (const result of parsed) {
+    if (!result.ok) continue; // already reported above
     const a = result.article;
-
-    if (a.seoWarnings.length > 0) {
-      warnings.push({
-        file: a.externalId,
-        messages: a.seoWarnings.map((w) => `${w.field}: ${w.message}`),
-      });
-    }
 
     if (dryRun) {
       console.log(`  valid: ${a.externalId}`);
@@ -142,23 +159,27 @@ async function main() {
     `\nSynced content: ${created} created, ${updated} updated, ${unchanged} unchanged, ${failures.length} rejected.`
   );
 
-  if (warnings.length > 0) {
-    console.warn("\nSEO warnings (not blocking, but worth fixing):");
-    for (const w of warnings) {
-      console.warn(`\n  ${w.file}`);
-      w.messages.forEach((m) => console.warn(`    - ${m}`));
-    }
-  }
+  reportWarnings(warnings);
+}
 
-  if (failures.length > 0) {
-    console.error("\nRejected files:");
-    for (const f of failures) {
-      console.error(`\n  ${f.file}`);
-      f.errors.forEach((e) => console.error(`    - ${e}`));
-    }
-    // Fail the build so a malformed article is caught in CI, not in production.
-    process.exitCode = 1;
+/** SEO advice that is worth fixing but must not block a deploy. */
+function reportWarnings(warnings: Array<{ file: string; messages: string[] }>) {
+  if (warnings.length === 0) return;
+  console.warn("\nSEO warnings (not blocking, but worth fixing):");
+  for (const w of warnings) {
+    console.warn(`\n  ${w.file}`);
+    w.messages.forEach((m) => console.warn(`    - ${m}`));
   }
+}
+
+/** Content errors. These always fail the build, whatever the database is doing. */
+function reportFailures(failures: ParseFailure[]) {
+  console.error("\nRejected files:");
+  for (const f of failures) {
+    console.error(`\n  ${f.file}`);
+    f.errors.forEach((e) => console.error(`    - ${e}`));
+  }
+  console.error("");
 }
 
 async function uniqueSlug(db: PrismaClient, base: string): Promise<string> {

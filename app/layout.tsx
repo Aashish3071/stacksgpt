@@ -34,9 +34,9 @@ export const metadata: Metadata = {
     locale: "en_US",
   },
   icons: {
-    icon: "/images/logo.jpg",
-    shortcut: "/images/logo.jpg",
-    apple: "/images/logo.jpg",
+    icon: "/images/logos/logo.jpg",
+    shortcut: "/images/logos/logo.jpg",
+    apple: "/images/logos/logo.jpg",
   },
   robots: { index: true, follow: true },
 };

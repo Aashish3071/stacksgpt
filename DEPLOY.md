@@ -41,38 +41,40 @@ fine for now. If it becomes a problem, move uploads to Vercel Blob and change
 `heroImage` to accept the returned URL, adding that hostname to
 `next.config.mjs`.
 
-## 1. Database (Vercel + Neon Storage)
+## 1. Database (Supabase)
 
-Stacksgpt uses Prisma with PostgreSQL for production.
+The schema is Postgres. Supabase gives you two connection strings and **which
+one goes where matters**:
 
-### Option A: Via Vercel Dashboard (Recommended)
-1. In your Vercel project, navigate to the **Storage** tab.
-2. Select **Neon** (or Vercel Postgres powered by Neon) and click **Create / Connect**.
-3. Vercel automatically creates the database and populates environment variables:
-   - `DATABASE_URL`: Set to the pooled connection string (e.g. `postgres://...@...pooler...neon.tech/neondb?sslmode=require`).
-   - `DIRECT_URL`: Set to the direct, unpooled connection string (e.g. `postgres://...@...neon.tech/neondb?sslmode=require`).
-   *(Note: If Vercel provides `POSTGRES_PRISMA_URL` and `POSTGRES_URL_NON_POOLING`, simply add `DATABASE_URL` = `$POSTGRES_PRISMA_URL` and `DIRECT_URL` = `$POSTGRES_URL_NON_POOLING` in your Vercel Environment Variables).*
+| Variable | Supabase string | Port | Why |
+|---|---|---|---|
+| `DATABASE_URL` | **Transaction pooler** | 6543 | Every serverless invocation opens its own connection. The direct endpoint's limit is small and will be exhausted under real traffic, producing intermittent `too many connections` errors that look like random 500s. |
+| `DIRECT_URL` | **Direct connection** | 5432 | Migrations need a real session; they cannot run through the pooler. |
 
-### Option B: Via Neon.tech Directly
-1. Create a database at [https://neon.tech](https://neon.tech).
-2. Under Connection Details, copy both:
-   - **Pooled connection string** $\rightarrow$ `DATABASE_URL`
-   - **Unpooled / Direct connection string** $\rightarrow$ `DIRECT_URL`
-3. Add both to your Vercel Project Settings $\rightarrow$ Environment Variables.
+Copy both from **Supabase → Project Settings → Database → Connection string**.
+The pooled one looks like:
 
-### Initialize Database Tables & Seed
-Once your Neon database is connected, initialize the tables and seed the starting channels and tool registry:
+```
+postgresql://postgres.<project-ref>:<password>@aws-0-<region>.pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1
+```
+
+and the direct one like:
+
+```
+postgresql://postgres:<password>@db.<project-ref>.supabase.co:5432/postgres
+```
+
+`connection_limit=1` is deliberate: with the pooler in front, each function
+instance only needs a single connection of its own.
+
+Create the tables once, from your machine, using the **direct** URL:
 
 ```bash
-# Push schema tables to Neon
 npx prisma db push
-
-# Seed default channels and tool registry
-npm run seed
-
-# Sync articles from content/articles into Neon
-npm run sync:content
 ```
+
+The app warns at build and at runtime if `DATABASE_URL` is not pooled while
+running on Vercel, so a misconfiguration here is visible rather than silent.
 
 ## 2. Environment variables in Vercel
 
@@ -85,7 +87,8 @@ openssl rand -hex 32   # CRON_SECRET
 
 | Variable | Notes |
 |---|---|
-| `DATABASE_URL` / `DIRECT_URL` | From Neon |
+| `DATABASE_URL` | Supabase **transaction pooler** string, port 6543 |
+| `DIRECT_URL` | Supabase **direct** string, port 5432 |
 | `GEMINI_API_KEY` | **Optional.** Only for the built-in writer. Empty = ingestion collects story leads and drafts nothing |
 | `GEMINI_MODEL` | Defaults to `gemini-flash-latest`; unused without a key |
 | `ADMIN_PASSWORD` | 8+ characters. Admin is disabled if unset |
@@ -95,7 +98,23 @@ openssl rand -hex 32   # CRON_SECRET
 | `NEXT_PUBLIC_ADS_PROVIDER` | Leave **empty** until approved. Empty = no ad markup renders |
 | `NEXT_PUBLIC_ADSENSE_ID` | Your `pub-…` id, once approved |
 
-## 3. Cron
+## 3. What the build refuses to do
+
+`npm run build` runs `sync-content` then `preflight` before `next build`:
+
+- **Any invalid article** fails the build, whatever state the database is in.
+  Content correctness is checked before the database is even contacted.
+- **A missing or unreachable `DATABASE_URL`** fails the build. This is
+  deliberate: without it the deploy would succeed and quietly replace a working
+  site with an empty one, handing search engines a sitemap containing no
+  articles. A failed build leaves the previous good deployment serving.
+- **Zero published articles** fails the build for the same reason. Override with
+  `ALLOW_EMPTY_BUILD=true` when you genuinely intend it, such as a first launch.
+- **A database that connects but has no tables** is allowed through once, with a
+  warning, because a brand new database must be deployed before `prisma db push`
+  can be pointed at it.
+
+## 4. Cron
 
 `vercel.json` schedules `/api/cron/ingest` daily at 06:00 UTC. Vercel sends the
 `CRON_SECRET` as a bearer token automatically once the variable is set.
@@ -110,7 +129,7 @@ curl -H "Authorization: Bearer $CRON_SECRET" https://yourdomain.com/api/cron/ing
 Vercel Hobby caps function duration at 60s. If a run times out, lower the batch:
 `/api/cron/ingest?limit=4`.
 
-## 4. Turning ads on
+## 5. Turning ads on
 
 Ads render nowhere while `NEXT_PUBLIC_ADS_PROVIDER` is empty. Applying to
 AdSense requires their script to be live on the site, so setting
