@@ -3,6 +3,8 @@ import { Source_Serif_4, Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { SITE_NAME, SITE_TAGLINE, siteUrl } from "@/lib/site";
 
 const serif = Source_Serif_4({
@@ -46,6 +48,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Navbar />
         <main className="flex-1">{children}</main>
         <Footer />
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
