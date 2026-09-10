@@ -1,0 +1,143 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Channel {
+  id            String    @id @default(cuid())
+  name          String
+  handleOrUrl   String    @unique
+  type          String    // "TWITTER", "RSS", "SUBSTACK", "YOUTUBE"
+  category      String    @default("General") // "Productivity", "Generative", "Coding", "General"
+  isActive      Boolean   @default(true)
+  lastFetchedAt DateTime?
+  newsItems     RawNews[]
+  createdAt     DateTime  @default(now())
+}
+
+model RawNews {
+  id          String    @id @default(cuid())
+  channelId   String
+  channel     Channel   @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  externalUrl String    @unique
+  author      String
+  title       String?
+  rawText     String
+  mediaUrl    String?
+  // Normalised hash of the title. Catches the same story reported by several
+  // outlets, which externalUrl (literal duplicates only) cannot.
+  contentHash String?
+  // Relevance score from lib/relevance.ts; only the top items are sent to the LLM.
+  score       Float     @default(0)
+  publishedAt DateTime?
+  status      String    @default("PENDING") // "PENDING", "PROCESSED", "IGNORED", "FAILED"
+  createdAt   DateTime  @default(now())
+  article     Article?
+
+  @@index([contentHash])
+  @@index([status, score])
+}
+
+model ToolAffiliate {
+  id            String    @id @default(cuid())
+  name          String    @unique
+  slug          String    @unique
+  tagline       String
+  description   String?
+  category      String    // "Writing", "Video", "Coding", "Automation", "Research"
+  pricingModel  String    @default("Freemium")
+  websiteUrl    String    // The tool's real public site. Always present.
+  // A real, approved partner link. Null until a deal actually exists — the
+  // pipeline must never generate one.
+  affiliateUrl  String?
+  // "NONE" = plain editorial listing. "ACTIVE" = approved partner link, rendered
+  // with rel="sponsored nofollow" and labelled to the reader.
+  status        String    @default("NONE")
+  // JSON array of alternative names the writer might use, e.g. ["GPT-5","ChatGPT"].
+  aliases       String?
+  discountCode  String?   // Only ever a code a vendor actually issued you.
+  clicksCount   Int       @default(0)
+  articles      Article[]
+  createdAt     DateTime  @default(now())
+}
+
+model Article {
+  id              String         @id @default(cuid())
+  slug            String         @unique
+  title           String         // Plain English / Jargon-free headline
+  originalTitle   String?
+  summary         String         // The 10-second takeaway
+  jargonBuster    String         // JSON: [{ technicalTerm, plainEnglish }]
+  useCases        String         // JSON: [{ title, targetAudience, stepByStep: [], promptTemplate }]
+  verdict         String         // Buying advice / is it worth it?
+  category        String         @default("Productivity")
+  primaryToolId   String?
+  primaryTool     ToolAffiliate? @relation(fields: [primaryToolId], references: [id])
+  readingMinutes  Int            @default(3)
+  // "DRAFT" | "NEEDS_EDIT" | "PUBLISHED" | "REJECTED".
+  // NEEDS_EDIT marks drafts produced by the offline fallback writer, which must
+  // never be published without a human rewriting them.
+  status          String         @default("DRAFT")
+  isPublished     Boolean        @default(false)
+  publishedAt     DateTime?
+  viewCount       Int            @default(0)
+  sourceAuthor    String?
+  sourceUrl       String?
+
+  // --- Provenance -------------------------------------------------------
+  // "RSS" = drafted by the built-in pipeline. "MDX" = committed to the repo by
+  // an external agent and imported by scripts/sync-content.ts.
+  origin          String         @default("RSS")
+  // Stable id from the MDX filename. Lets the sync step re-import the same file
+  // repeatedly without creating duplicates.
+  externalId      String?        @unique
+  // Hash of the imported file, so unchanged files are skipped on re-sync.
+  sourceHash      String?
+  // Optional long-form prose from the MDX body, stored as markdown.
+  body            String?
+
+  // What kind of story this is: ANNOUNCEMENT | NEWS | UPDATE | TOOL |
+  // USE_CASE | SHOWCASE. Drives which sections the article page renders.
+  type            String         @default("NEWS")
+  // JSON array of bullet points summarising the story, used by reporting pieces.
+  keyPoints       String?
+
+  // --- SEO ---------------------------------------------------------------
+  // seoTitle is what search engines show; it is length-capped and may differ
+  // from the on-page headline. metaDescription is the snippet under it.
+  // keywords is a JSON array — note that Google ignores the keywords meta tag,
+  // so these exist for internal use and non-Google engines, not for ranking.
+  seoTitle        String?
+  metaDescription String?
+  keywords        String?
+
+  // When the ORIGINAL source published, and when the writing agent fetched it.
+  // Distinct from publishedAt, which is when we published our article.
+  sourcePublishedAt DateTime?
+  retrievedAt       DateTime?
+
+  // --- Imagery ----------------------------------------------------------
+  // Path under /public (self-hosted, committed alongside the article) or an
+  // absolute URL. Alt text is required alongside it for accessibility and SEO.
+  heroImage       String?
+  heroImageAlt    String?
+  heroImageCredit String?
+
+  rawNewsId       String?        @unique
+  rawNews         RawNews?       @relation(fields: [rawNewsId], references: [id])
+  createdAt       DateTime       @default(now())
+
+  @@index([status])
+  @@index([category, isPublished])
+}
+
+model Subscriber {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  source    String   @default("homepage")
+  createdAt DateTime @default(now())
+}

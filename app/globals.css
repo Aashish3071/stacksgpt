@@ -1,0 +1,78 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-paper text-ink font-sans antialiased;
+  }
+
+  ::selection {
+    @apply bg-accent-soft text-ink;
+  }
+
+  /* Links inside running prose are underlined; UI links opt out. */
+  a {
+    text-underline-offset: 0.18em;
+  }
+
+  h1, h2, h3, h4 {
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+}
+
+@layer components {
+  /* The kicker: small caps label above a headline or section. */
+  .kicker {
+    @apply font-sans text-kicker font-semibold uppercase tracking-wider text-accent;
+  }
+
+  .kicker-muted {
+    @apply font-sans text-kicker font-semibold uppercase tracking-wider text-faint;
+  }
+
+  /* Byline / dateline row. */
+  .meta {
+    @apply font-sans text-meta text-faint;
+  }
+
+  /* Running article prose. Serif, generous leading, constrained measure. */
+  .article-prose {
+    @apply font-serif text-body-lg text-ink;
+  }
+
+  .article-prose p + p {
+    @apply mt-5;
+  }
+
+  .article-prose a {
+    @apply text-accent underline decoration-rule-strong hover:decoration-accent;
+  }
+
+  /* Hairline rule used to separate content instead of cards. */
+  .rule-t {
+    @apply border-t border-rule;
+  }
+}
+
+@layer components {
+  /* Ad containers reserve their height before the network paints, so switching
+     ads on does not shift the page. Heights come from lib/ad-config.ts. */
+  .ad-slot__inner {
+    min-height: var(--ad-h-mobile);
+  }
+
+  @media (min-width: 768px) {
+    .ad-slot__inner {
+      min-height: var(--ad-h-desktop);
+    }
+  }
+}
