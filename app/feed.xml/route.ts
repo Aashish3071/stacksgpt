@@ -14,12 +14,17 @@ function xml(text: string): string {
 }
 
 export async function GET() {
-  const articles = await prisma.article.findMany({
-    where: { isPublished: true },
-    orderBy: { publishedAt: "desc" },
-    take: 50,
-    select: { slug: true, title: true, summary: true, publishedAt: true, createdAt: true },
-  });
+  let articles: any[] = [];
+  try {
+    articles = await prisma.article.findMany({
+      where: { isPublished: true },
+      orderBy: { publishedAt: "desc" },
+      take: 50,
+      select: { slug: true, title: true, summary: true, publishedAt: true, createdAt: true },
+    });
+  } catch (err) {
+    console.warn("Could not load articles for feed.xml during build:", err);
+  }
 
   const items = articles
     .map((a) => {

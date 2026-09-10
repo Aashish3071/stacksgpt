@@ -40,12 +40,17 @@ const PER_CATEGORY = 4;
  * 5. Footer (rendered via RootLayout)
  */
 export default async function HomePage() {
-  const articles = await prisma.article.findMany({
-    where: { isPublished: true },
-    orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
-    take: 60,
-    select: CARD_FIELDS,
-  });
+  let articles: ArticleCardData[] = [];
+  try {
+    articles = await prisma.article.findMany({
+      where: { isPublished: true },
+      orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
+      take: 60,
+      select: CARD_FIELDS,
+    });
+  } catch (err) {
+    console.warn("Could not query articles on HomePage during build/render:", err);
+  }
 
   if (articles.length === 0) {
     return (

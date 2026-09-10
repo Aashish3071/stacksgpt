@@ -35,23 +35,28 @@ export default async function CategoryPage({ params }: Props) {
   const category = resolveCategory(params.slug);
   if (!category) notFound();
 
-  const articles = await prisma.article.findMany({
-    where: { isPublished: true, category },
-    orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
-    take: 60,
-    select: {
-      id: true,
-      slug: true,
-      title: true,
-      summary: true,
-      category: true,
-      readingMinutes: true,
-      publishedAt: true,
-      sourceAuthor: true,
-      heroImage: true,
-      heroImageAlt: true,
-    },
-  });
+  let articles: any[] = [];
+  try {
+    articles = await prisma.article.findMany({
+      where: { isPublished: true, category },
+      orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
+      take: 60,
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        summary: true,
+        category: true,
+        readingMinutes: true,
+        publishedAt: true,
+        sourceAuthor: true,
+        heroImage: true,
+        heroImageAlt: true,
+      },
+    });
+  } catch (err) {
+    console.warn("Could not query category articles during build/render:", err);
+  }
 
   return (
     <div className="mx-auto max-w-shell px-4 py-10 sm:px-6">

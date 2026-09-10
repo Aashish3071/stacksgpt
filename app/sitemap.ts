@@ -5,12 +5,17 @@ import { CATEGORIES, siteUrl } from "@/lib/site";
 export const revalidate = 3600;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const articles = await prisma.article.findMany({
-    where: { isPublished: true },
-    select: { slug: true, publishedAt: true, createdAt: true },
-    orderBy: { publishedAt: "desc" },
-    take: 5000,
-  });
+  let articles: any[] = [];
+  try {
+    articles = await prisma.article.findMany({
+      where: { isPublished: true },
+      select: { slug: true, publishedAt: true, createdAt: true },
+      orderBy: { publishedAt: "desc" },
+      take: 5000,
+    });
+  } catch (err) {
+    console.warn("Could not load articles for sitemap during build:", err);
+  }
 
   const staticPages = ["", "/tools", "/about", "/editorial-standards", "/privacy", "/contact"];
 

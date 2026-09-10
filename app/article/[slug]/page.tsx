@@ -28,31 +28,41 @@ const CARD_FIELDS = {
 } as const;
 
 export async function generateStaticParams() {
-  const articles = await prisma.article.findMany({
-    where: { isPublished: true },
-    select: { slug: true },
-    orderBy: { publishedAt: "desc" },
-    take: 200,
-  });
-  return articles.map(({ slug }) => ({ slug }));
+  try {
+    const articles = await prisma.article.findMany({
+      where: { isPublished: true },
+      select: { slug: true },
+      orderBy: { publishedAt: "desc" },
+      take: 200,
+    });
+    return articles.map(({ slug }) => ({ slug }));
+  } catch (err) {
+    console.warn("generateStaticParams skipped during build (database unmigrated or unreachable):", err);
+    return [];
+  }
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const article = await prisma.article.findUnique({
-    where: { slug: params.slug },
-    select: {
-      title: true,
-      summary: true,
-      publishedAt: true,
-      isPublished: true,
-      seoTitle: true,
-      metaDescription: true,
-      keywords: true,
-      heroImage: true,
-      heroImageAlt: true,
-      sourcePublishedAt: true,
-    },
-  });
+  let article: any = null;
+  try {
+    article = await prisma.article.findUnique({
+      where: { slug: params.slug },
+      select: {
+        title: true,
+        summary: true,
+        publishedAt: true,
+        isPublished: true,
+        seoTitle: true,
+        metaDescription: true,
+        keywords: true,
+        heroImage: true,
+        heroImageAlt: true,
+        sourcePublishedAt: true,
+      },
+    });
+  } catch {
+    article = null;
+  }
 
   if (!article || !article.isPublished) {
     return { title: "Article not found", robots: { index: false, follow: false } };
@@ -102,25 +112,34 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function ArticlePage({ params }: Props) {
-  const article = await prisma.article.findUnique({
-    where: { slug: params.slug },
-    include: { primaryTool: true },
-  });
+  let article: any = null;
+  let related: any[] = [];
+
+  try {
+    article = await prisma.article.findUnique({
+      where: { slug: params.slug },
+      include: { primaryTool: true },
+    });
+
+    if (article && article.isPublished) {
+      related = await prisma.article.findMany({
+        where: {
+          isPublished: true,
+          category: article.category,
+          NOT: { id: article.id },
+        },
+        orderBy: { publishedAt: "desc" },
+        take: 3,
+        select: CARD_FIELDS,
+      });
+    }
+  } catch (err) {
+    console.warn("Could not load article from database:", err);
+  }
 
   if (!article || !article.isPublished) {
     notFound();
   }
-
-  const related = await prisma.article.findMany({
-    where: {
-      isPublished: true,
-      category: article.category,
-      NOT: { id: article.id },
-    },
-    orderBy: { publishedAt: "desc" },
-    take: 3,
-    select: CARD_FIELDS,
-  });
 
   // Parsed here rather than in the client component so the schema renders in HTML.
   let useCases: Array<{ title: string; stepByStep: string[] }> = [];

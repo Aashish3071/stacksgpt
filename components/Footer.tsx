@@ -12,8 +12,7 @@ export default function Footer() {
               <Logo size="sm" />
             </Link>
             <p className="meta mt-3 leading-relaxed">
-              We track the latest AI and tech developments so you do not have to, delivering
-              what is new and why it matters in plain English.
+              Stack the facts. Skip the hype. We report what&apos;s new in AI and what actually matters.
             </p>
           </div>
 

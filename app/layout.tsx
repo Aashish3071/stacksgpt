@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     template: `%s — ${SITE_NAME}`,
   },
   description:
-    "Daily AI & tech news translated into plain English, with concise pointers on what is new, why it matters, and an honest verdict.",
+    "Stack the facts. Skip the hype. We report what's new in AI and what actually matters in plain English.",
   openGraph: {
     siteName: SITE_NAME,
     type: "website",

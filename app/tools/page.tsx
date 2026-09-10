@@ -13,9 +13,14 @@ export const metadata: Metadata = {
 };
 
 export default async function ToolsDirectoryPage() {
-  const tools = await prisma.toolAffiliate.findMany({
-    orderBy: [{ category: "asc" }, { name: "asc" }],
-  });
+  let tools: any[] = [];
+  try {
+    tools = await prisma.toolAffiliate.findMany({
+      orderBy: [{ category: "asc" }, { name: "asc" }],
+    });
+  } catch (err) {
+    console.warn("Could not query tools during build/render:", err);
+  }
 
   // Group into sections so the page reads as a reference, not a shop.
   const byCategory = tools.reduce<Record<string, typeof tools>>((acc, tool) => {
