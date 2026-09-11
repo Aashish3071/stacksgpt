@@ -43,19 +43,23 @@ async function main() {
   try {
     await prisma.$queryRaw`SELECT 1`;
   } catch (err) {
-    // Prisma's message starts with a blank line; take the first line with text.
-    const detail =
-      String(err instanceof Error ? err.message : err)
+    try {
+      await prisma.article.count();
+    } catch {
+      const allLines = String(
+        err instanceof Error ? err.stack || err.message : err,
+      )
         .split("\n")
         .map((l) => l.trim())
-        .find((l) => l.length > 0) || "no further detail";
+        .filter((l) => l.length > 0);
 
-    fail("cannot connect to the database", [
-      detail,
-      "",
-      "Check that DATABASE_URL is correct and that the database allows",
-      "connections from Vercel's build environment.",
-    ]);
+      fail("cannot connect to the database", [
+        ...allLines.slice(0, 5),
+        "",
+        "Check that DATABASE_URL is correct and that the database allows",
+        "connections from Vercel's build environment.",
+      ]);
+    }
   }
 
   let publishedCount: number;
