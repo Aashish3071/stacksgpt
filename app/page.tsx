@@ -44,20 +44,30 @@ export default async function HomePage() {
   try {
     articles = await prisma.article.findMany({
       where: { isPublished: true },
-      orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
+      orderBy: [
+        { featured: "desc" },
+        { publishedAt: "desc" },
+        { createdAt: "desc" },
+      ],
       take: 60,
       select: CARD_FIELDS,
     });
   } catch (err) {
-    console.warn("Could not query articles on HomePage during build/render:", err);
+    console.warn(
+      "Could not query articles on HomePage during build/render:",
+      err,
+    );
   }
 
   if (articles.length === 0) {
     return (
       <div className="mx-auto max-w-measure px-4 py-24 text-center sm:px-6">
-        <h1 className="font-serif text-head-lg text-ink">No articles published yet</h1>
+        <h1 className="font-serif text-head-lg text-ink">
+          No articles published yet
+        </h1>
         <p className="meta mt-3 leading-relaxed">
-          Review and approve incoming drafts in the admin panel to publish stories here.
+          Our first stories are being prepared. Check back for clear reporting
+          on AI and technology.
         </p>
       </div>
     );
@@ -69,10 +79,17 @@ export default async function HomePage() {
   const suggestedArticles = rest.slice(0, 8);
 
   // Category-wise sections
-  const sections = CATEGORIES.map((category) => ({
-    category,
-    items: rest.filter((a) => a.category === category).slice(0, PER_CATEGORY),
-  })).filter((s) => s.items.length >= 1);
+  const categories = await prisma.taxonomy.findMany({
+    where: { kind: "CATEGORY", active: true },
+    select: { name: true },
+  });
+  const sections = categories
+    .map((c) => c.name)
+    .map((category) => ({
+      category,
+      items: rest.filter((a) => a.category === category).slice(0, PER_CATEGORY),
+    }))
+    .filter((s) => s.items.length >= 1);
 
   return (
     <div className="mx-auto max-w-shell px-4 sm:px-6">
@@ -87,12 +104,18 @@ export default async function HomePage() {
       {suggestedArticles.length > 0 && (
         <section className="border-b border-rule py-8 sm:py-10">
           <div className="flex items-baseline justify-between border-b border-rule pb-2">
-            <h2 className="kicker text-ink font-semibold tracking-wide">Suggested Articles</h2>
+            <h2 className="kicker text-ink font-semibold tracking-wide">
+              Suggested Articles
+            </h2>
             <span className="meta text-xs">Newest additions</span>
           </div>
           <div className="grid grid-cols-2 gap-x-6 gap-y-8 pt-6 sm:gap-x-8 lg:grid-cols-4">
             {suggestedArticles.map((article) => (
-              <ArticleCard key={article.id} article={article} variant="square" />
+              <ArticleCard
+                key={article.id}
+                article={article}
+                variant="square"
+              />
             ))}
           </div>
         </section>
@@ -104,14 +127,23 @@ export default async function HomePage() {
       {sections.map(({ category, items }) => (
         <section key={category} className="border-b border-rule py-8 sm:py-10">
           <div className="flex items-baseline justify-between border-b border-rule pb-2">
-            <h2 className="kicker text-ink font-semibold tracking-wide">{category}</h2>
-            <Link href={categoryHref(category)} className="meta text-xs hover:text-accent">
+            <h2 className="kicker text-ink font-semibold tracking-wide">
+              {category}
+            </h2>
+            <Link
+              href={categoryHref(category)}
+              className="meta text-xs hover:text-accent"
+            >
               More in {category.toLowerCase()} →
             </Link>
           </div>
           <div className="grid grid-cols-2 gap-x-6 gap-y-8 pt-6 sm:gap-x-8 lg:grid-cols-4">
             {items.map((article) => (
-              <ArticleCard key={article.id} article={article} variant="square" />
+              <ArticleCard
+                key={article.id}
+                article={article}
+                variant="square"
+              />
             ))}
           </div>
         </section>

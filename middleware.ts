@@ -1,67 +1,57 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
-import { SESSION_COOKIE, verifySessionToken } from "@/lib/auth";
-
-/**
- * Gate for everything that can change the site.
- *
- * Without this, /admin and the mutating API routes are usable by anyone who
- * finds the URL — they could publish, edit or delete articles at will.
- */
-
-const PUBLIC_API_PREFIXES = [
+import { NextRequest, NextResponse } from "next/server";
+const publicApi = [
   "/api/admin/login",
-  "/api/cron/", // guarded separately by CRON_SECRET
-  "/api/subscribe", // public newsletter signup
-  "/api/views", // public pageview beacon
-  "/api/affiliate/", // public outbound redirect
+  "/api/auth/refresh",
+  "/api/import/",
+  "/api/cron/",
+  "/api/subscribe",
+  "/api/newsletter/",
+  "/api/events",
+  "/api/views",
+  "/api/affiliate/",
+  "/api/partners/",
 ];
-
-/** Methods that only read. Public GETs stay open so pages still render. */
-const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
-
-const PROTECTED_READ_PREFIXES = [
-  "/api/articles",
-  "/api/channels",
-  "/api/tools",
-  "/api/pipeline",
-  "/api/leads",
-];
-
-export async function middleware(req: NextRequest) {
-  const { pathname } = req.nextUrl;
-  const authed = await verifySessionToken(req.cookies.get(SESSION_COOKIE)?.value);
-
-  // Admin pages: redirect to login rather than showing a broken shell.
-  if (pathname.startsWith("/admin")) {
-    if (pathname === "/admin/login") return NextResponse.next();
-    if (!authed) {
-      const url = req.nextUrl.clone();
-      url.pathname = "/admin/login";
-      url.searchParams.set("next", pathname);
-      return NextResponse.redirect(url);
-    }
-    return NextResponse.next();
-  }
-
-  if (!pathname.startsWith("/api/")) return NextResponse.next();
-
-  if (PUBLIC_API_PREFIXES.some((p) => pathname.startsWith(p))) {
-    return NextResponse.next();
-  }
-
-  // Admin-only API surface: both reads and writes require a session, since the
-  // read endpoints expose unpublished drafts.
-  const isProtectedRead = PROTECTED_READ_PREFIXES.some((p) => pathname.startsWith(p));
-  if (!SAFE_METHODS.has(req.method) || isProtectedRead) {
-    if (!authed) {
+export function middleware(req: NextRequest) {
+  const path = req.nextUrl.pathname;
+  if (
+    path.startsWith("/admin") &&
+    path !== "/admin/login" &&
+    !req.cookies.get("stacksgpt_session")
+  )
+    return NextResponse.redirect(new URL("/admin/login", req.url));
+  if (
+    path.startsWith("/api/") &&
+    !publicApi.some(
+      (p) => path === p || (p.endsWith("/") && path.startsWith(p)),
+    )
+  ) {
+    if (!req.cookies.get("stacksgpt_session"))
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    if (
+      !["GET", "HEAD", "OPTIONS"].includes(req.method) &&
+      req.headers.get("origin") !== req.nextUrl.origin
+    )
+      return NextResponse.json(
+        { error: "Invalid request origin" },
+        { status: 403 },
+      );
   }
-
-  return NextResponse.next();
+  const res = NextResponse.next();
+  res.headers.set("X-Content-Type-Options", "nosniff");
+  res.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  res.headers.set("X-Frame-Options", "SAMEORIGIN");
+  if (path.startsWith("/newsletter/"))
+    res.headers.set("Referrer-Policy", "no-referrer");
+  if (
+    path.startsWith("/admin") ||
+    path.startsWith("/api/") ||
+    path.startsWith("/newsletter/")
+  ) {
+    res.headers.set("Cache-Control", "private, no-store");
+    res.headers.set("X-Robots-Tag", "noindex, nofollow");
+  }
+  return res;
 }
-
 export const config = {
-  matcher: ["/admin/:path*", "/api/:path*"],
+  matcher: ["/admin/:path*", "/api/:path*", "/newsletter/:path*"],
 };

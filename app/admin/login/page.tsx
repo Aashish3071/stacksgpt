@@ -1,84 +1,57 @@
 "use client";
-
-import { Suspense, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import Logo from "@/components/Logo";
-
-function LoginForm() {
-  const router = useRouter();
-  const params = useSearchParams();
+import { useState } from "react";
+export default function Login() {
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [busy, setBusy] = useState(false);
-
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setBusy(true);
-    setError("");
-
-    try {
-      const res = await fetch("/api/admin/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password }),
-      });
-      const data = await res.json();
-
-      if (res.ok) {
-        router.push(params.get("next") || "/admin");
-        router.refresh();
-      } else {
-        setError(data.error || "Login failed.");
-      }
-    } catch {
-      setError("Network error.");
-    } finally {
-      setBusy(false);
-    }
-  };
-
+  const [message, setMessage] = useState("");
   return (
-    <div className="mx-auto max-w-sm px-4 py-20">
-      <div className="mb-6">
-        <Logo size="md" />
-      </div>
-      <h1 className="font-serif text-head-md font-semibold text-ink">Admin sign in</h1>
-
-      <form onSubmit={submit} className="mt-6 space-y-3">
-        <label htmlFor="password" className="meta block">
-          Password
+    <section className="mx-auto max-w-lg p-8 py-20">
+      <h1 className="font-serif text-3xl">Editorial sign in</h1>
+      <p className="my-4">Use your invited Supabase editorial account.</p>
+      <form
+        onSubmit={async (e) => {
+          e.preventDefault();
+          setMessage("Signing in…");
+          try {
+            const r = await fetch("/api/admin/login", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ email, password }),
+            });
+            const d = await r.json();
+            if (!r.ok) throw Error(d.error);
+            window.location.assign("/admin");
+          } catch (e) {
+            setMessage(e instanceof Error ? e.message : "Sign-in failed");
+          }
+        }}
+        className="space-y-5"
+      >
+        <label className="block">
+          Email
+          <input
+            type="email"
+            autoComplete="username"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="block w-full border p-3"
+          />
         </label>
-        <input
-          id="password"
-          type="password"
-          autoFocus
-          required
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full border border-rule-strong bg-surface px-3 py-2.5 font-sans text-meta text-ink focus:border-ink focus:outline-none"
-        />
-        <button
-          type="submit"
-          disabled={busy}
-          className="w-full border border-ink bg-ink px-5 py-2.5 font-sans text-meta font-medium text-paper hover:bg-accent hover:border-accent disabled:opacity-60"
-        >
-          {busy ? "Signing in…" : "Sign in"}
-        </button>
+        <label className="block">
+          Password
+          <input
+            type="password"
+            autoComplete="current-password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="block w-full border p-3"
+          />
+        </label>
+        <button className="bg-ink text-paper px-6 py-3">Sign in</button>
+        <p role="status">{message}</p>
       </form>
-
-      {error && <p className="mt-3 font-sans text-meta text-accent">{error}</p>}
-    </div>
-  );
-}
-
-/**
- * useSearchParams needs a Suspense boundary, otherwise the whole route opts out
- * of static rendering and the production build fails on prerender.
- */
-export default function AdminLoginPage() {
-  return (
-    <Suspense fallback={<div className="mx-auto max-w-sm px-4 py-20" />}>
-      <LoginForm />
-    </Suspense>
+    </section>
   );
 }

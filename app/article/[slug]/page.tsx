@@ -1,16 +1,18 @@
+import { publicArticle } from "@/lib/public-article";
+import { permanentRedirect } from "next/navigation";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import prisma from "@/lib/db";
 import ArticleReader from "@/components/ArticleReader";
 import ViewBeacon from "@/components/ViewBeacon";
 import ArticleSchema from "@/components/ArticleSchema";
-import { marked } from "marked";
+import { safeMarkdown } from "@/lib/safe-markdown";
 import { siteUrl, isoDate } from "@/lib/site";
 
 export const revalidate = 300;
 
 interface Props {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 const CARD_FIELDS = {
@@ -37,7 +39,10 @@ export async function generateStaticParams() {
     });
     return articles.map(({ slug }) => ({ slug }));
   } catch (err) {
-    console.warn("generateStaticParams skipped during build (database unmigrated or unreachable):", err);
+    console.warn(
+      "generateStaticParams skipped during build (database unmigrated or unreachable):",
+      err,
+    );
     return [];
   }
 }
@@ -46,11 +51,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   let article: any = null;
   try {
     article = await prisma.article.findUnique({
-      where: { slug: params.slug },
+      where: { slug: (await params).slug },
       select: {
         title: true,
         summary: true,
         publishedAt: true,
+        publishedUpdatedAt: true,
         isPublished: true,
         seoTitle: true,
         metaDescription: true,
@@ -65,10 +71,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   if (!article || !article.isPublished) {
-    return { title: "Article not found", robots: { index: false, follow: false } };
+    return {
+      title: "Article not found",
+      robots: { index: false, follow: false },
+    };
   }
 
-  const url = siteUrl(`/article/${params.slug}`);
+  const url = siteUrl(`/article/${(await params).slug}`);
   // Fall back to the on-page copy so a page is never missing a title or
   // description, even for articles imported before the SEO fields existed.
   const title = article.seoTitle || article.title;
@@ -83,7 +92,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   const images = article.heroImage
-    ? [{ url: siteUrl(article.heroImage), alt: article.heroImageAlt || title }]
+    ? [
+        {
+          url: article.heroImage.startsWith("https://")
+            ? article.heroImage
+            : siteUrl(article.heroImage),
+          alt: article.heroImageAlt || title,
+        },
+      ]
     : undefined;
 
   return {
@@ -99,7 +115,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       url,
       images,
       publishedTime: isoDate(article.publishedAt) || undefined,
-      modifiedTime: isoDate(article.publishedAt) || undefined,
+      modifiedTime:
+        isoDate(article.publishedUpdatedAt || article.publishedAt) || undefined,
     },
     twitter: {
       card: images ? "summary_large_image" : "summary",
@@ -117,7 +134,7 @@ export default async function ArticlePage({ params }: Props) {
 
   try {
     article = await prisma.article.findUnique({
-      where: { slug: params.slug },
+      where: { slug: (await params).slug },
       include: { primaryTool: true },
     });
 
@@ -138,6 +155,12 @@ export default async function ArticlePage({ params }: Props) {
   }
 
   if (!article || !article.isPublished) {
+    const old = await prisma.articleRedirect.findUnique({
+      where: { slug: (await params).slug },
+      include: { article: { select: { slug: true, isPublished: true } } },
+    });
+    if (old?.article.isPublished)
+      permanentRedirect(`/article/${old.article.slug}`);
     notFound();
   }
 
@@ -151,8 +174,29 @@ export default async function ArticlePage({ params }: Props) {
   }
 
   // Markdown body is rendered on the server so it ships as HTML, not JS.
-  const bodyHtml = article.body ? await marked.parse(article.body) : null;
+  const bodyHtml = article.body ? await safeMarkdown(article.body) : null;
 
+  const author = article.authorId
+    ? await prisma.profile.findUnique({
+        where: { id: article.authorId },
+        select: { displayName: true },
+      })
+    : null;
+  if (
+    article.primaryTool?.affiliateUrl &&
+    !(await prisma.partnerLink.findFirst({
+      where: {
+        url: article.primaryTool.affiliateUrl,
+        active: true,
+        partner: { active: true },
+      },
+    }))
+  )
+    article.primaryTool = {
+      ...article.primaryTool,
+      affiliateUrl: null,
+      status: "NONE",
+    };
   return (
     <>
       <ArticleSchema
@@ -160,9 +204,19 @@ export default async function ArticlePage({ params }: Props) {
         summary={article.summary}
         slug={article.slug}
         publishedAt={article.publishedAt}
-        useCases={useCases}
+        updatedAt={article.publishedUpdatedAt || article.publishedAt}
+        image={article.heroImage}
+        authorName={author?.displayName}
+        category={article.category}
       />
-      <ArticleReader article={{ ...article, bodyHtml }} related={related} />
+      <ArticleReader
+        article={{
+          ...publicArticle(article),
+          bodyHtml,
+          authorName: author?.displayName,
+        }}
+        related={related}
+      />
       <ViewBeacon slug={article.slug} />
     </>
   );

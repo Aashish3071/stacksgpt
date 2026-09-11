@@ -1,28 +1,36 @@
 "use client";
-
 import { useEffect } from "react";
-
-/**
- * Records a pageview from the client after render.
- *
- * Counting in the server component instead would fire on every crawler hit and
- * force the page out of the static cache, which costs both rankings and ad revenue.
- */
+import { usePrivacy, track } from "./PrivacyControls";
 export default function ViewBeacon({ slug }: { slug: string }) {
+  const { analytics } = usePrivacy();
   useEffect(() => {
-    const timer = setTimeout(() => {
-      fetch("/api/views", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ slug }),
-        keepalive: true,
-      }).catch(() => {
-        /* a missed view count is not worth surfacing to the reader */
-      });
-    }, 1500);
-
-    return () => clearTimeout(timer);
-  }, [slug]);
-
+    if (!analytics) return;
+    const sent = new Set<string>();
+    const once = (event: string) => {
+      if (!sent.has(event)) {
+        sent.add(event);
+        track(event, slug);
+      }
+    };
+    const timer = setTimeout(() => once("article_view"), 1500);
+    const engaged = setTimeout(() => once("engaged_30s"), 30000);
+    const scroll = () => {
+      const length = document.documentElement.scrollHeight - window.innerHeight;
+      if (length > 0 && window.scrollY / length >= 0.75) once("scroll_75");
+    };
+    const click = (e: MouseEvent) => {
+      const link = (e.target as Element)?.closest("a");
+      if (link?.hostname && link.hostname !== location.hostname)
+        once("outbound_click");
+    };
+    addEventListener("scroll", scroll, { passive: true });
+    document.addEventListener("click", click);
+    return () => {
+      clearTimeout(timer);
+      clearTimeout(engaged);
+      removeEventListener("scroll", scroll);
+      document.removeEventListener("click", click);
+    };
+  }, [slug, analytics]);
   return null;
 }

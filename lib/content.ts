@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import crypto from "crypto";
-import matter from "gray-matter";
+import yaml from "yaml";
 import {
   ARTICLE_TYPE_KEYS,
   ArticleType,
@@ -9,6 +9,7 @@ import {
   PRACTICAL_TYPES,
   REPORTING_TYPES,
 } from "./site";
+import { editorialErrors } from "./editorial-rules";
 import {
   auditSeo,
   deriveMetaDescription,
@@ -29,7 +30,12 @@ import {
  */
 
 export const CONTENT_DIR = path.join(process.cwd(), "content", "articles");
-export const IMAGE_DIR = path.join(process.cwd(), "public", "images", "articles");
+export const IMAGE_DIR = path.join(
+  process.cwd(),
+  "public",
+  "images",
+  "articles",
+);
 
 export interface JargonTerm {
   technicalTerm: string;
@@ -44,6 +50,11 @@ export interface UseCase {
 }
 
 export interface ParsedArticle {
+  tags: string[];
+  audiences: string[];
+  heroImageOrigin: string;
+  structuredVerdict?: Record<string, string>;
+  additionalSources?: any[];
   externalId: string;
   slug: string;
   type: ArticleType;
@@ -76,8 +87,7 @@ export interface ParseFailure {
 }
 
 export type ParseResult =
-  | { ok: true; article: ParsedArticle }
-  | { ok: false; failure: ParseFailure };
+  { ok: true; article: ParsedArticle } | { ok: false; failure: ParseFailure };
 
 function asString(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
@@ -87,7 +97,27 @@ function asString(value: unknown): string {
 export function parseArticleFile(filePath: string): ParseResult {
   const fileName = path.basename(filePath);
   const raw = fs.readFileSync(filePath, "utf8");
-  const { data, content } = matter(raw);
+  return parseArticleText(raw, fileName);
+}
+
+export function parseArticleText(
+  raw: string,
+  fileName: string,
+  options = { checkLocalFiles: true },
+): ParseResult {
+  let data: Record<string, unknown>;
+  let content: string;
+  try {
+    const match = raw.match(/^---\s*\r?\n([\s\S]*?)\r?\n---\s*(?:\r?\n|$)/);
+    if (!match) throw new Error("Missing frontmatter");
+    data = (yaml.parse(match[1]) ?? {}) as Record<string, unknown>;
+    content = raw.slice(match[0].length);
+  } catch {
+    return {
+      ok: false,
+      failure: { file: fileName, errors: ["Invalid YAML frontmatter."] },
+    };
+  }
   const errors: string[] = [];
 
   const title = asString(data.title);
@@ -97,58 +127,18 @@ export function parseArticleFile(filePath: string): ParseResult {
   const sourceName = asString(data.sourceName);
   const category = asString(data.category);
 
-  if (title.length < 15) errors.push("`title` is required and must be at least 15 characters.");
-  if (summary.length < 40) errors.push("`summary` is required and must be at least 40 characters.");
-  if (verdict && verdict.length < 30) {
-    errors.push("`verdict`, when present, must be at least 30 characters.");
-  }
-  if (!sourceName) errors.push("`sourceName` is required (who published the original).");
-
-  // Attribution is non-negotiable: an article with no traceable source cannot
-  // be published, and unverifiable claims are what fail ad-network review.
-  if (!sourceUrl) {
-    errors.push("`sourceUrl` is required — every article must link to its original source.");
-  } else {
-    try {
-      const parsed = new URL(sourceUrl);
-      if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
-        errors.push("`sourceUrl` must be an http(s) URL.");
-      }
-    } catch {
-      errors.push(`\`sourceUrl\` is not a valid URL: "${sourceUrl}"`);
-    }
-  }
-
-  const matchedCategory = CATEGORIES.find((c) => c.toLowerCase() === category.toLowerCase());
-  if (!matchedCategory) {
-    errors.push(`\`category\` must be one of: ${CATEGORIES.join(", ")}. Got "${category}".`);
-  }
-
+  const matchedCategory = CATEGORIES.find(
+    (c) => c.toLowerCase() === category.toLowerCase(),
+  );
   // Story type decides which sections are required below.
-  const rawType = asString(data.type).toUpperCase().replace(/[\s-]+/g, "_");
+  const rawType = asString(data.type)
+    .toUpperCase()
+    .replace(/[\s-]+/g, "_");
   const type = ARTICLE_TYPE_KEYS.find((t) => t === rawType);
-  if (!type) {
-    errors.push(
-      `\`type\` must be one of: ${ARTICLE_TYPE_KEYS.join(", ")}. Got "${asString(data.type)}".`
-    );
-  }
-
-  const isReporting = type ? REPORTING_TYPES.includes(type) : false;
-  const isPractical = type ? PRACTICAL_TYPES.includes(type) : false;
-
   // Key points: the scannable bullet pointers (What's new / key facts).
   const keyPoints: string[] = Array.isArray(data.keyPoints)
     ? data.keyPoints.map(asString).filter(Boolean)
     : [];
-
-  if (keyPoints.length < 2) {
-    errors.push(
-      "`keyPoints` needs at least 2 bullet pointers — readers scan these first for what is new."
-    );
-  }
-  if (keyPoints.length > 6) {
-    errors.push("`keyPoints` should be at most 6; longer lists stop being scannable.");
-  }
 
   // Jargon terms (optional legacy support)
   const jargonBuster: JargonTerm[] = [];
@@ -184,30 +174,42 @@ export function parseArticleFile(filePath: string): ParseResult {
 
   // News pieces are prose-led: the body IS the article.
   const bodyText = content.trim();
-  if (bodyText.length < 200) {
+  if (/^\s*(import|export)\s|<\/?[a-zA-Z]|\{[^}]*\}/m.test(bodyText))
     errors.push(
-      `Body prose is required and must be at least 200 characters of reported news. Got ${bodyText.length}.`
+      "Use plain Markdown, without HTML, JSX, imports, or executable expressions.",
     );
-  }
-
-  // Hero image: must exist on disk if it points into /public, and must have alt text.
+  // Hero image. Presence, alt text and credit are checked by the shared rules;
+  // what is MDX-specific is that the file must actually exist in the repo.
   const heroImage = asString(data.heroImage);
   const heroImageAlt = asString(data.heroImageAlt);
   if (heroImage) {
-    if (!heroImageAlt) {
-      errors.push("`heroImageAlt` is required whenever `heroImage` is set.");
-    }
     // Images must be self-hosted: next.config.mjs allows no remote patterns, so
     // an external URL would pass validation and then fail to render in production.
-    if (heroImage.startsWith("/")) {
-      const onDisk = path.join(process.cwd(), "public", heroImage.replace(/^\//, ""));
-      if (!fs.existsSync(onDisk)) {
-        errors.push(`\`heroImage\` points at "${heroImage}" but no such file is committed.`);
+    if (
+      /^\/images\/articles\/[a-zA-Z0-9_-]+\.(png|jpe?g|webp|avif)$/.test(
+        heroImage,
+      )
+    ) {
+      const onDisk = path.join(
+        process.cwd(),
+        "public",
+        heroImage.replace(/^\//, ""),
+      );
+      if (options.checkLocalFiles && !fs.existsSync(onDisk)) {
+        errors.push(
+          `\`heroImage\` points at "${heroImage}" but no such file is committed.`,
+        );
       }
-    } else {
+    } else if (
+      !process.env.SUPABASE_URL ||
+      !heroImage.startsWith(
+        `${process.env.SUPABASE_URL}/storage/v1/object/public/article-media/`,
+      ) ||
+      /[?#]/.test(heroImage)
+    ) {
       errors.push(
         "`heroImage` must be a path under /public (e.g. /images/articles/name.png). " +
-          "Commit the image to the repo rather than linking to an external URL."
+          "Commit the image to the repo rather than linking to an external URL.",
       );
     }
   }
@@ -220,31 +222,71 @@ export function parseArticleFile(filePath: string): ParseResult {
   let retrievedAt: Date | undefined;
 
   const rawPublished = data.publishedDate;
-  if (rawPublished !== undefined && rawPublished !== null && rawPublished !== "") {
-    const d = rawPublished instanceof Date ? rawPublished : new Date(String(rawPublished));
+  if (
+    typeof rawPublished === "string" &&
+    (!/^\d{4}-\d{2}-\d{2}$/.test(rawPublished) ||
+      !Number.isFinite(new Date(rawPublished).getTime()) ||
+      new Date(rawPublished).toISOString().slice(0, 10) !== rawPublished)
+  )
+    errors.push(
+      "publishedDate must be an actual calendar date in YYYY-MM-DD format.",
+    );
+  if (
+    rawPublished !== undefined &&
+    rawPublished !== null &&
+    rawPublished !== ""
+  ) {
+    const d =
+      rawPublished instanceof Date
+        ? rawPublished
+        : new Date(String(rawPublished));
     if (Number.isNaN(d.getTime())) {
-      errors.push(`\`publishedDate\` is not a valid date: "${String(rawPublished)}"`);
-    } else if (d.getTime() > Date.now() + 864e5) {
-      errors.push("`publishedDate` is in the future. Use the date shown on the source.");
+      errors.push(
+        `\`publishedDate\` is not a valid date: "${String(rawPublished)}"`,
+      );
+    } else if (d.getTime() > Date.now()) {
+      errors.push(
+        "`publishedDate` is in the future. Use the date shown on the source.",
+      );
     } else {
       sourcePublishedAt = d;
     }
   } else {
-    errors.push("`publishedDate` is required — the date the original source published.");
+    errors.push(
+      "`publishedDate` is required: the date the original source published.",
+    );
   }
 
   const rawRetrieved = data.retrievedAt;
-  if (rawRetrieved !== undefined && rawRetrieved !== null && rawRetrieved !== "") {
-    const d = rawRetrieved instanceof Date ? rawRetrieved : new Date(String(rawRetrieved));
+  if (
+    typeof rawRetrieved === "string" &&
+    !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,3})?Z$/.test(rawRetrieved)
+  )
+    errors.push("retrievedAt must include its UTC time, ending in Z.");
+  if (
+    rawRetrieved !== undefined &&
+    rawRetrieved !== null &&
+    rawRetrieved !== ""
+  ) {
+    const d =
+      rawRetrieved instanceof Date
+        ? rawRetrieved
+        : new Date(String(rawRetrieved));
     if (Number.isNaN(d.getTime())) {
-      errors.push(`\`retrievedAt\` is not a valid timestamp: "${String(rawRetrieved)}"`);
+      errors.push(
+        `\`retrievedAt\` is not a valid timestamp: "${String(rawRetrieved)}"`,
+      );
+    } else if (d.getTime() > Date.now()) {
+      errors.push("retrievedAt cannot be in the future.");
     } else {
       retrievedAt = d;
     }
   } else {
-    errors.push("`retrievedAt` is required — when the source page was fetched.");
+    errors.push("`retrievedAt` is required: when the source page was fetched.");
   }
 
+  if (sourcePublishedAt && retrievedAt && sourcePublishedAt > retrievedAt)
+    errors.push("Source publication cannot follow retrieval.");
   // --- SEO ---------------------------------------------------------------
   // Derived when not given, so no article ships without a title tag, a
   // description and a clean slug. Search is the only traffic source that
@@ -255,14 +297,46 @@ export function parseArticleFile(filePath: string): ParseResult {
   const seoTitle = deriveSeoTitle(asString(data.seoTitle) || undefined, title);
   const metaDescription = deriveMetaDescription(
     asString(data.metaDescription) || undefined,
-    summary
+    summary,
   );
   const keywords = normaliseKeywords(data.keywords);
 
-  const seoIssues = auditSeo({ slug, seoTitle, metaDescription, keywords, title });
+  const seoIssues = auditSeo({
+    slug,
+    seoTitle,
+    metaDescription,
+    keywords,
+    title,
+  });
   const seoErrors = seoIssues.filter((i) => i.severity === "error");
   const seoWarnings = seoIssues.filter((i) => i.severity === "warning");
   seoErrors.forEach((i) => errors.push(`SEO ${i.field}: ${i.message}`));
+
+  // The shared editorial rules. Everything above this point is MDX-specific
+  // parsing (frontmatter shape, image present on disk, SEO derivation); the
+  // rules that decide whether an article is publishable live in one module so
+  // the newsroom and this importer cannot drift apart.
+  errors.push(
+    ...editorialErrors({
+      title,
+      summary,
+      verdict,
+      body: bodyText,
+      keyPoints,
+      slug,
+      type: type ?? asString(data.type),
+      category: matchedCategory ?? category,
+      seoTitle,
+      metaDescription,
+      sourceAuthor: sourceName,
+      sourceUrl,
+      sourcePublishedAt,
+      retrievedAt,
+      heroImage,
+      heroImageAlt,
+      heroImageCredit: asString(data.heroImageCredit),
+    }),
+  );
 
   if (errors.length > 0) {
     return { ok: false, failure: { file: fileName, errors } };
@@ -273,6 +347,18 @@ export function parseArticleFile(filePath: string): ParseResult {
   return {
     ok: true,
     article: {
+      tags: Array.isArray(data.tags) ? data.tags.map(asString) : [],
+      audiences: Array.isArray(data.audiences)
+        ? data.audiences.map(asString)
+        : [],
+      heroImageOrigin: asString(data.heroImageOrigin) || "generated",
+      structuredVerdict:
+        data.structuredVerdict && typeof data.structuredVerdict === "object"
+          ? (data.structuredVerdict as Record<string, string>)
+          : undefined,
+      additionalSources: Array.isArray(data.additionalSources)
+        ? data.additionalSources
+        : undefined,
       externalId,
       slug,
       type: type as ArticleType,
@@ -296,7 +382,11 @@ export function parseArticleFile(filePath: string): ParseResult {
       metaDescription,
       keywords,
       seoWarnings,
-      sourceHash: crypto.createHash("sha256").update(raw).digest("hex").slice(0, 16),
+      sourceHash: crypto
+        .createHash("sha256")
+        .update(raw)
+        .digest("hex")
+        .slice(0, 16),
     },
   };
 }
@@ -319,5 +409,8 @@ export function estimateReadingMinutes(a: ParsedArticle): number {
     ...a.jargonBuster.map((j) => j.plainEnglish),
     ...a.useCases.flatMap((u) => [...u.stepByStep, u.promptTemplate || ""]),
   ].join(" ");
-  return Math.max(2, Math.round(text.split(/\s+/).filter(Boolean).length / 200));
+  return Math.max(
+    2,
+    Math.round(text.split(/\s+/).filter(Boolean).length / 200),
+  );
 }

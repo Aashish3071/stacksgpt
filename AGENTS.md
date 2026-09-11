@@ -22,26 +22,41 @@ updates that article; a new filename creates a new one. Never rename a file to
 
 ## Story types — read this first
 
-This is a **news site**, not a DIY how-to site. Every piece is written as reported news:
-what happened, what the model or tool is actually like, who it affects, what it costs,
-and what the catch is.
+This is a **news site**. Every article is reported journalism and uses the same
+structure. There is no tutorial format here: no copy-paste prompt templates, no
+step-by-step walkthroughs, no jargon glossaries. Even a use case is *reported*,
+meaning you describe what someone did and what came of it, rather than
+instructing the reader.
 
-| `type` | For | Body prose | `keyPoints` (What's New) | `verdict` (Why It Matters) |
-|---|---|---|---|---|
-| `ANNOUNCEMENT` | A lab or company ships a model or major product | **Required** | **Required** (2–6 pointers) | **Required** |
-| `NEWS` | General tech news: Apple launches Apple 18 Pro, policy changes | **Required** | **Required** (2–6 pointers) | **Required** |
-| `UPDATE` | A change to a tool or model that already exists | **Required** | **Required** (2–6 pointers) | **Required** |
-| `TOOL` | A profile of a tool — what Hermes or Ollama is, who it suits | **Required** | **Required** (2–6 pointers) | **Required** |
-| `USE_CASE` | Reporting on a real-world use-case of AI in business | **Required** | **Required** (2–6 pointers) | **Required** |
-| `SHOWCASE` | Someone on X/Twitter demonstrating a breakthrough use of AI | **Required** | **Required** (2–6 pointers) | **Required** |
+The `type` field says what kind of story it is. It changes the label shown on the
+page, not the shape of the article.
 
-All articles are **reported journalism**.
-- `keyPoints`: 2–6 scannable bullet pointers answering **What's New**.
-- `verdict`: Plain-English explanation answering **Why It Matters**.
-- `body`: The news story itself (200+ characters of prose).
-- **Do not include DIY tutorial steps or copy-paste prompt blocks.** Stacksgpt is a news publication, not a prompt directory.
-`TOOL` it renders as "Is it worth it?"; it is required on `USE_CASE` and
-`SHOWCASE`, where it renders as "The verdict".
+| `type` | For |
+|---|---|
+| `ANNOUNCEMENT` | A lab or company ships a model or product |
+| `NEWS` | General tech news, e.g. an Apple launch or an acquisition |
+| `UPDATE` | A change to an existing tool or model |
+| `TOOL` | A profile of a tool such as Hermes or Ollama |
+| `USE_CASE` | Reporting on a real-world use case in industry |
+| `SHOWCASE` | Reporting on someone demonstrating an AI capability |
+
+Every article, whatever its type, needs all five of these:
+
+| Field | What it is |
+|---|---|
+| **Headline** (`title`) | What happened and why it matters, in plain English |
+| **Summary** (`summary`) | 1–2 paragraphs of plain-English standfirst |
+| **What's New** (`keyPoints`) | 2–6 concise bullets of concrete facts |
+| **Why It Matters** (`verdict`) | 1–3 sentences: the honest takeaway for ordinary people |
+| **Body prose** | 200+ words of reported context, background, pricing and caveats |
+
+## House style
+
+**No em dashes.** Use a comma, a full stop or a colon. This is enforced at build
+time across the headline, summary, key points, verdict and body.
+
+Write for someone who does not work in AI. If a sentence needs a glossary entry
+to parse, rewrite the sentence rather than adding the glossary.
 
 ## The file
 
@@ -76,26 +91,7 @@ keyPoints:
   - "Available today on paid plans; no date given for the free tier."
   - "Voice data is processed on OpenAI's servers, not on your device."
 
-jargonBuster:
-  - technicalTerm: "sub-300ms end-to-end latency"
-    plainEnglish: "It replies fast enough to feel like a phone call rather than a walkie-talkie."
-  - technicalTerm: "speech-to-speech model"
-    plainEnglish: "It hears you directly instead of converting your words to text first, so tone survives."
 
-useCases:
-  - title: "Run a practice job interview on your commute"
-    targetAudience: "Job seekers"
-    stepByStep:
-      - "Open the voice mode and describe the role you are interviewing for."
-      - "Ask it to interview you as the hiring manager, one question at a time."
-      - "At the end, ask for the two weakest answers and how to improve them."
-    promptTemplate: |
-      You are the hiring manager for a [ROLE] position.
-      Interview me one question at a time, waiting for my answer before the next.
-      After six questions, tell me my two weakest answers and how to improve them.
-  - title: "..."
-    targetAudience: "..."
-    stepByStep: ["..."]
 
 verdict: >
   Honest, specific advice on whether this is worth paying for, or whether the
@@ -116,10 +112,9 @@ structured sections above. Most articles do not need it.
 | `category` | Exactly one of: Productivity, Writing, Coding, Research, Design, Automation. |
 | `sourceName` | Who published the original, e.g. "Anthropic", "Mistral". |
 | `sourceUrl` | Link to the original announcement. **Every article must have one.** |
-| `keyPoints` | 2–6 scannable bullets. Required on ANNOUNCEMENT, NEWS, UPDATE and TOOL. |
-| `useCases` | Required on USE_CASE and SHOWCASE only. Each needs `title`, `targetAudience`, `stepByStep`. |
-| body prose | 300+ characters, required on ANNOUNCEMENT, NEWS, UPDATE and TOOL. |
-| `verdict` | 30+ characters when present. Required on USE_CASE and SHOWCASE. |
+| `keyPoints` | 2–6 scannable bullets. Required on every article. |
+| body prose | 200+ words of reported context. Required on every article. |
+| `verdict` | Required on every article: 1–3 sentences of "Why It Matters". |
 | `publishedDate` | Date the original source published, `YYYY-MM-DD`. Cannot be in the future. |
 | `retrievedAt` | UTC timestamp when you fetched the source, ISO 8601. |
 | `heroImageAlt` | Required whenever `heroImage` is set. |

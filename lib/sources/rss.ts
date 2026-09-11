@@ -1,3 +1,4 @@
+import { validateFeedUrl } from "../security";
 import Parser from "rss-parser";
 import {
   IngestedItem,
@@ -8,10 +9,14 @@ import {
 } from "./types";
 
 // YouTube and Media RSS put the real description in custom fields.
-const parser: Parser<Record<string, unknown>, Record<string, unknown>> = new Parser({
+const parser: Parser<
+  Record<string, unknown>,
+  Record<string, unknown>
+> = new Parser({
   timeout: 15000,
   headers: {
-    "User-Agent": "DecodedAI-NewsBot/1.0 (+https://github.com/; contact via site)",
+    "User-Agent":
+      "DecodedAI-NewsBot/1.0 (+https://github.com/; contact via site)",
   },
   customFields: {
     item: [
@@ -76,11 +81,39 @@ function extractContent(item: Record<string, any>): string {
 
   // Fall back to whatever short text exists rather than dropping the item.
   const fallback = candidates.find((c) => typeof c === "string" && c.trim());
-  return typeof fallback === "string" ? stripHtml(fallback).slice(0, MAX_CONTENT_CHARS) : "";
+  return typeof fallback === "string"
+    ? stripHtml(fallback).slice(0, MAX_CONTENT_CHARS)
+    : "";
 }
 
-export async function fetchRssFeed(feedUrl: string, fallbackAuthor = ""): Promise<IngestedItem[]> {
-  const feed = await parser.parseURL(feedUrl);
+export async function fetchRssFeed(
+  feedUrl: string,
+  fallbackAuthor = "",
+): Promise<IngestedItem[]> {
+  await validateFeedUrl(feedUrl);
+  const response = await fetch(feedUrl, {
+    redirect: "error",
+    signal: AbortSignal.timeout(15000),
+  });
+  if (!response.ok) throw Error(`Feed returned ${response.status}`);
+  const reader = response.body!.getReader();
+  let text = "",
+    size = 0;
+  const decoder = new TextDecoder();
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    size += value.length;
+    if (size > 1500000) {
+      await reader.cancel();
+      throw Error("Feed too large");
+    }
+    text += decoder.decode(value, { stream: true });
+  }
+  text += decoder.decode();
+  if (/<!DOCTYPE|<!ENTITY/i.test(text))
+    throw Error("External XML entities are not permitted");
+  const feed = await parser.parseString(text);
 
   return (feed.items || [])
     .slice(0, MAX_ITEMS_PER_CHANNEL)
@@ -113,8 +146,11 @@ export const rssAdapter: SourceAdapter = {
       return await fetchRssFeed(channel.handleOrUrl, channel.name);
     } catch (error) {
       // A dead feed must not abort the run; the caller logs and continues.
-      console.error(`[rss] ${channel.name} (${channel.handleOrUrl}) failed:`, error);
-      return [];
+      console.error(
+        `[rss] ${channel.name} (${channel.handleOrUrl}) failed:`,
+        error,
+      );
+      throw error;
     }
   },
 };

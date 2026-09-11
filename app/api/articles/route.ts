@@ -1,97 +1,96 @@
-import { NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
 import prisma from "@/lib/db";
-
+import { editor } from "@/lib/editor-auth";
+import { limitedJson, sameOrigin } from "@/lib/security";
+import { saveDraft, transitionArticle } from "@/lib/editorial";
+import { revalidatePath } from "next/cache";
 export const dynamic = "force-dynamic";
-
-const VALID_STATUSES = new Set(["DRAFT", "NEEDS_EDIT", "PUBLISHED", "REJECTED"]);
-
 export async function GET(req: Request) {
   try {
-    const { searchParams } = new URL(req.url);
-    const status = searchParams.get("status");
-
-    const articles = await prisma.article.findMany({
-      where: status ? { status } : undefined,
-      orderBy: { createdAt: "desc" },
-      take: 100,
-      include: {
-        primaryTool: { select: { name: true, slug: true, status: true } },
-        rawNews: { select: { title: true, rawText: true, externalUrl: true, author: true, score: true } },
-      },
-    });
-
-    return NextResponse.json({ articles });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    await editor();
+    const p = new URL(req.url).searchParams;
+    const page = Math.max(1, parseInt(p.get("page") || "1") || 1);
+    const status = p.get("status");
+    const where: any = status
+      ? { OR: [{ status }, { pendingStatus: status }] }
+      : {};
+    if (p.get("q")) where.title = { contains: p.get("q"), mode: "insensitive" };
+    const [articles, total] = await prisma.$transaction([
+      prisma.article.findMany({
+        where,
+        orderBy: { createdAt: "desc" },
+        take: 25,
+        skip: (page - 1) * 25,
+      }),
+      prisma.article.count({ where }),
+    ]);
+    return Response.json({ articles, total, page });
+  } catch (e) {
+    return Response.json(
+      { error: String(e instanceof Error ? e.message : e) },
+      { status: 401 },
+    );
   }
 }
-
-/**
- * Review actions: edit the copy and/or move an article through the queue.
- * Publishing is only ever reachable here, never from the ingestion pipeline.
- */
+export async function POST(req: Request) {
+  try {
+    sameOrigin(req);
+    const p = await editor();
+    return Response.json({
+      article: await saveDraft(await limitedJson(req), p.id),
+    });
+  } catch (e) {
+    return Response.json(
+      { error: e instanceof Error ? e.message : "Cannot save draft" },
+      {
+        status: e instanceof Error && e.message === "Unauthorized" ? 401 : 400,
+      },
+    );
+  }
+}
 export async function PATCH(req: Request) {
   try {
-    const body = await req.json();
-    const { id, status, title, summary, verdict, category, seoTitle, metaDescription } = body;
-
-    if (!id) return NextResponse.json({ error: "Missing article id" }, { status: 400 });
-
-    const data: Record<string, unknown> = {};
-
-    if (typeof title === "string" && title.trim()) data.title = title.trim();
-    if (typeof summary === "string" && summary.trim()) data.summary = summary.trim();
-    if (typeof verdict === "string" && verdict.trim()) data.verdict = verdict.trim();
-    if (typeof category === "string" && category.trim()) data.category = category.trim();
-    if (typeof seoTitle === "string") data.seoTitle = seoTitle.trim() || null;
-    if (typeof metaDescription === "string") data.metaDescription = metaDescription.trim() || null;
-
-    if (status) {
-      if (!VALID_STATUSES.has(status)) {
-        return NextResponse.json({ error: `Unknown status "${status}"` }, { status: 400 });
-      }
-
-      const existing = await prisma.article.findUnique({
-        where: { id },
-        select: { publishedAt: true },
-      });
-
-      data.status = status;
-      data.isPublished = status === "PUBLISHED";
-      // Keep the original publication date if it is being re-published.
-      data.publishedAt =
-        status === "PUBLISHED" ? existing?.publishedAt ?? new Date() : null;
-    }
-
-    if (Object.keys(data).length === 0) {
-      return NextResponse.json({ error: "Nothing to update" }, { status: 400 });
-    }
-
-    const article = await prisma.article.update({ where: { id }, data });
-
-    // Push the change live immediately instead of waiting out the ISR window,
-    // so approving in the review queue shows up on the site straight away.
-    revalidatePath("/");
+    sameOrigin(req);
+    const p = await editor();
+    const body = await limitedJson(req);
+    if (!body.id) throw Error("Article ID is required.");
+    const article = body.action
+      ? await transitionArticle(
+          body.id,
+          body.action,
+          p.id,
+          body.version,
+          body.when,
+          body.reason,
+          body.checks,
+        )
+      : await saveDraft(body, p.id);
+    for (const path of [
+      "/",
+      "/latest",
+      "/archive",
+      "/search",
+      "/sitemap.xml",
+      "/feed.xml",
+      "/category",
+      "/tag",
+      "/source",
+      "/audience",
+    ])
+      revalidatePath(path, "layout");
     revalidatePath(`/article/${article.slug}`);
-    revalidatePath(`/category/${article.category.toLowerCase()}`);
-    revalidatePath("/sitemap.xml");
-
-    return NextResponse.json({ success: true, article });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return Response.json({ success: true, article });
+  } catch (e) {
+    return Response.json(
+      { error: e instanceof Error ? e.message : "Cannot update article" },
+      {
+        status: e instanceof Error && e.message === "Unauthorized" ? 401 : 400,
+      },
+    );
   }
 }
-
-export async function DELETE(req: Request) {
-  try {
-    const { searchParams } = new URL(req.url);
-    const id = searchParams.get("id");
-    if (!id) return NextResponse.json({ error: "Missing article id" }, { status: 400 });
-
-    await prisma.article.delete({ where: { id } });
-    return NextResponse.json({ success: true });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
-  }
+export async function DELETE() {
+  return Response.json(
+    { error: "Use Archive to retain editorial history." },
+    { status: 405 },
+  );
 }

@@ -3,8 +3,10 @@ import { Source_Serif_4, Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Analytics } from "@vercel/analytics/react";
-import { SpeedInsights } from "@vercel/speed-insights/next";
+import PrivacyControls from "@/components/PrivacyControls";
+import { getSettings } from "@/lib/settings";
+import prisma from "@/lib/db";
+
 import { SITE_NAME, SITE_TAGLINE, siteUrl } from "@/lib/site";
 
 const serif = Source_Serif_4({
@@ -20,7 +22,7 @@ const sans = Inter({
   variable: "--font-sans",
 });
 
-export const metadata: Metadata = {
+const baseMetadata: Metadata = {
   metadataBase: new URL(siteUrl()),
   title: {
     default: `${SITE_NAME} — ${SITE_TAGLINE}`,
@@ -41,15 +43,47 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export async function generateMetadata(): Promise<Metadata> {
+  const s = await getSettings();
+  return {
+    ...baseMetadata,
+    title: { default: `${s.name} — ${s.tagline}`, template: `%s — ${s.name}` },
+    verification: s.searchConsoleId ? { google: s.searchConsoleId } : undefined,
+  };
+}
+export default async function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const s = await getSettings();
+  const categories = await prisma.taxonomy.findMany({
+    where: { kind: "CATEGORY", active: true },
+    orderBy: { name: "asc" },
+    select: { name: true, slug: true },
+  });
+  const publicSettings = {
+    name: s.name,
+    tagline: s.tagline,
+    analyticsEnabled: s.analyticsEnabled,
+    ga4Id: s.ga4Id,
+    adsEnabled: s.adsEnabled,
+    adsProvider: s.adsProvider,
+    adsenseId: s.adsenseId,
+    adUnits: s.adUnits,
+  };
   return (
-    <html lang="en" className={`${serif.variable} ${sans.variable}`} suppressHydrationWarning>
+    <html
+      lang="en"
+      className={`${serif.variable} ${sans.variable}`}
+      suppressHydrationWarning
+    >
       <body className="flex min-h-screen flex-col" suppressHydrationWarning>
-        <Navbar />
-        <main className="flex-1">{children}</main>
-        <Footer />
-        <Analytics />
-        <SpeedInsights />
+        <PrivacyControls settings={publicSettings}>
+          <Navbar categories={categories} />
+          <main className="flex-1">{children}</main>
+          <Footer tagline={s.tagline} socialLinks={s.socialLinks} />
+        </PrivacyControls>
       </body>
     </html>
   );

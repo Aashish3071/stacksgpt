@@ -13,30 +13,84 @@ import { IngestedItem } from "./sources/types";
 
 /** Signals that a story is about something a reader can actually use today. */
 const STRONG_SIGNALS = [
-  "launch", "launches", "launched", "release", "releases", "released",
-  "now available", "generally available", "rolling out", "introduc",
-  "new feature", "update", "free tier", "open source", "you can now",
-  "hands on", "how to", "guide", "tutorial",
+  "launch",
+  "launches",
+  "launched",
+  "release",
+  "releases",
+  "released",
+  "now available",
+  "generally available",
+  "rolling out",
+  "introduc",
+  "new feature",
+  "update",
+  "free tier",
+  "open source",
+  "you can now",
+  "hands on",
+  "how to",
+  "guide",
+  "tutorial",
 ];
 
 /** Named tools and models: concrete subjects make for practical articles. */
 const TOOL_SIGNALS = [
-  "chatgpt", "openai", "claude", "anthropic", "gemini", "google ai",
-  "copilot", "cursor", "perplexity", "midjourney", "notion", "canva",
-  "elevenlabs", "runway", "grok", "llama", "mistral", "deepseek",
-  "figma", "zapier", "make.com", "n8n",
+  "chatgpt",
+  "openai",
+  "claude",
+  "anthropic",
+  "gemini",
+  "google ai",
+  "copilot",
+  "cursor",
+  "perplexity",
+  "midjourney",
+  "notion",
+  "canva",
+  "elevenlabs",
+  "runway",
+  "grok",
+  "llama",
+  "mistral",
+  "deepseek",
+  "figma",
+  "zapier",
+  "make.com",
+  "n8n",
 ];
 
 /** Industry noise with nothing for a general reader to act on. */
 const NEGATIVE_SIGNALS = [
-  "funding round", "series a", "series b", "series c", "valuation",
-  "raises $", "ipo", "acquisition", "acquires", "stock", "shares",
-  "lawsuit", "sues", "appoints", "hires", "steps down", "resigns",
-  "conference", "keynote", "webinar", "earnings", "quarterly results",
+  "funding round",
+  "series a",
+  "series b",
+  "series c",
+  "valuation",
+  "raises $",
+  "ipo",
+  "acquisition",
+  "acquires",
+  "stock",
+  "shares",
+  "lawsuit",
+  "sues",
+  "appoints",
+  "hires",
+  "steps down",
+  "resigns",
+  "conference",
+  "keynote",
+  "webinar",
+  "earnings",
+  "quarterly results",
 ];
 
 function countHits(haystack: string, needles: string[]): number {
-  return needles.reduce((n, needle) => (haystack.includes(needle) ? n + 1 : n), 0);
+  return needles.reduce(
+    (n, needle) => (haystack.includes(needle) ? n + 1 : n),
+    0,
+  );
 }
 
 /** Hours since publication, or a large number when the date is unknown. */
@@ -94,7 +148,41 @@ export function contentHash(title: string): string {
 }
 
 const STOPWORDS = new Set([
-  "this", "that", "with", "from", "your", "will", "have", "into", "just",
-  "what", "when", "than", "then", "they", "their", "about", "more", "over",
-  "here", "your", "been", "were", "being",
+  "this",
+  "that",
+  "with",
+  "from",
+  "your",
+  "will",
+  "have",
+  "into",
+  "just",
+  "what",
+  "when",
+  "than",
+  "then",
+  "they",
+  "their",
+  "about",
+  "more",
+  "over",
+  "here",
+  "your",
+  "been",
+  "were",
+  "being",
 ]);
+
+export function scoreComponents(item: IngestedItem) {
+  const text = `${item.title} ${item.content}`.toLowerCase();
+  return {
+    relevanceScore: Math.min(countHits(text, TOOL_SIGNALS), 3) * 1.2,
+    usefulnessScore: Math.min(countHits(text, STRONG_SIGNALS), 3) * 1.5,
+    noveltyScore:
+      ageInHours(item.publishedAt) <= 24
+        ? 2.5
+        : ageInHours(item.publishedAt) <= 48
+          ? 1.5
+          : 0,
+  };
+}

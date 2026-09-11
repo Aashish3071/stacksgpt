@@ -1,7 +1,5 @@
-import { PrismaClient } from "@prisma/client";
+import prisma from "../lib/db";
 import { SEED_CHANNELS, SEED_TOOLS } from "../lib/seed-data";
-
-const prisma = new PrismaClient();
 
 async function main() {
   console.log("Seeding AI Updates database...");
@@ -25,7 +23,6 @@ async function main() {
     });
   }
   console.log(`✓ Seeded ${SEED_TOOLS.length} affiliate tools`);
-
 }
 
 main()

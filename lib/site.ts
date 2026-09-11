@@ -5,12 +5,16 @@
  */
 
 export const SITE_NAME = "Stacksgpt";
-export const SITE_TAGLINE = "Stack the facts. Skip the hype. We report what's new in AI and what actually matters";
+export const SITE_TAGLINE =
+  "Stack the facts. Skip the hype. We report what's new in AI and what actually matters";
 
 const FALLBACK_URL = "http://localhost:3000";
 
 export function siteUrl(path = ""): string {
-  const base = (process.env.NEXT_PUBLIC_SITE_URL || FALLBACK_URL).replace(/\/+$/, "");
+  const base = (process.env.NEXT_PUBLIC_SITE_URL || FALLBACK_URL).replace(
+    /\/+$/,
+    "",
+  );
   if (!path) return base;
   return `${base}${path.startsWith("/") ? path : `/${path}`}`;
 }
@@ -73,8 +77,18 @@ export const CATEGORIES = [
  * article page for anyone not in the server's timezone.
  */
 const MONTH_NAMES = [
-  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
 ];
 
 export function formatDate(value: Date | string | null | undefined): string {
@@ -84,7 +98,6 @@ export function formatDate(value: Date | string | null | undefined): string {
   return `${d.getUTCDate()} ${MONTH_NAMES[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
 }
 
-
 /** Machine-readable date for <time dateTime> and structured data. */
 export function isoDate(value: Date | string | null | undefined): string {
   if (!value) return "";
@@ -93,5 +106,10 @@ export function isoDate(value: Date | string | null | undefined): string {
 }
 
 export function categoryHref(category: string): string {
-  return `/category/${encodeURIComponent(category.toLowerCase())}`;
+  return `/category/${encodeURIComponent(
+    category
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, ""),
+  )}`;
 }

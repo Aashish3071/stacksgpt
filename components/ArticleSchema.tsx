@@ -1,63 +1,61 @@
-import { SITE_NAME, isoDate, siteUrl } from "@/lib/site";
-
-interface UseCase {
-  title: string;
-  stepByStep: string[];
-}
-
-/**
- * Article + FAQ structured data.
- *
- * The three use cases map naturally onto FAQPage entries, which is what makes
- * these pages eligible for expanded search results — the cheapest traffic gain
- * available to a site like this.
- */
+import { jsonLd } from "@/lib/safe-markdown";
+import { SITE_NAME, siteUrl, isoDate, categoryHref } from "@/lib/site";
 export default function ArticleSchema({
   title,
   summary,
   slug,
   publishedAt,
-  useCases,
+  updatedAt,
+  image,
+  authorName,
+  category,
 }: {
   title: string;
   summary: string;
   slug: string;
   publishedAt: Date | string | null;
-  useCases: UseCase[];
+  updatedAt: Date | string | null;
+  image?: string | null;
+  authorName?: string;
+  category: string;
 }) {
   const url = siteUrl(`/article/${slug}`);
-  const published = isoDate(publishedAt);
-
-  const graph: Record<string, unknown>[] = [
+  const graph = [
     {
       "@type": "NewsArticle",
-      headline: title.slice(0, 110),
+      headline: title,
       description: summary,
-      mainEntityOfPage: { "@type": "WebPage", "@id": url },
+      mainEntityOfPage: url,
       url,
-      ...(published ? { datePublished: published, dateModified: published } : {}),
+      datePublished: isoDate(publishedAt),
+      dateModified: isoDate(updatedAt),
+      ...(image
+        ? { image: image.startsWith("https://") ? image : siteUrl(image) }
+        : {}),
+      author: authorName
+        ? { "@type": "Person", name: authorName }
+        : { "@type": "Organization", name: SITE_NAME, url: siteUrl() },
       publisher: { "@type": "Organization", name: SITE_NAME, url: siteUrl() },
-      author: { "@type": "Organization", name: SITE_NAME, url: siteUrl() },
+    },
+    {
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Home", item: siteUrl() },
+        {
+          "@type": "ListItem",
+          position: 2,
+          name: category,
+          item: siteUrl(categoryHref(category)),
+        },
+        { "@type": "ListItem", position: 3, name: title, item: url },
+      ],
     },
   ];
-
-  const faqs = useCases.filter((u) => u.title && u.stepByStep?.length);
-  if (faqs.length > 0) {
-    graph.push({
-      "@type": "FAQPage",
-      mainEntity: faqs.map((u) => ({
-        "@type": "Question",
-        name: u.title,
-        acceptedAnswer: { "@type": "Answer", text: u.stepByStep.join(" ") },
-      })),
-    });
-  }
-
   return (
     <script
       type="application/ld+json"
       dangerouslySetInnerHTML={{
-        __html: JSON.stringify({ "@context": "https://schema.org", "@graph": graph }),
+        __html: jsonLd({ "@context": "https://schema.org", "@graph": graph }),
       }}
     />
   );

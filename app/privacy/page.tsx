@@ -1,44 +1,49 @@
-import type { Metadata } from "next";
+import Link from "next/link";
 import { LegalPage } from "@/lib/legal-pages";
-import { SITE_NAME, siteUrl } from "@/lib/site";
-
-export const metadata: Metadata = {
-  title: "Privacy policy",
-  description: "What data this site collects and how it is used.",
-  alternates: { canonical: siteUrl("/privacy") },
-};
-
-export default function PrivacyPage() {
+export const metadata = { title: "Privacy policy" };
+export default function Page() {
   return (
     <LegalPage title="Privacy policy">
+      <h2>Newsletter</h2>
       <p>
-        {/* TODO: review before launch, and add your ad network's specific disclosures
-            plus a consent banner if you serve readers in the EU or UK. */}
-        This policy explains what {SITE_NAME} collects and why.
+        We store your email address and subscription status to deliver the
+        newsletter through our configured email provider. Confirming your
+        address is required before newsletter delivery. Each newsletter includes
+        an unsubscribe link. Unsubscribing stops delivery; we retain the
+        suppression record to avoid emailing you again. Contact us to request
+        deletion.
+      </p>
+      <h2>Optional analytics and advertising</h2>
+      <p>
+        These features are disabled until configured by the publisher and
+        accepted through Privacy choices. You can reject them or change your
+        choice using the control at the foot of every page. Your choice is
+        stored in this browser.
       </p>
       <p>
-        <strong>Newsletter.</strong> If you subscribe, we store your email address for the sole
-        purpose of sending the newsletter. We do not sell or share it. Every email includes an
-        unsubscribe link, and unsubscribing deletes your address.
+        When analytics are enabled and accepted, we record daily counts of
+        article views, reading engagement, source clicks, and searches. We do
+        not store raw search queries in our editorial analytics. Counts are
+        retained for 90 days. Vercel Analytics and Speed Insights, and Google
+        Analytics when configured, may process usage and performance information
+        under their own policies.
       </p>
       <p>
-        <strong>Analytics.</strong> We count how many times each article is viewed. This is a simple
-        counter and is not tied to you or your device.
+        When advertising is enabled and accepted, Google AdSense may load
+        advertising resources and use cookies. Links to tools and partners may
+        lead to third parties with separate policies.
       </p>
+      <h2>Security and editorial accounts</h2>
       <p>
-        <strong>Advertising.</strong> This site is funded by advertising. Ad providers may set
-        cookies or use similar technologies to measure and select the ads you see. If you are in a
-        region that requires consent for this, you will be asked before any such cookies are set,
-        and you can change your choice at any time.
+        Our hosting and database providers process requests to operate and
+        protect the service. Short-lived, hashed network identifiers limit
+        abusive requests. Editors use essential sign-in cookies; editorial
+        actions and revisions are retained for accountability.
       </p>
+      <h2>Contact</h2>
       <p>
-        <strong>Links to other sites.</strong> Articles link to the sources they are based on and to
-        the tools they describe. Those sites have their own privacy policies, which we do not
-        control.
-      </p>
-      <p>
-        <strong>Your rights and questions.</strong> To ask what we hold about you, or to have it
-        deleted, use the <a href="/contact">contact page</a>.
+        Use our <Link href="/contact">contact page</Link> to ask about your data
+        or request deletion. We do not sell newsletter addresses.
       </p>
     </LegalPage>
   );

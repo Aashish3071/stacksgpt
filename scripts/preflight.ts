@@ -15,7 +15,8 @@
  * serving, which is always better than publishing an empty news site.
  */
 
-import { PrismaClient } from "@prisma/client";
+import prisma from "../lib/db";
+import { verifyHeroImage } from "../lib/media-validation";
 
 const ALLOW_EMPTY = process.env.ALLOW_EMPTY_BUILD === "true";
 
@@ -39,8 +40,6 @@ async function main() {
     ]);
   }
 
-  const prisma = new PrismaClient();
-
   try {
     await prisma.$queryRaw`SELECT 1`;
   } catch (err) {
@@ -61,13 +60,15 @@ async function main() {
 
   let publishedCount: number;
   try {
-    publishedCount = await prisma.article.count({ where: { isPublished: true } });
+    publishedCount = await prisma.article.count({
+      where: { isPublished: true },
+    });
   } catch {
     // Tables absent: a new database that has not been migrated yet. Allowed,
     // because the very first deploy has to happen before `prisma db push` can run.
     console.warn(
       "\n⚠️  Connected, but the tables do not exist yet.\n" +
-        "   Run `npx prisma db push` against this database, then redeploy.\n"
+        "   Run `npx prisma db push` against this database, then redeploy.\n",
     );
     await prisma.$disconnect();
     return;
@@ -83,17 +84,49 @@ async function main() {
     ]);
   }
 
-  const pooled = /pgbouncer=true/.test(url) || /:6543\//.test(url) || /pooler\./.test(url);
+  const liveImages = await prisma.article.findMany({
+    where: { isPublished: true, heroImage: { not: null } },
+    distinct: ["heroImage"],
+    select: {
+      heroImage: true,
+      heroImageAlt: true,
+      heroImageCredit: true,
+      heroImageOrigin: true,
+    },
+  });
+  for (const a of liveImages) {
+    const image = await verifyHeroImage(a.heroImage!, { localRequired: true });
+    const known = await prisma.mediaAsset.findUnique({
+      where: { url: a.heroImage! },
+    });
+    if (known?.contentHash && known.contentHash !== image.contentHash)
+      throw Error(
+        "A published image was overwritten. Restore it and use a new filename for the revision.",
+      );
+    if (!known)
+      await prisma.mediaAsset.create({
+        data: {
+          url: a.heroImage!,
+          alt: a.heroImageAlt || "",
+          credit: a.heroImageCredit || "",
+          origin: a.heroImageOrigin,
+          createdBy: "migration",
+          ...image,
+        },
+      });
+  }
+  const pooled =
+    /pgbouncer=true/.test(url) || /:6543\//.test(url) || /pooler\./.test(url);
   if (process.env.VERCEL && !pooled) {
     console.warn(
       "\n⚠️  DATABASE_URL is not a pooled connection.\n" +
         "   Serverless opens a connection per invocation and will exhaust the\n" +
         "   direct endpoint's limit. Use the transaction pooler (port 6543) for\n" +
-        "   DATABASE_URL and keep the direct endpoint for DIRECT_URL.\n"
+        "   DATABASE_URL and keep the direct endpoint for DIRECT_URL.\n",
     );
   }
 
-  console.log(`✓ Preflight passed — ${publishedCount} published article(s).`);
+  console.log(`✓ Preflight passed: ${publishedCount} published article(s).`);
   await prisma.$disconnect();
 }
 

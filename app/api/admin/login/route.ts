@@ -1,38 +1,68 @@
 import { NextResponse } from "next/server";
-import { SESSION_COOKIE, createSessionToken, isAuthConfigured, verifyPassword } from "@/lib/auth";
-
+import { cookies } from "next/headers";
+import { supabase, AUTH_COOKIE } from "@/lib/editor-auth";
+import { sameOrigin, limitedJson, rateLimit } from "@/lib/security";
+import prisma from "@/lib/db";
 export const dynamic = "force-dynamic";
-export const runtime = "nodejs";
-
 export async function POST(req: Request) {
-  if (!isAuthConfigured()) {
+  try {
+    sameOrigin(req);
+    await rateLimit(req, "login", 8);
+    const { email, password } = await limitedJson(req, 3000);
+    if (typeof email !== "string" || typeof password !== "string")
+      throw Error("Email and password are required.");
+    const { data, error } = await supabase().auth.signInWithPassword({
+      email,
+      password,
+    });
+    if (error || !data.session)
+      throw Error("Sign-in failed. Check your email and password.");
+    const profile = await prisma.profile.findUnique({
+      where: { id: data.user.id },
+    });
+    if (!profile?.active)
+      throw Error("This account has not been granted newsroom access.");
+    const res = NextResponse.json({ ok: true });
+    const opts = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict" as const,
+      path: "/",
+    };
+    res.cookies.set(AUTH_COOKIE, data.session.access_token, {
+      ...opts,
+      maxAge: data.session.expires_in,
+    });
+    res.cookies.set("stacksgpt_refresh", data.session.refresh_token, {
+      ...opts,
+      path: "/api",
+      maxAge: 86400 * 7,
+    });
+    return res;
+  } catch (e) {
     return NextResponse.json(
-      { error: "ADMIN_PASSWORD is not set (minimum 8 characters). Admin access is disabled." },
-      { status: 503 }
+      { error: e instanceof Error ? e.message : "Sign-in failed" },
+      { status: 401 },
     );
   }
-
-  const { password } = await req.json().catch(() => ({ password: "" }));
-
-  if (!verifyPassword(String(password || ""))) {
-    // Deliberately vague, and slowed slightly to blunt brute forcing.
-    await new Promise((r) => setTimeout(r, 600));
-    return NextResponse.json({ error: "Incorrect password." }, { status: 401 });
-  }
-
-  const res = NextResponse.json({ ok: true });
-  res.cookies.set(SESSION_COOKIE, await createSessionToken(), {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-    maxAge: 60 * 60 * 12,
-  });
-  return res;
 }
-
-export async function DELETE() {
-  const res = NextResponse.json({ ok: true });
-  res.cookies.delete(SESSION_COOKIE);
-  return res;
+export async function DELETE(req: Request) {
+  try {
+    sameOrigin(req);
+    const token = (await cookies()).get(AUTH_COOKIE)?.value;
+    if (token)
+      await fetch(`${process.env.SUPABASE_URL}/auth/v1/logout`, {
+        method: "POST",
+        headers: {
+          apikey: process.env.SUPABASE_PUBLISHABLE_KEY!,
+          Authorization: `Bearer ${token}`,
+        },
+      });
+    const res = NextResponse.json({ ok: true });
+    res.cookies.delete(AUTH_COOKIE);
+    res.cookies.set("stacksgpt_refresh", "", { path: "/api", maxAge: 0 });
+    return res;
+  } catch {
+    return NextResponse.json({ error: "Sign-out failed" }, { status: 400 });
+  }
 }

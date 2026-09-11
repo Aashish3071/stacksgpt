@@ -6,6 +6,7 @@ datasource db {
 
 generator client {
   provider = "prisma-client-js"
+  engineType = "client"
 }
 
 model Channel {
@@ -16,6 +17,9 @@ model Channel {
   category      String    @default("General") // "Productivity", "Generative", "Coding", "General"
   isActive      Boolean   @default(true)
   lastFetchedAt DateTime?
+  lastSuccessAt DateTime?
+  lastError String?
+  pollingEnabled Boolean @default(true)
   newsItems     RawNews[]
   createdAt     DateTime  @default(now())
 }
@@ -37,6 +41,11 @@ model RawNews {
   publishedAt DateTime?
   status      String    @default("PENDING") // "PENDING", "PROCESSED", "IGNORED", "FAILED"
   createdAt   DateTime  @default(now())
+  notes String?
+  duplicateOf String?
+  relevanceScore Float @default(0)
+  usefulnessScore Float @default(0)
+  noveltyScore Float @default(0)
   article     Article?
 
   @@index([contentHash])
@@ -128,10 +137,35 @@ model Article {
   heroImageAlt    String?
   heroImageCredit String?
 
+  searchDocument Unsupported("tsvector")?
+  publishedUpdatedAt DateTime?
+  updatedAt DateTime @default(now()) @updatedAt
+  authorId String?
+  reviewedBy String?
+  approvedAt DateTime?
+  scheduledFor DateTime?
+  correctionNote String?
+  structuredVerdict Json?
+  tags String[] @default([])
+  audiences String[] @default([])
+  additionalSources Json?
+  featured Boolean @default(false)
+  editorsPick Boolean @default(false)
+  pendingDraft Json?
+  pendingHash String?
+  pendingStatus String?
+  rejectionReason String?
+  version Int @default(1)
+  heroImageOrigin String @default("generated")
+  revisions ArticleRevision[]
+  redirects ArticleRedirect[]
   rawNewsId       String?        @unique
   rawNews         RawNews?       @relation(fields: [rawNewsId], references: [id])
   createdAt       DateTime       @default(now())
 
+  @@index([searchDocument], type: Gin, map: "Article_search_idx")
+  @@index([tags], type: Gin, map: "Article_tags_idx")
+  @@index([audiences], type: Gin, map: "Article_audiences_idx")
   @@index([status])
   @@index([category, isPublished])
 }
@@ -140,5 +174,124 @@ model Subscriber {
   id        String   @id @default(cuid())
   email     String   @unique
   source    String   @default("homepage")
+  confirmedAt DateTime?
+  unsubscribedAt DateTime?
+  token String @unique @default(uuid())
   createdAt DateTime @default(now())
+}
+
+model Profile {
+ id String @id
+ email String @unique
+ displayName String
+ role String @default("EDITOR")
+ active Boolean @default(true)
+ createdAt DateTime @default(now())
+}
+model ArticleRevision {
+ id String @id @default(cuid())
+ articleId String
+ article Article @relation(fields:[articleId],references:[id],onDelete:Cascade)
+ version Int
+ snapshot Json
+ actorId String?
+ createdAt DateTime @default(now())
+ @@unique([articleId,version])
+}
+model ArticleRedirect {
+ slug String @id
+ articleId String
+ article Article @relation(fields:[articleId],references:[id],onDelete:Cascade)
+}
+model AuditLog {
+ id String @id @default(cuid())
+ actorId String?
+ action String
+ articleId String?
+ detail Json?
+ createdAt DateTime @default(now())
+ @@index([createdAt])
+}
+model ImportAttempt {
+ id String @id @default(cuid())
+ externalId String?
+ status String
+ errors Json
+ createdAt DateTime @default(now())
+}
+model Taxonomy {
+ id String @id @default(cuid())
+ kind String
+ slug String
+ name String
+ description String @default("")
+ active Boolean @default(true)
+ @@unique([kind,slug])
+}
+model MediaAsset {
+ id String @id @default(cuid())
+ contentHash String?
+ width Int?
+ height Int?
+ byteSize Int?
+ url String @unique
+ alt String
+ credit String
+ origin String
+ createdBy String
+ createdAt DateTime @default(now())
+}
+model SiteSetting {
+ key String @id
+ value Json
+}
+model Partner {
+ id String @id @default(cuid())
+ name String
+ website String
+ disclosure String
+ active Boolean @default(false)
+ links PartnerLink[]
+ createdBy String
+ createdAt DateTime @default(now())
+}
+model PartnerLink {
+ id String @id @default(cuid())
+ partnerId String
+ partner Partner @relation(fields:[partnerId],references:[id])
+ label String
+ url String
+ active Boolean @default(false)
+}
+model EventDaily {
+ id String @id @default(cuid())
+ day String
+ event String
+ articleId String @default("")
+ count Int @default(0)
+ @@unique([day,event,articleId])
+}
+model RateLimit {
+ key String @id
+ count Int @default(1)
+ expiresAt DateTime
+}
+model Newsletter {
+ id String @id @default(cuid())
+ subject String
+ body String
+ status String @default("DRAFT")
+ createdBy String
+ createdAt DateTime @default(now())
+ deliveries NewsletterDelivery[]
+}
+model NewsletterDelivery {
+ id String @id @default(cuid())
+ newsletterId String
+ newsletter Newsletter @relation(fields:[newsletterId],references:[id])
+ subscriberId String
+ status String @default("PENDING")
+ sentAt DateTime?
+ error String?
+ @@unique([newsletterId,subscriberId])
 }

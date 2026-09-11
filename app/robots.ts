@@ -8,7 +8,7 @@ export default function robots(): MetadataRoute.Robots {
         userAgent: "*",
         allow: "/",
         // Nothing here should ever be indexed or crawled.
-        disallow: ["/admin", "/api/"],
+        disallow: ["/admin", "/api/", "/newsletter/", "/search"],
       },
     ],
     sitemap: siteUrl("/sitemap.xml"),

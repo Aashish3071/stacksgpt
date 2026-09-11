@@ -1,81 +1,68 @@
 import { notFound } from "next/navigation";
-import type { Metadata } from "next";
+import Link from "next/link";
 import prisma from "@/lib/db";
+import { discover } from "@/lib/discovery";
 import ArticleCard from "@/components/ArticleCard";
-import { CATEGORIES, siteUrl } from "@/lib/site";
-
-export const revalidate = 300;
-
+import { siteUrl } from "@/lib/site";
 interface Props {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ page?: string }>;
 }
-
-/** Maps a url slug back to the canonical category name, or null if unknown. */
-function resolveCategory(slug: string): string | null {
-  const decoded = decodeURIComponent(slug).toLowerCase();
-  return CATEGORIES.find((c) => c.toLowerCase() === decoded) ?? null;
-}
-
-export function generateStaticParams() {
-  return CATEGORIES.map((c) => ({ slug: c.toLowerCase() }));
-}
-
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const category = resolveCategory(params.slug);
-  if (!category) return { title: "Category not found", robots: { index: false } };
-
+export const dynamic = "force-dynamic";
+export async function generateMetadata({ params, searchParams }: Props) {
+  const { slug } = await params;
+  const page = Math.max(1, parseInt((await searchParams).page || "1") || 1);
   return {
-    title: `${category} — AI news you can use`,
-    description: `Every ${category.toLowerCase()} story, explained in plain English with practical ways to use it.`,
-    alternates: { canonical: siteUrl(`/category/${params.slug.toLowerCase()}`) },
+    title: `${slug.replaceAll("-", " ")} news${page > 1 ? ` — Page ${page}` : ""}`,
+    alternates: {
+      canonical: siteUrl(`/category/${slug}${page > 1 ? `?page=${page}` : ""}`),
+    },
   };
 }
-
-export default async function CategoryPage({ params }: Props) {
-  const category = resolveCategory(params.slug);
+export default async function Page({ params, searchParams }: Props) {
+  const { slug } = await params;
+  const category = await prisma.taxonomy.findFirst({
+    where: {
+      kind: "CATEGORY",
+      OR: [
+        { slug },
+        { name: { equals: slug.replaceAll("-", " "), mode: "insensitive" } },
+      ],
+    },
+  });
   if (!category) notFound();
-
-  let articles: any[] = [];
-  try {
-    articles = await prisma.article.findMany({
-      where: { isPublished: true, category },
-      orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
-      take: 60,
-      select: {
-        id: true,
-        slug: true,
-        title: true,
-        summary: true,
-        category: true,
-        readingMinutes: true,
-        publishedAt: true,
-        sourceAuthor: true,
-        heroImage: true,
-        heroImageAlt: true,
-      },
-    });
-  } catch (err) {
-    console.warn("Could not query category articles during build/render:", err);
-  }
-
+  const page = Math.max(
+    1,
+    Math.min(100000, parseInt((await searchParams).page || "1") || 1),
+  );
+  const { items, total } = await discover({
+    page,
+    kind: "category",
+    slug: category.slug,
+  });
   return (
-    <div className="mx-auto max-w-shell px-4 py-10 sm:px-6">
-      <header className="border-b border-rule pb-4">
-        <h1 className="font-serif text-head-lg font-semibold text-ink">{category}</h1>
-        <p className="meta mt-2">
-          {articles.length === 0
-            ? "No stories in this section yet."
-            : `${articles.length} ${articles.length === 1 ? "story" : "stories"}`}
-        </p>
-      </header>
-
-      {articles.length > 0 && (
-        <div className="grid gap-x-8 gap-y-9 pt-8 sm:grid-cols-2 lg:grid-cols-3">
-          {articles.map((article) => (
-            <ArticleCard key={article.id} article={article} />
+    <div className="mx-auto max-w-shell px-6 py-12">
+      <h1 className="font-serif text-4xl">{category.name}</h1>
+      <p className="my-5">
+        {category.description || `${total} published stories`}
+      </p>
+      {items.length ? (
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          {items.map((a) => (
+            <ArticleCard key={a.id} article={a} />
           ))}
         </div>
+      ) : (
+        <p>No stories in this section yet.</p>
       )}
+      <nav
+        aria-label="Pagination"
+        className="flex justify-between mt-10 border-t pt-5"
+      >
+        {page > 1 ? <Link href={`?page=${page - 1}`}>Previous</Link> : <span />}
+        <span>Page {page}</span>
+        {page * 12 < total && <Link href={`?page=${page + 1}`}>Next</Link>}
+      </nav>
     </div>
   );
 }
