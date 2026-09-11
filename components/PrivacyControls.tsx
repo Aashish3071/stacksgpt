@@ -2,8 +2,6 @@
 import Link from "next/link";
 import { createContext, useContext, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { Analytics } from "@vercel/analytics/react";
-import { SpeedInsights } from "@vercel/speed-insights/next";
 import Script from "next/script";
 export type PublicSettings = {
   name: string;
@@ -92,8 +90,6 @@ export default function PrivacyControls({
       {children}
       {analytics && (
         <>
-          <Analytics />
-          <SpeedInsights />
           {settings.ga4Id && (
             <>
               <Script

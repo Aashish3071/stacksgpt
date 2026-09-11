@@ -10,6 +10,8 @@ import { getSettings } from "@/lib/settings";
 import prisma from "@/lib/db";
 
 import { SITE_NAME, SITE_TAGLINE, siteUrl, CATEGORIES } from "@/lib/site";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const serif = Source_Serif_4({
   subsets: ["latin"],
@@ -119,6 +121,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             {children}
           </SiteChrome>
         </PrivacyControls>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
