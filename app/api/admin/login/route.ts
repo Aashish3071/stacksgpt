@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { supabase, AUTH_COOKIE } from "@/lib/editor-auth";
+import { supabase, AUTH_COOKIE, createMasterSession } from "@/lib/editor-auth";
 import { sameOrigin, limitedJson, rateLimit } from "@/lib/security";
 import prisma from "@/lib/db";
 export const dynamic = "force-dynamic";
@@ -11,6 +11,22 @@ export async function POST(req: Request) {
     const { email, password } = await limitedJson(req, 3000);
     if (typeof email !== "string" || typeof password !== "string")
       throw Error("Email and password are required.");
+
+    const masterPassword = process.env.ADMIN_PASSWORD;
+    if (masterPassword && password === masterPassword) {
+      const token = createMasterSession(email);
+      const res = NextResponse.json({ ok: true });
+      const opts = {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict" as const,
+        path: "/",
+        maxAge: 86400 * 7,
+      };
+      res.cookies.set(AUTH_COOKIE, token, opts);
+      return res;
+    }
+
     const { data, error } = await supabase().auth.signInWithPassword({
       email,
       password,

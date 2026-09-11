@@ -26,11 +26,11 @@ const sans = Inter({
 const baseMetadata: Metadata = {
   metadataBase: new URL(siteUrl()),
   title: {
-    default: `${SITE_NAME} — ${SITE_TAGLINE}`,
-    template: `%s — ${SITE_NAME}`,
+    default: `${SITE_NAME}: ${SITE_TAGLINE}`,
+    template: `%s · ${SITE_NAME}`,
   },
   description:
-    "Stack the facts. Skip the hype. We report what's new in AI and what actually matters in plain English.",
+    "We track the latest AI and tech developments so you do not have to, delivering what is new and why it matters.",
   openGraph: {
     siteName: SITE_NAME,
     type: "website",

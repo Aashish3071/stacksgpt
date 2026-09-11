@@ -17,7 +17,10 @@ export default function Footer({
             <Link href="/" className="inline-block">
               <Logo size="sm" />
             </Link>
-            <p className="meta mt-3 leading-relaxed">{tagline}</p>
+            <p className="meta mt-3 leading-relaxed">
+              {tagline ||
+                "We track the latest AI and tech developments so you do not have to, delivering what is new and why it matters."}
+            </p>
           </div>
 
           <nav className="font-sans text-meta">
