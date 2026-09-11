@@ -1,5 +1,6 @@
 import prisma from "./db";
 import { Prisma } from "@prisma/client";
+import { CATEGORIES } from "./site";
 export async function discover({
   q = "",
   page = 1,
@@ -31,20 +32,29 @@ export async function discover({
     }
   }
   const where: Prisma.ArticleWhereInput = { isPublished: true };
-  if (kind === "category") {
-    try {
-      const t = await prisma.taxonomy.findUnique({
-        where: { kind_slug: { kind: "CATEGORY", slug: slug! } },
-      });
-      where.category = {
-        equals: t?.name || slug?.replaceAll("-", " "),
-        mode: "insensitive",
-      };
-    } catch {
-      where.category = {
-        equals: slug?.replaceAll("-", " "),
-        mode: "insensitive",
-      };
+  if (kind === "category" && slug) {
+    const matched = (CATEGORIES as readonly string[]).find(
+      (c) =>
+        c.toLowerCase() === slug.toLowerCase() ||
+        c.toLowerCase() === slug.replaceAll("-", " ").toLowerCase(),
+    );
+    if (matched) {
+      where.category = { equals: matched, mode: "insensitive" };
+    } else {
+      try {
+        const t = await prisma.taxonomy.findUnique({
+          where: { kind_slug: { kind: "CATEGORY", slug } },
+        });
+        where.category = {
+          equals: t?.name || slug.replaceAll("-", " "),
+          mode: "insensitive",
+        };
+      } catch {
+        where.category = {
+          equals: slug.replaceAll("-", " "),
+          mode: "insensitive",
+        };
+      }
     }
   }
   if (kind === "tag") where.tags = { has: slug };
@@ -81,7 +91,7 @@ export async function discover({
   } as const;
 
   try {
-    const [items, total] = await prisma.$transaction([
+    const [items, total] = await Promise.all([
       prisma.article.findMany({
         where,
         orderBy: [{ publishedAt: "desc" }, { id: "asc" }],
@@ -93,20 +103,7 @@ export async function discover({
     ]);
     return { items, total };
   } catch (err) {
-    console.warn("discover transaction failed, falling back to direct queries:", err);
-    try {
-      const items = await prisma.article.findMany({
-        where,
-        orderBy: [{ publishedAt: "desc" }, { id: "asc" }],
-        take: limit,
-        skip: offset,
-        select: selectFields,
-      });
-      const total = await prisma.article.count({ where });
-      return { items, total };
-    } catch (fallbackErr) {
-      console.warn("discover fallback query failed:", fallbackErr);
-      return { items: [], total: 0 };
-    }
+    console.warn("discover query failed, returning empty:", err);
+    return { items: [], total: 0 };
   }
 }

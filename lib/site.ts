@@ -64,6 +64,7 @@ export const CATEGORIES = [
   "Coding",
   "Research",
   "Design",
+  "Writing",
   "Automation",
 ] as const;
 

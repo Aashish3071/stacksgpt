@@ -4,7 +4,7 @@ import prisma from "@/lib/db";
 import ArticleCard, { ArticleCardData } from "@/components/ArticleCard";
 import NewsletterCard from "@/components/NewsletterCard";
 import AdSlot from "@/components/AdSlot";
-import { CATEGORIES, categoryHref, siteUrl, SITE_NAME } from "@/lib/site";
+import { CATEGORIES, categoryHref, siteUrl, SITE_NAME, SITE_TAGLINE } from "@/lib/site";
 import { jsonLd } from "@/lib/safe-markdown";
 
 export const revalidate = 300;
@@ -30,14 +30,6 @@ const CARD_FIELDS = {
 /** How many stories each category strip shows. */
 const PER_CATEGORY = 4;
 
-/**
- * Homepage layout:
- * 1. Hero article (latest published, full-width)
- * 2. Latest articles grid (next 4-8 newest, square cards)
- * 3. Category sections (Productivity, Coding, Research, Design, Automation)
- * 4. Newsletter subscribe CTA
- * 5. Footer (rendered via RootLayout)
- */
 export default async function HomePage() {
   let articles: ArticleCardData[] = [];
   try {
@@ -56,33 +48,6 @@ export default async function HomePage() {
       err,
     );
   }
-
-  if (articles.length === 0) {
-    return (
-      <div className="mx-auto max-w-measure px-4 py-24 text-center sm:px-6">
-        <h1 className="font-serif text-head-lg text-ink">
-          No articles published yet
-        </h1>
-        <p className="meta mt-3 leading-relaxed">
-          Our first stories are being prepared. Check back for clear reporting
-          on AI and technology.
-        </p>
-      </div>
-    );
-  }
-
-  const [hero, ...rest] = articles as ArticleCardData[];
-
-  // Latest articles: next 8 newest across all categories
-  const latestArticles = rest.slice(0, 8);
-
-  // Category sections: only show categories with published content
-  const sections = CATEGORIES
-    .map((category) => ({
-      category,
-      items: rest.filter((a) => a.category === category).slice(0, PER_CATEGORY),
-    }))
-    .filter((s) => s.items.length >= 1);
 
   // Schema.org structured data for the homepage
   const homepageSchema = {
@@ -112,6 +77,56 @@ export default async function HomePage() {
     ],
   };
 
+  if (articles.length === 0) {
+    return (
+      <div className="mx-auto max-w-shell px-4 sm:px-6">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: jsonLd(homepageSchema),
+          }}
+        />
+
+        <div className="mx-auto max-w-2xl py-16 text-center sm:py-24">
+          <span className="font-mono text-xs uppercase tracking-widest text-accent font-semibold">
+            Plain English AI Intelligence
+          </span>
+          <h1 className="mt-4 font-serif text-3xl font-bold leading-tight text-ink sm:text-5xl">
+            {SITE_TAGLINE}
+          </h1>
+          <p className="meta mt-4 text-base leading-relaxed text-muted sm:text-lg">
+            Our newsroom is reviewing and preparing fresh stories. Subscribe below to
+            receive breaking model announcements, benchmark teardowns, and practical
+            briefings as soon as they publish.
+          </p>
+          <div className="mt-8 flex justify-center gap-3">
+            <Link
+              href="/tools"
+              prefetch={true}
+              className="rounded-lg border border-rule bg-paper px-4 py-2 font-sans text-sm font-medium text-ink hover:border-ink transition-colors"
+            >
+              Browse AI Tools Directory →
+            </Link>
+          </div>
+        </div>
+
+        <div id="newsletter" className="pb-12">
+          <NewsletterCard />
+        </div>
+      </div>
+    );
+  }
+
+  const [hero, ...rest] = articles as ArticleCardData[];
+  const latestArticles = rest.slice(0, 8);
+
+  const sections = CATEGORIES
+    .map((category) => ({
+      category,
+      items: rest.filter((a) => a.category === category).slice(0, PER_CATEGORY),
+    }))
+    .filter((s) => s.items.length >= 1);
+
   return (
     <div className="mx-auto max-w-shell px-4 sm:px-6">
       {/* Homepage JSON-LD structured data */}
@@ -138,6 +153,7 @@ export default async function HomePage() {
             </h2>
             <Link
               href="/latest"
+              prefetch={true}
               className="meta text-xs hover:text-accent"
             >
               View all
@@ -166,6 +182,7 @@ export default async function HomePage() {
             </h2>
             <Link
               href={categoryHref(category)}
+              prefetch={true}
               className="meta text-xs hover:text-accent"
             >
               More in {category.toLowerCase()}
