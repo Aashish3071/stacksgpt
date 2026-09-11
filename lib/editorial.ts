@@ -254,7 +254,11 @@ export async function transitionArticle(
           readingMinutes:Math.max(1,Math.ceil((fields.body||"").split(/\s+/).length/200)),
           status: "PUBLISHED",
           isPublished: true,
-          publishedAt: a.publishedAt || new Date(),
+          publishedAt: fields.publishedAt
+            ? new Date(fields.publishedAt)
+            : a.status === "PUBLISHED"
+              ? a.publishedAt || new Date()
+              : new Date(),
           publishedUpdatedAt: new Date(),
           pendingDraft: null,
           pendingStatus: null,

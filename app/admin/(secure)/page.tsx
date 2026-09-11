@@ -45,7 +45,7 @@ export default async function Page() {
       prisma.article
         .findMany({
           where: { isPublished: true },
-          orderBy: { publishedAt: "desc" },
+          orderBy: { publishedAt: { sort: "desc", nulls: "last" } },
           take: 6,
         })
         .catch(() => []),

@@ -5,8 +5,7 @@
  */
 
 export const SITE_NAME = "StacksGPT";
-export const SITE_TAGLINE =
-  "We track the latest AI and tech developments so you do not have to, delivering what is new and why it matters";
+export const SITE_TAGLINE = "Simplifying the AI for you";
 
 const FALLBACK_URL = "http://localhost:3000";
 

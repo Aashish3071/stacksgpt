@@ -94,7 +94,7 @@ export async function discover({
     const [items, total] = await Promise.all([
       prisma.article.findMany({
         where,
-        orderBy: [{ publishedAt: "desc" }, { id: "asc" }],
+        orderBy: [{ publishedAt: { sort: "desc", nulls: "last" } }, { id: "asc" }],
         take: limit,
         skip: offset,
         select: selectFields,

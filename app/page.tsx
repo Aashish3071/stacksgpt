@@ -7,7 +7,7 @@ import AdSlot from "@/components/AdSlot";
 import { CATEGORIES, categoryHref, siteUrl, SITE_NAME, SITE_TAGLINE } from "@/lib/site";
 import { jsonLd } from "@/lib/safe-markdown";
 
-export const revalidate = 300;
+export const revalidate = 60;
 
 export const metadata: Metadata = {
   alternates: { canonical: siteUrl() },
@@ -36,7 +36,7 @@ export default async function HomePage() {
     articles = await prisma.article.findMany({
       where: { isPublished: true },
       orderBy: [
-        { publishedAt: "desc" },
+        { publishedAt: { sort: "desc", nulls: "last" } },
         { createdAt: "desc" },
       ],
       take: 60,

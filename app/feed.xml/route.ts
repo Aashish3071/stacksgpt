@@ -18,7 +18,7 @@ export async function GET() {
   try {
     articles = await prisma.article.findMany({
       where: { isPublished: true },
-      orderBy: { publishedAt: "desc" },
+      orderBy: { publishedAt: { sort: "desc", nulls: "last" } },
       take: 50,
       select: { slug: true, title: true, summary: true, publishedAt: true, createdAt: true },
     });

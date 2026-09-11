@@ -2,8 +2,7 @@ import { perRequest } from "./per-request-cache";
 import prisma from "./db";
 export const defaultSettings = {
   name: "StacksGPT",
-  tagline:
-    "We track the latest AI and tech developments so you do not have to, delivering what is new and why it matters.",
+  tagline: "Simplifying the AI for you",
   contactEmail: "support@stacksgpt.com",
   socialLinks: [{ label: "X", url: "https://x.com/StacksGPT01" }] as {
     label: string;

@@ -34,7 +34,7 @@ export async function generateStaticParams() {
     const articles = await prisma.article.findMany({
       where: { isPublished: true },
       select: { slug: true },
-      orderBy: { publishedAt: "desc" },
+      orderBy: { publishedAt: { sort: "desc", nulls: "last" } },
       take: 200,
     });
     return articles.map(({ slug }) => ({ slug }));
@@ -145,7 +145,7 @@ export default async function ArticlePage({ params }: Props) {
           category: article.category,
           NOT: { id: article.id },
         },
-        orderBy: { publishedAt: "desc" },
+        orderBy: { publishedAt: { sort: "desc", nulls: "last" } },
         take: 3,
         select: CARD_FIELDS,
       });
