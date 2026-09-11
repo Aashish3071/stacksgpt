@@ -57,11 +57,14 @@ export async function processImport(
     const asset = await prisma.mediaAsset.findUnique({
       where: { url: fields.heroImage! },
     });
-    if (asset?.contentHash && asset.contentHash !== image.contentHash)
+    const publishedOwner = await prisma.article.findFirst({
+      where: { heroImage: fields.heroImage!, isPublished: true },
+    });
+    if (publishedOwner && asset?.contentHash && asset.contentHash !== image.contentHash)
       throw Error(
         "An existing image was overwritten. Use a new versioned image filename so published articles keep their approved image.",
       );
-    if (!asset)
+    if (!asset) {
       await prisma.mediaAsset.create({
         data: {
           url: fields.heroImage!,
@@ -72,6 +75,19 @@ export async function processImport(
           ...image,
         },
       });
+    } else if (asset.contentHash !== image.contentHash && !publishedOwner) {
+      await prisma.mediaAsset.update({
+        where: { id: asset.id },
+        data: {
+          contentHash: image.contentHash,
+          width: image.width,
+          height: image.height,
+          byteSize: image.byteSize,
+          alt: fields.heroImageAlt!,
+          credit: fields.heroImageCredit!,
+        },
+      });
+    }
     const before = await prisma.article.findUnique({
       where: { externalId },
       select: { sourceHash: true, pendingHash: true },

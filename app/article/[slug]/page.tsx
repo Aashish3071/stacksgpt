@@ -155,12 +155,16 @@ export default async function ArticlePage({ params }: Props) {
   }
 
   if (!article || !article.isPublished) {
-    const old = await prisma.articleRedirect.findUnique({
-      where: { slug: (await params).slug },
-      include: { article: { select: { slug: true, isPublished: true } } },
-    });
-    if (old?.article.isPublished)
-      permanentRedirect(`/article/${old.article.slug}`);
+    try {
+      const old = await prisma.articleRedirect.findUnique({
+        where: { slug: (await params).slug },
+        include: { article: { select: { slug: true, isPublished: true } } },
+      });
+      if (old?.article.isPublished)
+        permanentRedirect(`/article/${old.article.slug}`);
+    } catch (err) {
+      console.warn("Could not check article redirect:", err);
+    }
     notFound();
   }
 
@@ -176,27 +180,37 @@ export default async function ArticlePage({ params }: Props) {
   // Markdown body is rendered on the server so it ships as HTML, not JS.
   const bodyHtml = article.body ? await safeMarkdown(article.body) : null;
 
-  const author = article.authorId
-    ? await prisma.profile.findUnique({
-        where: { id: article.authorId },
-        select: { displayName: true },
-      })
-    : null;
-  if (
-    article.primaryTool?.affiliateUrl &&
-    !(await prisma.partnerLink.findFirst({
-      where: {
-        url: article.primaryTool.affiliateUrl,
-        active: true,
-        partner: { active: true },
-      },
-    }))
-  )
-    article.primaryTool = {
-      ...article.primaryTool,
-      affiliateUrl: null,
-      status: "NONE",
-    };
+  let author: { displayName: string } | null = null;
+  try {
+    author = article.authorId
+      ? await prisma.profile.findUnique({
+          where: { id: article.authorId },
+          select: { displayName: true },
+        })
+      : null;
+  } catch (err) {
+    console.warn("Could not load author profile:", err);
+  }
+
+  try {
+    if (
+      article.primaryTool?.affiliateUrl &&
+      !(await prisma.partnerLink.findFirst({
+        where: {
+          url: article.primaryTool.affiliateUrl,
+          active: true,
+          partner: { active: true },
+        },
+      }))
+    )
+      article.primaryTool = {
+        ...article.primaryTool,
+        affiliateUrl: null,
+        status: "NONE",
+      };
+  } catch (err) {
+    console.warn("Could not verify partner link:", err);
+  }
   return (
     <>
       <ArticleSchema

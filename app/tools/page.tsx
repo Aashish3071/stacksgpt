@@ -14,18 +14,19 @@ export const metadata: Metadata = {
 
 export default async function ToolsDirectoryPage() {
   let tools: any[] = [];
+  let approved: { url: string }[] = [];
   try {
     tools = await prisma.toolAffiliate.findMany({
       orderBy: [{ category: "asc" }, { name: "asc" }],
     });
+    approved = await prisma.partnerLink.findMany({
+      where: { active: true, partner: { active: true } },
+      select: { url: true },
+    });
   } catch (err) {
-    console.warn("Could not query tools during build/render:", err);
+    console.warn("Could not query tools or partners during build/render:", err);
   }
 
-  const approved = await prisma.partnerLink.findMany({
-    where: { active: true, partner: { active: true } },
-    select: { url: true },
-  });
   tools = tools.map((t) =>
     approved.some((p) => p.url === t.affiliateUrl)
       ? t

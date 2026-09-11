@@ -8,7 +8,7 @@ import PrivacyControls from "@/components/PrivacyControls";
 import { getSettings } from "@/lib/settings";
 import prisma from "@/lib/db";
 
-import { SITE_NAME, SITE_TAGLINE, siteUrl } from "@/lib/site";
+import { SITE_NAME, SITE_TAGLINE, siteUrl, CATEGORIES } from "@/lib/site";
 
 const serif = Source_Serif_4({
   subsets: ["latin"],
@@ -60,11 +60,19 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const s = await getSettings();
-  const categories = await prisma.taxonomy.findMany({
-    where: { kind: "CATEGORY", active: true },
-    orderBy: { name: "asc" },
-    select: { name: true, slug: true },
-  });
+  let categories: { name: string; slug: string }[] = [];
+  try {
+    categories = await prisma.taxonomy.findMany({
+      where: { kind: "CATEGORY", active: true },
+      orderBy: { name: "asc" },
+      select: { name: true, slug: true },
+    });
+  } catch (err) {
+    console.warn("Could not fetch categories taxonomy, using defaults:", err);
+  }
+  if (!categories.length) {
+    categories = CATEGORIES.map((c) => ({ name: c, slug: c.toLowerCase() }));
+  }
   const publicSettings = {
     name: s.name,
     tagline: s.tagline,

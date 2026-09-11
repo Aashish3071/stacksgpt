@@ -14,8 +14,13 @@ export const defaultSettings = {
   rssFallbackEnabled: true,
 };
 export async function getSettings() {
-  const row = await prisma.siteSetting.findUnique({
-    where: { key: "publication" },
-  });
-  return { ...defaultSettings, ...((row?.value as any) || {}) };
+  try {
+    const row = await prisma.siteSetting.findUnique({
+      where: { key: "publication" },
+    });
+    return { ...defaultSettings, ...((row?.value as any) || {}) };
+  } catch (err) {
+    console.warn("Could not fetch publication settings, using defaults:", err);
+    return defaultSettings;
+  }
 }

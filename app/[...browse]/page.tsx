@@ -32,30 +32,43 @@ export default async function Browse({ params, searchParams }: Props) {
     (["latest", "archive", "search"].includes(kind) && slug)
   )
     notFound();
-  if (
-    ["tag", "audience"].includes(kind) &&
-    !(await prisma.taxonomy.findUnique({
-      where: {
-        kind_slug: { kind: kind === "tag" ? "TAG" : "AUDIENCE", slug: slug! },
-      },
-    }))
-  )
-    notFound();
-  if (kind === "source") {
-    const source = await prisma.taxonomy.findUnique({
-      where: { kind_slug: { kind: "SOURCE", slug } },
-    });
+  try {
     if (
-      !source?.active ||
-      !(await prisma.article.count({
-        where: { isPublished: true, sourceAuthor: source.name },
+      ["tag", "audience"].includes(kind) &&
+      !(await prisma.taxonomy.findUnique({
+        where: {
+          kind_slug: { kind: kind === "tag" ? "TAG" : "AUDIENCE", slug: slug! },
+        },
       }))
     )
       notFound();
+    if (kind === "source") {
+      const source = await prisma.taxonomy.findUnique({
+        where: { kind_slug: { kind: "SOURCE", slug } },
+      });
+      if (
+        !source?.active ||
+        !(await prisma.article.count({
+          where: { isPublished: true, sourceAuthor: source.name },
+        }))
+      )
+        notFound();
+    }
+  } catch (err) {
+    console.warn("Could not check taxonomy in browse:", err);
   }
+
   const q = kind === "search" ? (search.q || "").slice(0, 200) : "";
   const page = Math.max(1, Math.min(100000, parseInt(search.page || "1") || 1));
-  const { items, total } = await discover({ q, page, kind, slug });
+  let items: any[] = [];
+  let total = 0;
+  try {
+    const res = await discover({ q, page, kind, slug });
+    items = res.items;
+    total = res.total;
+  } catch (err) {
+    console.warn("Could not discover browse articles:", err);
+  }
   const title =
     kind === "search"
       ? "Find a story"
