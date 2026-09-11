@@ -7,9 +7,22 @@ import prisma from "./db";
 
 export const AUTH_COOKIE = "stacksgpt_session";
 
-// No hardcoded fallback: a committed default secret in a public repo lets
-// anyone forge session tokens. Fail closed instead.
-const MASTER_SECRET = process.env.ADMIN_SESSION_SECRET;
+function getMasterSecret(): string {
+  if (
+    process.env.ADMIN_SESSION_SECRET &&
+    process.env.ADMIN_SESSION_SECRET.trim().length >= 16
+  ) {
+    return process.env.ADMIN_SESSION_SECRET.trim();
+  }
+  const dbUrl = process.env.DIRECT_URL || process.env.DATABASE_URL;
+  if (dbUrl) {
+    return crypto
+      .createHmac("sha256", dbUrl)
+      .update("stacksgpt_editorial_session_secret")
+      .digest("hex");
+  }
+  throw Error("Neither ADMIN_SESSION_SECRET nor DATABASE_URL is configured.");
+}
 
 export type EditorRole = "ADMIN" | "EDITOR";
 
@@ -21,11 +34,11 @@ export function createMasterSession(
   email = "admin@stacksgpt.com",
   role: EditorRole = "ADMIN",
 ): string {
-  if (!MASTER_SECRET) throw Error("ADMIN_SESSION_SECRET is not configured.");
+  const secret = getMasterSecret();
   const expiresAt = Date.now() + 1000 * 60 * 60 * 24 * 7;
   const payload = `master:${email}:${role}:${expiresAt}`;
   const hmac = crypto
-    .createHmac("sha256", MASTER_SECRET)
+    .createHmac("sha256", secret)
     .update(payload)
     .digest("hex");
   const claims = Buffer.from(`${email}:${role}`).toString("base64url");
@@ -35,30 +48,34 @@ export function createMasterSession(
 export function verifyMasterSession(
   token: string,
 ): { email: string; role: EditorRole } | null {
-  if (!MASTER_SECRET) return null;
-  if (!token.startsWith("master.")) return null;
-  const parts = token.split(".");
-  if (parts.length !== 4) return null;
-  const [, expStr, hmac, claimsB64] = parts;
-  const exp = parseInt(expStr, 10);
-  if (isNaN(exp) || Date.now() > exp) return null;
-  const claims = Buffer.from(claimsB64, "base64url").toString("utf8");
-  const split = claims.lastIndexOf(":");
-  if (split < 1) return null;
-  const email = claims.slice(0, split);
-  const role = claims.slice(split + 1);
-  if (role !== "ADMIN" && role !== "EDITOR") return null;
-  const payload = `master:${email}:${role}:${expStr}`;
-  const expected = crypto
-    .createHmac("sha256", MASTER_SECRET)
-    .update(payload)
-    .digest("hex");
-  if (
-    hmac.length !== expected.length ||
-    !crypto.timingSafeEqual(Buffer.from(hmac), Buffer.from(expected))
-  )
+  try {
+    const secret = getMasterSecret();
+    if (!token.startsWith("master.")) return null;
+    const parts = token.split(".");
+    if (parts.length !== 4) return null;
+    const [, expStr, hmac, claimsB64] = parts;
+    const exp = parseInt(expStr, 10);
+    if (isNaN(exp) || Date.now() > exp) return null;
+    const claims = Buffer.from(claimsB64, "base64url").toString("utf8");
+    const split = claims.lastIndexOf(":");
+    if (split < 1) return null;
+    const email = claims.slice(0, split);
+    const role = claims.slice(split + 1);
+    if (role !== "ADMIN" && role !== "EDITOR") return null;
+    const payload = `master:${email}:${role}:${expStr}`;
+    const expected = crypto
+      .createHmac("sha256", secret)
+      .update(payload)
+      .digest("hex");
+    if (
+      hmac.length !== expected.length ||
+      !crypto.timingSafeEqual(Buffer.from(hmac), Buffer.from(expected))
+    )
+      return null;
+    return { email, role: role as EditorRole };
+  } catch {
     return null;
-  return { email, role };
+  }
 }
 
 export function supabase(token?: string) {

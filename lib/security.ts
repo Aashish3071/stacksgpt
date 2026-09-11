@@ -41,7 +41,13 @@ export function sameOrigin(req: Request) {
     // is a shared suffix across every Vercel project (anyone's deployment
     // would pass), and this check is the site's CSRF defense on every
     // mutating admin/API request.
-    if (originHost === reqHost) return;
+    if (
+      originHost === reqHost ||
+      originHost.replace(/^www\./, "") === reqHost.replace(/^www\./, "") ||
+      originUrl.origin === new URL(req.url).origin
+    ) {
+      return;
+    }
   } catch {}
 
   throw Error("This request must originate from the publication.");

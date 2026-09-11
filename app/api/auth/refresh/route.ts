@@ -19,7 +19,7 @@ export async function POST(req: Request) {
     const o = {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict" as const,
+      sameSite: "lax" as const,
       path: "/",
     };
     res.cookies.set(AUTH_COOKIE, data.session.access_token, {

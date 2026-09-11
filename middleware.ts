@@ -42,7 +42,11 @@ export function middleware(req: NextRequest) {
         // this to "*.vercel.app" or a hardcoded domain: vercel.app is a
         // shared suffix across every Vercel project, and this check is the
         // site's CSRF defense on every mutating admin/API request.
-        if (originHost !== reqHost) {
+        if (
+          originHost !== reqHost &&
+          originHost.replace(/^www\./, "") !== reqHost.replace(/^www\./, "") &&
+          originUrl.origin !== req.nextUrl.origin
+        ) {
           return NextResponse.json(
             { error: "Invalid request origin" },
             { status: 403 },
