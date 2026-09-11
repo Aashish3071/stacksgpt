@@ -9,6 +9,7 @@ export default function ArticleSchema({
   image,
   authorName,
   category,
+  keywords,
 }: {
   title: string;
   summary: string;
@@ -18,9 +19,10 @@ export default function ArticleSchema({
   image?: string | null;
   authorName?: string;
   category: string;
+  keywords?: string[];
 }) {
   const url = siteUrl(`/article/${slug}`);
-  const graph = [
+  const graph: any[] = [
     {
       "@type": "NewsArticle",
       headline: title,
@@ -29,6 +31,7 @@ export default function ArticleSchema({
       url,
       datePublished: isoDate(publishedAt),
       dateModified: isoDate(updatedAt),
+      keywords: keywords && keywords.length ? keywords.join(", ") : undefined,
       ...(image
         ? { image: image.startsWith("https://") ? image : siteUrl(image) }
         : {}),

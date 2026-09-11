@@ -232,20 +232,33 @@ export default function ArticleReader({
             <strong>Correction:</strong> {article.correctionNote}
           </aside>
         )}
-        <nav aria-label="Related topics" className="flex flex-wrap gap-3 mt-6">
+        <nav aria-label="Related topics" className="flex flex-wrap items-center gap-2 mt-6">
+          {article.tags && article.tags.length > 0 && (
+            <span className="text-xs font-semibold text-muted uppercase tracking-wider mr-1">
+              Tags:
+            </span>
+          )}
           {article.tags?.map((t) => (
-            <Link key={t} className="border px-3 py-1" href={`/tag/${t}`}>
-              {t.replaceAll("-", " ")}
+            <Link
+              key={t}
+              className="inline-flex items-center rounded border border-rule bg-surface px-2.5 py-1 font-sans text-xs font-medium text-ink hover:border-ink hover:bg-paper transition-colors"
+              href={`/tag/${t}`}
+            >
+              #{t.replaceAll("-", " ")}
             </Link>
           ))}
           {article.audiences?.map((t) => (
-            <Link key={t} className="border px-3 py-1" href={`/audience/${t}`}>
+            <Link
+              key={t}
+              className="inline-flex items-center rounded border border-rule bg-surface px-2.5 py-1 font-sans text-xs font-medium text-muted hover:text-ink hover:border-ink hover:bg-paper transition-colors"
+              href={`/audience/${t}`}
+            >
               For {t.replaceAll("-", " ")}
             </Link>
           ))}
           {article.sourceAuthor && (
             <Link
-              className="border px-3 py-1"
+              className="inline-flex items-center rounded border border-rule bg-surface px-2.5 py-1 font-sans text-xs font-medium text-muted hover:text-ink hover:border-ink hover:bg-paper transition-colors"
               href={`/source/${article.sourceAuthor
                 .toLowerCase()
                 .replace(/[^a-z0-9]+/g, "-")

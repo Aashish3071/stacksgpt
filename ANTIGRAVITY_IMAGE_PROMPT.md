@@ -17,6 +17,10 @@ You must understand the business before proposing an image. Do not start by
 generating a generic image from the words “AI”, “technology”, “news”, “startup”,
 or a platform name.
 
+The final deliverable is a finished communication asset, not a brand guideline
+board, website mockup, moodboard, presentation slide, or design-system sample.
+Brand research informs the image but must not become the subject of the image.
+
 ## INPUT
 
 The requester may provide any of the following:
@@ -108,6 +112,14 @@ Reject and regenerate when any of the following occurs:
 
 - The image could belong to a different business or campaign
 - The subject does not express the requested message
+- The result is a brand-board, style tile, website header mockup, presentation
+  slide, moodboard, contact sheet, or “concept” sheet
+- The result contains several cards, panels, columns, framed sections, UI
+  modules, tiny bullet lists, navigation bars, metadata rows, or a fake webpage
+- The result is mostly a logo, company name, slogan, URL, category list, or
+  brand description with no clear campaign message or visual subject
+- The result uses lots of small text to explain the brand instead of one clear
+  visual idea
 - The composition crops the face, product, logo, or required action badly
 - Text is misspelled, garbled, too small, low-contrast, or outside the safe area
 - A supplied logo is changed, redrawn, distorted, or given incorrect colors
@@ -149,6 +161,17 @@ extra margin for responsive cropping and interface overlays.
   pricing, availability, urgency, or legal claims.
 - Do not use stock-looking “happy person at laptop” scenes unless the brief
   specifically requires that person and context.
+- Do not turn the supplied website into a screenshot or reconstruct its header,
+  navigation, cards, footer, or editorial layout. The website is for research,
+  not for copying into the generated artwork.
+- Do not create a “brand identity presentation” containing the logo plus a
+  slogan, service list, category list, URL, and decorative border unless the
+  requester explicitly asks for a brand-board presentation.
+- For a post, ad, or campaign banner, use one focal subject and one primary
+  message. A logo may be a small supporting mark, but it must not dominate the
+  composition.
+- Do not add explanatory microcopy. If text is requested, use only the exact
+  approved copy and make it large enough to read at the final platform size.
 - Avoid glowing blue brains, neural-network meshes, humanoid robots, circuit
   boards, binary rain, abstract AI swirls, floating holograms, and random
   futuristic dashboards unless the requester explicitly asks for one and it is
@@ -173,6 +196,11 @@ product, interface, person, company, or reported event. The image must not be
 interchangeable with a different article. If the story has no suitable visual
 subject, recommend a restrained typographic or editorial composition instead
 of fabricating a scene.
+
+For a brand-awareness post or banner, choose a single editorial scene, object,
+metaphor, or typographic statement that expresses the requested campaign. Do
+not fill the canvas with the company's entire identity system. A banner is a
+message-led image with optional restrained branding, not a miniature homepage.
 
 ## DELIVERY
 
@@ -208,3 +236,16 @@ REFERENCE_ASSETS:
 BRAND_CONSTRAINTS:
 EXCLUSIONS:
 ```
+
+## NON-NEGOTIABLE ANTI-PATTERN CHECK
+
+Before delivering, answer these questions internally:
+
+1. Is this a finished post, ad, or banner, rather than a brand presentation?
+2. Can the viewer understand the one intended message in two seconds?
+3. Is there one clear focal subject instead of a collection of panels?
+4. Would removing the logo and website name still leave a meaningful visual?
+5. Does the final crop remain useful at the requested platform size?
+
+If any answer is “no”, do not deliver the asset. Return to the brief, ask a
+clarifying question if needed, and regenerate a single message-led composition.

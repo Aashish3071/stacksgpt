@@ -61,6 +61,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         seoTitle: true,
         metaDescription: true,
         keywords: true,
+        tags: true,
         heroImage: true,
         heroImageAlt: true,
         sourcePublishedAt: true,
@@ -91,6 +92,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     keywords = [];
   }
 
+  const tags: string[] =
+    Array.isArray(article.tags) && article.tags.length > 0
+      ? article.tags
+      : keywords.map((k) =>
+          k
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/^-|-$/g, ""),
+        );
+
+  const allKeywords = Array.from(
+    new Set([...keywords, ...tags.map((t) => t.replaceAll("-", " "))]),
+  );
+
   const images = article.heroImage
     ? [
         {
@@ -106,7 +121,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title,
     description,
     // Google ignores this tag; emitted for other engines and internal grouping.
-    keywords: keywords.length ? keywords : undefined,
+    keywords: allKeywords.length ? allKeywords : undefined,
     alternates: { canonical: url },
     openGraph: {
       title,
@@ -114,6 +129,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       type: "article",
       url,
       images,
+      tags: tags.length ? tags : undefined,
       publishedTime: isoDate(article.publishedAt) || undefined,
       modifiedTime:
         isoDate(article.publishedUpdatedAt || article.publishedAt) || undefined,
@@ -211,6 +227,15 @@ export default async function ArticlePage({ params }: Props) {
   } catch (err) {
     console.warn("Could not verify partner link:", err);
   }
+  let articleKeywords: string[] = [];
+  try {
+    const parsed = JSON.parse(article.keywords || "[]");
+    if (Array.isArray(parsed)) articleKeywords = parsed.map(String);
+  } catch {}
+  if (Array.isArray(article.tags) && article.tags.length) {
+    articleKeywords = Array.from(new Set([...articleKeywords, ...article.tags]));
+  }
+
   return (
     <>
       <ArticleSchema
@@ -222,6 +247,7 @@ export default async function ArticlePage({ params }: Props) {
         image={article.heroImage}
         authorName={author?.displayName}
         category={article.category}
+        keywords={articleKeywords}
       />
       <ArticleReader
         article={{

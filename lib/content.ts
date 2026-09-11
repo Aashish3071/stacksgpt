@@ -347,7 +347,23 @@ export function parseArticleText(
   return {
     ok: true,
     article: {
-      tags: Array.isArray(data.tags) ? data.tags.map(asString) : [],
+      tags: (
+        Array.isArray(data.tags) && data.tags.length > 0
+          ? data.tags.map(asString)
+          : keywords.map((k) =>
+              k
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, "-")
+                .replace(/^-|-$/g, ""),
+            )
+      )
+        .map((t) =>
+          t
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/^-|-$/g, ""),
+        )
+        .filter((t) => Boolean(t) && /^[a-z0-9-]{1,70}$/.test(t)),
       audiences: Array.isArray(data.audiences)
         ? data.audiences.map(asString)
         : [],
