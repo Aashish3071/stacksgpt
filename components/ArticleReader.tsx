@@ -126,33 +126,6 @@ export default function ArticleReader({
                   </time>
                 </span>
               )}
-            {article.sourceAuthor && (
-              <>
-                <span aria-hidden> · </span>
-                <span>
-                  Source:{" "}
-                  {article.sourcePublishedAt ? (
-                    <span suppressHydrationWarning>
-                      {formatDate(article.sourcePublishedAt)},{" "}
-                    </span>
-                  ) : (
-                    ""
-                  )}
-                  {article.sourceUrl ? (
-                    <a
-                      href={article.sourceUrl}
-                      target="_blank"
-                      rel="noreferrer nofollow"
-                      className="text-accent underline decoration-rule-strong hover:decoration-accent"
-                    >
-                      {article.sourceAuthor}
-                    </a>
-                  ) : (
-                    article.sourceAuthor
-                  )}
-                </span>
-              </>
-            )}
           </p>
         </header>
 
@@ -309,7 +282,7 @@ export default function ArticleReader({
                   </Link>
                   <span className="meta">
                     {" "}
-                    — partner link, we may earn a commission
+                    (partner link, we may earn a commission)
                   </span>
                 </>
               ) : (
@@ -356,12 +329,12 @@ export default function ArticleReader({
                 href={article.sourceUrl}
                 target="_blank"
                 rel="noreferrer nofollow"
-                className="underline decoration-rule-strong hover:text-ink"
+                className="underline decoration-rule-strong hover:text-ink font-medium"
               >
-                the original announcement
+                {article.sourceAuthor ? `${article.sourceAuthor}'s original announcement` : "the original announcement"}
               </a>
             ) : (
-              "the original announcement"
+              article.sourceAuthor || "the original announcement"
             )}{" "}
             with editorial review by StacksGPT. See our{" "}
             <Link

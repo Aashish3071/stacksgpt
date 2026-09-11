@@ -58,6 +58,9 @@ export async function saveDraft(
           actorId,
         },
       });
+      if (!fields.authorId && !current.authorId && actorId && !external) {
+        fields.authorId = actorId;
+      }
       const updated = await tx.article.update({
         where: { id: current.id },
         data: current.isPublished
@@ -103,7 +106,7 @@ export async function saveDraft(
         origin: external ? "ANTIGRAVITY" : "EDITOR",
         status: "DRAFT",
         isPublished: false,
-        authorId: actorId,
+        authorId: fields.authorId || actorId,
       },
     });
     await tx.auditLog.create({

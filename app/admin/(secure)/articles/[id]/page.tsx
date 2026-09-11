@@ -17,7 +17,8 @@ export default async function Page({
     prisma.article.findUnique({ where: { id: (await params).id } }),
     prisma.profile.findMany({
       where: { active: true },
-      select: { id: true, displayName: true },
+      select: { id: true, displayName: true, email: true, role: true },
+      orderBy: { createdAt: "asc" },
     }),
     prisma.taxonomy.findMany({ where: { active: true } }),
     prisma.mediaAsset.findMany({ take: 100, orderBy: { createdAt: "desc" } }),
