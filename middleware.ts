@@ -71,11 +71,14 @@ export function middleware(req: NextRequest) {
     path.startsWith("/api/") ||
     path.startsWith("/newsletter/")
   ) {
-    res.headers.set("Cache-Control", "private, no-store");
-    res.headers.set("X-Robots-Tag", "noindex, nofollow");
+    res.headers.set(
+      "Cache-Control",
+      "private, no-store, max-age=0, must-revalidate",
+    );
+    res.headers.set("X-Robots-Tag", "noindex, nofollow, noarchive, nosnippet");
   }
   return res;
 }
 export const config = {
-  matcher: ["/admin/:path*", "/api/:path*", "/newsletter/:path*"],
+  matcher: ["/admin", "/admin/:path*", "/api/:path*", "/newsletter/:path*"],
 };

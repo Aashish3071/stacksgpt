@@ -3,8 +3,20 @@ import SessionControls from "@/components/SessionControls";
 import { requireEditor } from "@/lib/editor-auth";
 export const dynamic = "force-dynamic";
 export const metadata = {
-  title: "Newsroom",
-  robots: { index: false, follow: false },
+  title: "Newsroom · StacksGPT",
+  robots: {
+    index: false,
+    follow: false,
+    nocache: true,
+    googleBot: {
+      index: false,
+      follow: false,
+      noimageindex: true,
+      "max-video-preview": -1,
+      "max-image-preview": "none",
+      "max-snippet": -1,
+    },
+  },
 };
 export default async function Layout({
   children,
