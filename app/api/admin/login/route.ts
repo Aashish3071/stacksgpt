@@ -121,9 +121,21 @@ export async function POST(req: Request) {
 
     throw Error("Sign-in failed. Please verify your email and password.");
   } catch (e) {
+    // Never echo the internal reason to an unauthenticated caller: it leaked
+    // server configuration ("ADMIN_SESSION_SECRET is not configured") and
+    // whether a given account exists. Operators read the real cause in the
+    // function logs. Rate limiting is the one message worth surfacing, since
+    // the caller needs to know to back off rather than retry.
+    const message = e instanceof Error ? e.message : "Sign-in failed";
+    console.warn("Admin sign-in failed:", message);
+    const rateLimited = message.startsWith("Too many requests");
     return NextResponse.json(
-      { error: e instanceof Error ? e.message : "Sign-in failed" },
-      { status: 401 },
+      {
+        error: rateLimited
+          ? message
+          : "Sign-in failed. Please verify your email and password.",
+      },
+      { status: rateLimited ? 429 : 401 },
     );
   }
 }
