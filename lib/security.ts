@@ -35,16 +35,13 @@ export function sameOrigin(req: Request) {
       new URL(req.url).host
     ).toLowerCase();
 
-    if (
-      originHost === reqHost ||
-      originUrl.origin === new URL(req.url).origin ||
-      originHost === "stacksgpt.com" ||
-      originHost.endsWith(".stacksgpt.com") ||
-      originHost.endsWith(".vercel.app") ||
-      originHost.startsWith("localhost")
-    ) {
-      return;
-    }
+    // Only the exact host actually serving the request may pass (this also
+    // covers local dev, since both origin and host are "localhost:PORT").
+    // Do NOT widen this to "*.vercel.app" or a hardcoded domain: vercel.app
+    // is a shared suffix across every Vercel project (anyone's deployment
+    // would pass), and this check is the site's CSRF defense on every
+    // mutating admin/API request.
+    if (originHost === reqHost) return;
   } catch {}
 
   throw Error("This request must originate from the publication.");

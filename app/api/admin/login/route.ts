@@ -19,18 +19,17 @@ export async function POST(req: Request) {
     const cleanEmail = email.trim().toLowerCase();
     const cleanPassword = password.trim();
 
-    // 1. Master password authentication (from environment or default fallback)
-    const masterPassword = (
-      process.env.ADMIN_PASSWORD || "7caf9137d7dbb7bb"
-    ).trim();
+    // 1. Master password authentication. No hardcoded fallback: a default
+    // committed to a public repo would let anyone log in as admin.
+    const masterPassword = process.env.ADMIN_PASSWORD?.trim();
 
-    if (cleanPassword === masterPassword) {
+    if (masterPassword && cleanPassword === masterPassword) {
       const token = createMasterSession(cleanEmail);
       const res = NextResponse.json({ ok: true });
       res.cookies.set(AUTH_COOKIE, token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
+        sameSite: "strict",
         path: "/",
         maxAge: 86400 * 7,
       });
@@ -66,7 +65,7 @@ export async function POST(req: Request) {
         res.cookies.set(AUTH_COOKIE, token, {
           httpOnly: true,
           secure: process.env.NODE_ENV === "production",
-          sameSite: "lax",
+          sameSite: "strict",
           path: "/",
           maxAge: 86400 * 7,
         });
@@ -92,7 +91,7 @@ export async function POST(req: Request) {
           const opts = {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
-            sameSite: "lax" as const,
+            sameSite: "strict" as const,
             path: "/",
           };
           res.cookies.set(AUTH_COOKIE, data.session.access_token, {

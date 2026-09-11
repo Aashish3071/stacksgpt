@@ -6,12 +6,12 @@ import prisma from "./db";
 
 export const AUTH_COOKIE = "stacksgpt_session";
 
-const MASTER_SECRET =
-  process.env.ADMIN_SESSION_SECRET ||
-  process.env.ADMIN_PASSWORD ||
-  "stacksgpt_editorial_session_secret_2026";
+// No hardcoded fallback: a committed default secret in a public repo lets
+// anyone forge session tokens. Fail closed instead.
+const MASTER_SECRET = process.env.ADMIN_SESSION_SECRET;
 
 export function createMasterSession(email = "admin@stacksgpt.com"): string {
+  if (!MASTER_SECRET) throw Error("ADMIN_SESSION_SECRET is not configured.");
   const expiresAt = Date.now() + 1000 * 60 * 60 * 24 * 7;
   const payload = `master:${email}:${expiresAt}`;
   const hmac = crypto
@@ -22,6 +22,7 @@ export function createMasterSession(email = "admin@stacksgpt.com"): string {
 }
 
 export function verifyMasterSession(token: string): { email: string } | null {
+  if (!MASTER_SECRET) return null;
   if (!token.startsWith("master.")) return null;
   const parts = token.split(".");
   if (parts.length !== 4) return null;
@@ -34,7 +35,11 @@ export function verifyMasterSession(token: string): { email: string } | null {
     .createHmac("sha256", MASTER_SECRET)
     .update(payload)
     .digest("hex");
-  if (hmac !== expected) return null;
+  if (
+    hmac.length !== expected.length ||
+    !crypto.timingSafeEqual(Buffer.from(hmac), Buffer.from(expected))
+  )
+    return null;
   return { email };
 }
 

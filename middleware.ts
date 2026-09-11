@@ -38,15 +38,11 @@ export function middleware(req: NextRequest) {
           req.nextUrl.host
         ).toLowerCase();
 
-        const isAllowed =
-          originHost === reqHost ||
-          originUrl.origin === req.nextUrl.origin ||
-          originHost === "stacksgpt.com" ||
-          originHost.endsWith(".stacksgpt.com") ||
-          originHost.endsWith(".vercel.app") ||
-          originHost.startsWith("localhost");
-
-        if (!isAllowed) {
+        // Only the exact host serving the request may pass. Do NOT widen
+        // this to "*.vercel.app" or a hardcoded domain: vercel.app is a
+        // shared suffix across every Vercel project, and this check is the
+        // site's CSRF defense on every mutating admin/API request.
+        if (originHost !== reqHost) {
           return NextResponse.json(
             { error: "Invalid request origin" },
             { status: 403 },

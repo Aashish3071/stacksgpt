@@ -4,7 +4,13 @@ import crypto from "crypto";
 
 async function main() {
   const email = process.argv[2] || "admin@stacksgpt.com";
-  const password = process.argv[3] || process.env.ADMIN_PASSWORD || "7caf9137d7dbb7bb";
+  const password = process.argv[3] || process.env.ADMIN_PASSWORD;
+  if (!password) {
+    console.error(
+      "No password provided. Pass one as an argument or set ADMIN_PASSWORD.",
+    );
+    process.exit(1);
+  }
   const displayName = process.argv[4] || "Newsroom Admin";
 
   const { config } = postgresConfig(process.env.DIRECT_URL || process.env.DATABASE_URL!);
