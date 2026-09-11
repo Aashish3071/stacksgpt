@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import Logo from "@/components/Logo";
 import SearchModal from "@/components/SearchModal";
 import SubscribeModal from "@/components/SubscribeModal";
@@ -46,7 +47,11 @@ export default function Navbar({
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [subscribeOpen, setSubscribeOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Portal target must wait for the client; document isn't available during SSR.
+  useEffect(() => setMounted(true), []);
 
   // Close dropdown on click outside
   useEffect(() => {
@@ -303,14 +308,27 @@ export default function Navbar({
           </div>
         </div>
 
-        {/* Mobile Full-Screen Navigation Menu */}
-        {mobileOpen && (
-          <div
-            className="fixed inset-0 z-[100] sm:hidden flex flex-col bg-surface overflow-hidden animate-in fade-in duration-150"
-            role="dialog"
-            aria-modal="true"
-            aria-label="Navigation menu"
-          >
+        {/*
+          Mobile Full-Screen Navigation Menu, portalled to document.body.
+          The header above has `backdrop-blur` (backdrop-filter), and per the
+          CSS spec an ancestor with filter/backdrop-filter becomes the
+          containing block for any `position: fixed` descendant — the same
+          effect `transform` has. Left inline here, this panel's `fixed
+          inset-0` resolved against the 56px-tall header instead of the
+          viewport, so it rendered as an invisible sliver: the hamburger
+          correctly toggled to an X, but no menu ever appeared. Portalling out
+          from under the header restores fixed positioning against the
+          viewport.
+        */}
+        {mobileOpen &&
+          mounted &&
+          createPortal(
+            <div
+              className="fixed inset-0 z-[100] sm:hidden flex flex-col bg-surface overflow-hidden animate-in fade-in duration-150"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Navigation menu"
+            >
             {/* Top Bar: Matches site header height and padding precisely */}
             <div className="flex h-14 items-center justify-between border-b border-rule px-4 bg-surface shrink-0">
               <Link
@@ -478,8 +496,9 @@ export default function Navbar({
                 </a>
               </div>
             </div>
-          </div>
-        )}
+            </div>,
+            document.body,
+          )}
       </header>
 
       {/* Global Modals */}
