@@ -45,10 +45,10 @@ export default function Footer({
 
             <div className="mt-5 flex flex-col gap-2 font-sans text-xs">
               <span className="text-muted">
-                Editorial & support:{" "}
+                Editorial &amp; support:{" "}
                 <a
                   href="mailto:support@stacksgpt.com"
-                  className="text-ink hover:underline font-medium"
+                  className="text-ink hover:underline font-medium py-1 inline-block"
                 >
                   support@stacksgpt.com
                 </a>
@@ -61,7 +61,7 @@ export default function Footer({
                 href={twitterLink}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-lg border border-rule bg-paper px-3.5 py-1.5 font-sans text-xs font-medium text-ink transition-colors hover:border-ink hover:bg-surface"
+                className="inline-flex items-center gap-2 rounded-lg border border-rule bg-paper px-3.5 py-2.5 font-sans text-xs font-medium text-ink transition-colors hover:border-ink hover:bg-surface min-h-[44px]"
               >
                 <svg
                   width="14"
@@ -80,14 +80,14 @@ export default function Footer({
           {/* Column 2: News & Briefings (matching Navbar) */}
           <div>
             <h3 className="font-sans text-xs font-semibold uppercase tracking-wider text-ink">
-              News & Briefings
+              News &amp; Briefings
             </h3>
-            <ul className="mt-4 space-y-2.5 font-sans text-sm">
+            <ul className="mt-3 space-y-1 font-sans text-sm">
               <li>
                 <Link
                   href="/latest"
                   prefetch={true}
-                  className="text-muted hover:text-ink transition-colors"
+                  className="flex items-center py-2 text-muted hover:text-ink transition-colors min-h-[44px]"
                 >
                   Latest Stories
                 </Link>
@@ -96,16 +96,16 @@ export default function Footer({
                 <Link
                   href="/category/research"
                   prefetch={true}
-                  className="text-muted hover:text-ink transition-colors"
+                  className="flex items-center py-2 text-muted hover:text-ink transition-colors min-h-[44px]"
                 >
-                  Research & Models
+                  Research &amp; Models
                 </Link>
               </li>
               <li>
                 <Link
                   href="/tools"
                   prefetch={true}
-                  className="text-muted hover:text-ink transition-colors"
+                  className="flex items-center py-2 text-muted hover:text-ink transition-colors min-h-[44px]"
                 >
                   AI Tools Directory
                 </Link>
@@ -114,7 +114,7 @@ export default function Footer({
                 <Link
                   href="/search"
                   prefetch={true}
-                  className="text-muted hover:text-ink transition-colors"
+                  className="flex items-center py-2 text-muted hover:text-ink transition-colors min-h-[44px]"
                 >
                   Search Stories
                 </Link>
@@ -127,12 +127,12 @@ export default function Footer({
             <h3 className="font-sans text-xs font-semibold uppercase tracking-wider text-ink">
               Categories
             </h3>
-            <ul className="mt-4 space-y-2.5 font-sans text-sm">
+            <ul className="mt-3 space-y-1 font-sans text-sm">
               <li>
                 <Link
                   href="/category/productivity"
                   prefetch={true}
-                  className="text-muted hover:text-ink transition-colors"
+                  className="flex items-center py-2 text-muted hover:text-ink transition-colors min-h-[44px]"
                 >
                   Productivity
                 </Link>
@@ -141,7 +141,7 @@ export default function Footer({
                 <Link
                   href="/category/coding"
                   prefetch={true}
-                  className="text-muted hover:text-ink transition-colors"
+                  className="flex items-center py-2 text-muted hover:text-ink transition-colors min-h-[44px]"
                 >
                   Coding
                 </Link>
@@ -150,7 +150,7 @@ export default function Footer({
                 <Link
                   href="/category/design"
                   prefetch={true}
-                  className="text-muted hover:text-ink transition-colors"
+                  className="flex items-center py-2 text-muted hover:text-ink transition-colors min-h-[44px]"
                 >
                   Design
                 </Link>
@@ -159,7 +159,7 @@ export default function Footer({
                 <Link
                   href="/category/automation"
                   prefetch={true}
-                  className="text-muted hover:text-ink transition-colors"
+                  className="flex items-center py-2 text-muted hover:text-ink transition-colors min-h-[44px]"
                 >
                   Automation
                 </Link>
@@ -172,12 +172,12 @@ export default function Footer({
             <h3 className="font-sans text-xs font-semibold uppercase tracking-wider text-ink">
               Publication
             </h3>
-            <ul className="mt-4 space-y-2.5 font-sans text-sm">
+            <ul className="mt-3 space-y-1 font-sans text-sm">
               <li>
                 <Link
                   href="/about"
                   prefetch={true}
-                  className="text-muted hover:text-ink transition-colors"
+                  className="flex items-center py-2 text-muted hover:text-ink transition-colors min-h-[44px]"
                 >
                   About StacksGPT
                 </Link>
@@ -186,7 +186,7 @@ export default function Footer({
                 <Link
                   href="/editorial-standards"
                   prefetch={true}
-                  className="text-muted hover:text-ink transition-colors"
+                  className="flex items-center py-2 text-muted hover:text-ink transition-colors min-h-[44px]"
                 >
                   Editorial Standards
                 </Link>
@@ -195,7 +195,7 @@ export default function Footer({
                 <Link
                   href="/methodology"
                   prefetch={true}
-                  className="text-muted hover:text-ink transition-colors"
+                  className="flex items-center py-2 text-muted hover:text-ink transition-colors min-h-[44px]"
                 >
                   How We Report
                 </Link>
@@ -204,7 +204,7 @@ export default function Footer({
                 <Link
                   href="/corrections"
                   prefetch={true}
-                  className="text-muted hover:text-ink transition-colors"
+                  className="flex items-center py-2 text-muted hover:text-ink transition-colors min-h-[44px]"
                 >
                   Corrections Policy
                 </Link>
@@ -213,7 +213,7 @@ export default function Footer({
                 <Link
                   href="/contact"
                   prefetch={true}
-                  className="text-muted hover:text-ink transition-colors"
+                  className="flex items-center py-2 text-muted hover:text-ink transition-colors min-h-[44px]"
                 >
                   Contact Us
                 </Link>
@@ -228,21 +228,21 @@ export default function Footer({
             © {new Date().getFullYear()} {SITE_NAME}. All rights reserved.
           </p>
 
-          <div className="flex flex-wrap items-center gap-6">
-            <Link href="/privacy" className="hover:text-ink transition-colors">
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+            <Link href="/privacy" className="py-2.5 inline-flex items-center min-h-[44px] hover:text-ink transition-colors">
               Privacy Policy
             </Link>
-            <Link href="/terms" className="hover:text-ink transition-colors">
+            <Link href="/terms" className="py-2.5 inline-flex items-center min-h-[44px] hover:text-ink transition-colors">
               Terms of Service
             </Link>
-            <Link href="/partners" className="hover:text-ink transition-colors">
+            <Link href="/partners" className="py-2.5 inline-flex items-center min-h-[44px] hover:text-ink transition-colors">
               Partner Disclosures
             </Link>
             <a
               href={twitterLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-ink transition-colors"
+              className="py-2.5 inline-flex items-center min-h-[44px] hover:text-ink transition-colors"
             >
               X (Twitter)
             </a>

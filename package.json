@@ -2,6 +2,10 @@
   "name": "ai-updates-web",
   "version": "1.0.0",
   "private": true,
+  "browserslist": [
+    "defaults and fully supports es6-module",
+    "not dead"
+  ],
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && node --env-file-if-exists=.env --env-file-if-exists=.env.local --import tsx scripts/sync-content.ts && node --env-file-if-exists=.env --env-file-if-exists=.env.local --import tsx scripts/preflight.ts && next build",

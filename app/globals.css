@@ -36,12 +36,12 @@
   }
 
   .kicker-muted {
-    @apply font-sans text-kicker font-semibold uppercase tracking-wider text-faint;
+    @apply font-sans text-kicker font-semibold uppercase tracking-wider text-muted;
   }
 
   /* Byline / dateline row. */
   .meta {
-    @apply font-sans text-meta text-faint;
+    @apply font-sans text-meta text-muted;
   }
 
   /* Running article prose. Serif, generous leading, constrained measure. */

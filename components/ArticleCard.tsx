@@ -19,9 +19,9 @@ export interface ArticleCardData {
 interface Props {
   article: ArticleCardData;
   /**
-   * lead     — the one story the page opens with
-   * standard — grid item in the river
-   * compact  — scannable list item, headline and read time only
+   * lead: the one story the page opens with
+   * standard: grid item in the river
+   * compact: scannable list item, headline and read time only
    */
   variant?: "lead" | "standard" | "compact" | "square";
 }
@@ -95,12 +95,12 @@ export default function ArticleCard({ article, variant = "standard" }: Props) {
   }
 
   // Compact: nothing but the headline and how long it takes. No category label,
-  // no standfirst — a scannable column, not ten miniature articles.
+  // no standfirst: a scannable column, not ten miniature articles.
   if (variant === "compact") {
     return (
       <article className="py-3">
         <h3 className="font-serif text-head-sm font-semibold leading-snug">
-          <Link href={href} className="text-ink hover:text-accent">
+          <Link href={href} className="text-ink hover:text-accent block py-1">
             {article.title}
           </Link>
         </h3>
@@ -113,7 +113,10 @@ export default function ArticleCard({ article, variant = "standard" }: Props) {
     return (
       <article>
         <div className="flex items-baseline gap-2">
-          <Link href={categoryHref(article.category)} className="kicker hover:underline">
+          <Link
+            href={categoryHref(article.category)}
+            className="kicker hover:underline inline-block py-1"
+          >
             {article.category}
           </Link>
           <TypeLabel type={article.type} />
@@ -139,7 +142,7 @@ export default function ArticleCard({ article, variant = "standard" }: Props) {
               width={1200}
               height={630}
               priority
-              sizes="(max-width: 1024px) 100vw, 700px"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 1152px"
               className="h-auto w-full border border-rule"
             />
           </Link>
@@ -167,12 +170,12 @@ export default function ArticleCard({ article, variant = "standard" }: Props) {
 
       <Link
         href={categoryHref(article.category)}
-        className="kicker-muted hover:text-accent"
+        className="kicker-muted hover:text-accent inline-block py-1"
       >
         {article.category}
       </Link>
 
-      <h3 className="mt-1.5 font-serif text-head-md font-semibold leading-tight">
+      <h3 className="mt-1 font-serif text-head-md font-semibold leading-tight">
         <Link href={href} className="text-ink hover:text-accent">
           {article.title}
         </Link>

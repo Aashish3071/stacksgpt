@@ -86,7 +86,7 @@ export default function SubscribeModal({ isOpen, onClose }: Props) {
           <button
             type="button"
             onClick={onClose}
-            className="rounded p-1 text-muted hover:bg-paper hover:text-ink transition-colors"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-muted hover:bg-paper hover:text-ink transition-colors"
             aria-label="Close subscription modal"
           >
             <svg
@@ -120,7 +120,7 @@ export default function SubscribeModal({ isOpen, onClose }: Props) {
             <button
               type="button"
               onClick={onClose}
-              className="mt-4 rounded-md bg-ink px-4 py-1.5 font-sans text-xs font-medium text-surface hover:bg-ink/90"
+              className="mt-4 rounded-lg bg-ink px-5 py-2.5 min-h-[44px] font-sans text-xs font-medium text-surface hover:bg-ink/90 inline-flex items-center justify-center"
             >
               Close
             </button>
@@ -135,12 +135,12 @@ export default function SubscribeModal({ isOpen, onClose }: Props) {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="your@email.com"
-                className="w-full rounded-lg border border-rule bg-paper px-3.5 py-2.5 font-sans text-sm text-ink placeholder:text-muted focus:border-ink focus:outline-none"
+                className="w-full rounded-lg border border-rule bg-paper px-3.5 py-3 min-h-[44px] font-sans text-sm text-ink placeholder:text-muted focus:border-ink focus:outline-none"
               />
               <button
                 type="submit"
                 disabled={status === "loading"}
-                className="w-full rounded-lg bg-ink py-2.5 font-sans text-sm font-medium text-surface hover:bg-ink/90 disabled:opacity-50 transition-all shadow-sm"
+                className="w-full rounded-lg bg-ink py-3 min-h-[44px] font-sans text-sm font-semibold text-surface hover:bg-ink/90 disabled:opacity-50 transition-all shadow-sm flex items-center justify-center"
               >
                 {status === "loading" ? "Subscribing..." : "Subscribe for free"}
               </button>

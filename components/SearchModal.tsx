@@ -73,7 +73,7 @@ export default function SearchModal({ isOpen, onClose }: Props) {
           <button
             type="button"
             onClick={onClose}
-            className="rounded p-1 text-muted hover:bg-paper hover:text-ink transition-colors"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-muted hover:bg-paper hover:text-ink transition-colors"
             aria-label="Close search"
           >
             <svg
@@ -110,12 +110,12 @@ export default function SearchModal({ isOpen, onClose }: Props) {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search news, models, tools, companies..."
-              className="w-full rounded-lg border border-rule bg-paper py-3 pl-10 pr-12 font-sans text-sm text-ink placeholder:text-muted focus:border-ink focus:outline-none"
+              className="w-full rounded-lg border border-rule bg-paper py-3 pl-10 pr-14 font-sans text-sm text-ink placeholder:text-muted focus:border-ink focus:outline-none min-h-[44px]"
             />
             {query && (
               <button
                 type="submit"
-                className="absolute right-2.5 rounded px-2 py-1 font-sans text-xs font-medium text-ink hover:bg-surface transition-colors"
+                className="absolute right-2 rounded-lg px-2.5 py-1.5 font-sans text-xs font-semibold text-ink hover:bg-surface border border-rule transition-colors min-h-[36px]"
               >
                 Search
               </button>
@@ -134,7 +134,7 @@ export default function SearchModal({ isOpen, onClose }: Props) {
                 href={topic.href}
                 prefetch={true}
                 onClick={onClose}
-                className="rounded-full border border-rule bg-paper px-3 py-1 font-sans text-xs text-muted hover:border-ink hover:text-ink transition-colors"
+                className="rounded-full border border-rule bg-paper px-3.5 py-2 font-sans text-xs text-muted hover:border-ink hover:text-ink transition-colors min-h-[36px] inline-flex items-center"
               >
                 {topic.label}
               </Link>

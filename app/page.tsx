@@ -103,7 +103,7 @@ export default async function HomePage() {
             <Link
               href="/tools"
               prefetch={true}
-              className="rounded-lg border border-rule bg-paper px-4 py-2 font-sans text-sm font-medium text-ink hover:border-ink transition-colors"
+              className="rounded-lg border border-rule bg-paper px-4 py-2.5 font-sans text-sm font-medium text-ink hover:border-ink transition-colors min-h-[44px] inline-flex items-center"
             >
               Browse AI Tools Directory →
             </Link>
@@ -154,7 +154,7 @@ export default async function HomePage() {
             <Link
               href="/latest"
               prefetch={true}
-              className="meta text-xs hover:text-accent"
+              className="meta text-xs hover:text-accent py-2 px-1 -my-2 inline-flex items-center min-h-[44px]"
             >
               View all
             </Link>
@@ -183,7 +183,7 @@ export default async function HomePage() {
             <Link
               href={categoryHref(category)}
               prefetch={true}
-              className="meta text-xs hover:text-accent"
+              className="meta text-xs hover:text-accent py-2 px-1 -my-2 inline-flex items-center min-h-[44px]"
             >
               More in {category.toLowerCase()}
             </Link>

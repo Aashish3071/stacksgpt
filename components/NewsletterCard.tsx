@@ -66,14 +66,14 @@ export default function NewsletterCard() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
-              className="flex-1 border border-rule-strong bg-surface px-3 py-2.5 font-sans text-meta text-ink placeholder:text-faint focus:border-ink focus:outline-none"
+              className="flex-1 border border-rule-strong bg-surface px-3.5 py-2.5 min-h-[44px] font-sans text-meta text-ink placeholder:text-muted focus:border-ink focus:outline-none"
             />
             <button
               type="submit"
               disabled={status === "loading"}
-              className="border border-ink bg-ink px-5 py-2.5 font-sans text-meta font-medium text-paper transition-colors hover:bg-accent hover:border-accent disabled:opacity-60"
+              className="border border-ink bg-ink px-5 py-2.5 min-h-[44px] font-sans text-meta font-medium text-paper transition-colors hover:bg-accent hover:border-accent disabled:opacity-60"
             >
-              {status === "loading" ? "Subscribing…" : "Subscribe"}
+              {status === "loading" ? "Subscribing..." : "Subscribe"}
             </button>
           </form>
         )}

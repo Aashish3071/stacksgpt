@@ -115,7 +115,7 @@ export default function Navbar({
         <div className="mx-auto flex h-14 max-w-shell items-center justify-between gap-2 sm:gap-4 px-3 sm:px-6">
           {/* Left: Brand + Core Nav Links */}
           <div className="flex items-center gap-4 lg:gap-8 min-w-0">
-            <Link href="/" className="group shrink-0 flex items-center" aria-label="StacksGPT Home">
+            <Link href="/" className="group shrink-0 flex items-center min-h-[44px]" aria-label="StacksGPT Home">
               <Logo size="md" />
             </Link>
 
@@ -123,7 +123,7 @@ export default function Navbar({
               <Link
                 href="/latest"
                 prefetch={true}
-                className={`rounded-md px-3 py-1.5 transition-colors ${
+                className={`rounded-md px-3 py-2 transition-colors min-h-[36px] flex items-center ${
                   isActive("/latest")
                     ? "bg-paper font-semibold text-ink"
                     : "text-muted hover:text-ink"
@@ -136,20 +136,20 @@ export default function Navbar({
               <Link
                 href="/category/research"
                 prefetch={true}
-                className={`rounded-md px-3 py-1.5 transition-colors ${
+                className={`rounded-md px-3 py-2 transition-colors min-h-[36px] flex items-center ${
                   isActive("/category/research")
                     ? "bg-paper font-semibold text-ink"
                     : "text-muted hover:text-ink"
                 }`}
                 title="Model launches, benchmarks, lab news"
               >
-                Research & Models
+                Research &amp; Models
               </Link>
 
               <Link
                 href="/tools"
                 prefetch={true}
-                className={`rounded-md px-3 py-1.5 transition-colors ${
+                className={`rounded-md px-3 py-2 transition-colors min-h-[36px] flex items-center ${
                   isActive("/tools")
                     ? "bg-paper font-semibold text-ink"
                     : "text-muted hover:text-ink"
@@ -166,7 +166,7 @@ export default function Navbar({
                   onClick={() => setDropdownOpen((prev) => !prev)}
                   aria-expanded={dropdownOpen}
                   aria-haspopup="true"
-                  className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 transition-colors ${
+                  className={`inline-flex items-center gap-1.5 rounded-md px-3 py-2 min-h-[36px] transition-colors ${
                     isCategoryActive || dropdownOpen
                       ? "bg-paper font-semibold text-ink"
                       : "text-muted hover:text-ink"
@@ -236,7 +236,7 @@ export default function Navbar({
             <button
               type="button"
               onClick={() => setSearchOpen(true)}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-muted hover:bg-paper hover:text-ink transition-colors shrink-0"
+              className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-muted hover:bg-paper hover:text-ink transition-colors shrink-0"
               aria-label="Search articles"
               title="Search (⌘K)"
             >
@@ -259,7 +259,7 @@ export default function Navbar({
             <button
               type="button"
               onClick={() => setSubscribeOpen(true)}
-              className="hidden sm:inline-flex rounded-full bg-ink px-4 py-1.5 font-sans text-xs sm:text-[13px] font-semibold text-surface transition-all hover:bg-ink/90 shadow-sm hover:scale-[1.02] active:scale-[0.98] shrink-0"
+              className="hidden sm:inline-flex rounded-full bg-ink px-4 py-2 font-sans text-xs sm:text-[13px] font-semibold text-surface transition-all hover:bg-ink/90 shadow-sm hover:scale-[1.02] active:scale-[0.98] shrink-0 min-h-[36px] items-center"
             >
               Subscribe
             </button>
@@ -268,7 +268,7 @@ export default function Navbar({
             <button
               type="button"
               onClick={() => setMobileOpen((prev) => !prev)}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-muted hover:bg-paper hover:text-ink sm:hidden transition-colors shrink-0"
+              className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-muted hover:bg-paper hover:text-ink sm:hidden transition-colors shrink-0"
               aria-label={mobileOpen ? "Close mobile menu" : "Open mobile menu"}
             >
               {mobileOpen ? (
@@ -324,7 +324,7 @@ export default function Navbar({
               <button
                 type="button"
                 onClick={() => setMobileOpen(false)}
-                className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-muted hover:bg-paper hover:text-ink transition-colors"
+                className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-muted hover:bg-paper hover:text-ink transition-colors"
                 aria-label="Close navigation menu"
               >
                 <svg

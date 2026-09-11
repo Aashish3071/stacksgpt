@@ -106,12 +106,14 @@ export default function PrivacyControls({
         </>
       )}
       {!privatePage && (
-        <button
-          className="mx-auto mb-6 text-sm underline"
-          onClick={() => setOpen(true)}
-        >
-          Privacy choices
-        </button>
+        <div className="flex justify-center pb-6">
+          <button
+            className="text-xs text-muted hover:text-ink underline py-2.5 px-4 min-h-[44px] inline-flex items-center justify-center transition-colors"
+            onClick={() => setOpen(true)}
+          >
+            Privacy choices
+          </button>
+        </div>
       )}
       {open &&
         !privatePage && (
@@ -132,25 +134,25 @@ export default function PrivacyControls({
               </p>
               <div className="flex flex-wrap gap-3">
                 <button
-                  className="border px-4 py-2"
+                  className="border border-rule px-4 py-2.5 min-h-[44px] font-sans text-xs font-medium hover:border-ink transition-colors"
                   onClick={() => choose(false, false)}
                 >
                   Reject optional
                 </button>
                 <button
-                  className="border px-4 py-2"
+                  className="border border-rule px-4 py-2.5 min-h-[44px] font-sans text-xs font-medium hover:border-ink transition-colors"
                   onClick={() => choose(true, false)}
                 >
                   Allow analytics only
                 </button>
                 <button
-                  className="border px-4 py-2"
+                  className="border border-rule px-4 py-2.5 min-h-[44px] font-sans text-xs font-medium hover:border-ink transition-colors"
                   onClick={() => choose(false, true)}
                 >
                   Allow ads only
                 </button>
                 <button
-                  className="bg-ink text-paper px-4 py-2"
+                  className="bg-ink text-paper px-4 py-2.5 min-h-[44px] font-sans text-xs font-medium hover:bg-ink/90 transition-colors"
                   onClick={() => choose(true, true)}
                 >
                   Allow both
