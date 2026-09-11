@@ -1,3 +1,6 @@
+import { readFileSync } from "node:fs";
+import path from "node:path";
+
 export function postgresConfig(value: string) {
   const url = new URL(value);
   const schema = url.searchParams.get("schema") || "public";
@@ -18,11 +21,11 @@ export function postgresConfig(value: string) {
     "pool_timeout",
   ])
     url.searchParams.delete(key);
-  // Deliberately NOT pinning a downloaded CA file here: Supabase's direct
-  // host and pooler host present different certs, and a pinned cert breaks
-  // every connection the moment either side rotates. System CAs already
-  // trust Supabase's public CA, so plain TLS verification is both safer
-  // (no stale pinned file) and actually works.
+  // Supabase signs with its own private root ("Supabase Root 2021 CA"), not
+  // a publicly trusted one, so plain `rejectUnauthorized: true` fails with
+  // SELF_SIGNED_CERT_IN_CHAIN against both the direct host and the pooler
+  // (verified directly against both — same root either way). Pinning this
+  // cert is required to get real verification instead of skipping it.
   return {
     schema,
     config: {
@@ -31,8 +34,15 @@ export function postgresConfig(value: string) {
       connectionTimeoutMillis: 10000,
       idleTimeoutMillis: 30000,
       options: `-c search_path=${schema}`,
-      ssl:
-        isSupabase || mode === "require" || mode === "verify-full"
+      ssl: isSupabase
+        ? {
+            rejectUnauthorized: true,
+            ca: readFileSync(
+              path.join(process.cwd(), "certs/supabase-root-2021.crt"),
+              "utf8",
+            ),
+          }
+        : mode === "require" || mode === "verify-full"
           ? { rejectUnauthorized: true }
           : undefined,
     },
