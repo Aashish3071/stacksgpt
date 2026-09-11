@@ -179,7 +179,7 @@ export default function Footer({
                   prefetch={true}
                   className="text-muted hover:text-ink transition-colors"
                 >
-                  About Stacksgpt
+                  About StacksGPT
                 </Link>
               </li>
               <li>

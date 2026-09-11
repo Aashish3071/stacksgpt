@@ -38,7 +38,7 @@ export default function NewsletterCard() {
   return (
     <section id="newsletter" className="border-t border-rule py-10 sm:py-12">
       <div className="max-w-measure-wide">
-        <h2 className="kicker">The Stacksgpt Briefing</h2>
+        <h2 className="kicker">The StacksGPT Briefing</h2>
         <p className="mt-2 font-serif text-head-md text-ink">
           Stay ahead of the AI curve with essential intelligence.
         </p>

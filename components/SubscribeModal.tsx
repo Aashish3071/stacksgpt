@@ -106,7 +106,7 @@ export default function SubscribeModal({ isOpen, onClose }: Props) {
 
         <div className="mt-4">
           <h3 className="font-serif text-xl font-bold text-ink">
-            High-Signal AI Briefings
+            The StacksGPT Intelligence Briefing
           </h3>
           <p className="meta mt-2 text-sm leading-relaxed text-muted">
             We track the latest AI and tech developments so you do not have to,

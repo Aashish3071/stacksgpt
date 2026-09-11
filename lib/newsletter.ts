@@ -17,7 +17,7 @@ export async function sendMail(
   if (!emailConfigured()) throw Error("Email sending is not configured.");
   const host = process.env.SMTP_HOST || "smtppro.zoho.com";
   const user = process.env.SMTP_USER || "support@stacksgpt.com";
-  const from = process.env.NEWSLETTER_FROM || `Stacksgpt <${user}>`;
+  const from = process.env.NEWSLETTER_FROM || `StacksGPT <${user}>`;
   const transport = nodemailer.createTransport({
     host,
     port: Number(process.env.SMTP_PORT || 465),

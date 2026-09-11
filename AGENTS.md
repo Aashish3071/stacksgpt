@@ -1,4 +1,4 @@
-# Writing articles for Stacksgpt
+# Writing articles for StacksGPT
 
 This repository powers a news site that delivers high-signal AI and tech reporting
 for builders, leaders, and operators: clever, persuasive, and stripped of vendor hype.
@@ -85,7 +85,7 @@ retrievedAt: "2026-09-10T14:32:00Z"
 
 heroImage: "/images/articles/2026-09-10-openai-realtime-voice-api.png"
 heroImageAlt: "A phone showing a live voice conversation with an assistant"
-heroImageCredit: "Illustration generated for Stacksgpt"
+heroImageCredit: "Illustration generated for StacksGPT"
 
 keyPoints:
   - "The assistant now replies fast enough to interrupt, like a phone call."

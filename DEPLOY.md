@@ -1,6 +1,6 @@
-# Stacksgpt deployment
+# StacksGPT deployment
 
-Stacksgpt uses Next.js on Vercel and Supabase Postgres, Auth, and Storage. Antigravity supplies researched drafts and relevant images. The app does not contain an AI writer.
+StacksGPT uses Next.js on Vercel and Supabase Postgres, Auth, and Storage. Antigravity supplies researched drafts and relevant images. The app does not contain an AI writer.
 
 ## Server configuration
 

@@ -4,7 +4,7 @@
  * so pointing a new domain at the site is a one-line env change.
  */
 
-export const SITE_NAME = "Stacksgpt";
+export const SITE_NAME = "StacksGPT";
 export const SITE_TAGLINE =
   "We track the latest AI and tech developments so you do not have to, delivering what is new and why it matters";
 

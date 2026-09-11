@@ -88,9 +88,57 @@ export async function PATCH(req: Request) {
     );
   }
 }
-export async function DELETE() {
-  return Response.json(
-    { error: "Use Archive to retain editorial history." },
-    { status: 405 },
-  );
+export async function DELETE(req: Request) {
+  try {
+    sameOrigin(req);
+    const p = await editor();
+    const url = new URL(req.url);
+    let id = url.searchParams.get("id");
+    if (!id) {
+      const body = await limitedJson(req).catch(() => ({}));
+      id = body?.id;
+    }
+    if (!id) throw Error("Article ID is required.");
+
+    const article = await prisma.article.findUnique({ where: { id } });
+    if (!article) throw Error("Article not found.");
+
+    await prisma.$transaction([
+      prisma.articleRevision.deleteMany({ where: { articleId: id } }),
+      prisma.articleRedirect.deleteMany({ where: { articleId: id } }),
+      prisma.auditLog.create({
+        data: {
+          actorId: p.id,
+          action: "ARTICLE_DELETED",
+          articleId: id,
+          detail: {
+            title: article.title,
+            slug: article.slug,
+            status: article.status,
+          },
+        },
+      }),
+      prisma.article.delete({ where: { id } }),
+    ]);
+
+    for (const path of [
+      "/",
+      "/latest",
+      "/sitemap.xml",
+      "/feed.xml",
+      "/category",
+    ]) {
+      revalidatePath(path, "layout");
+    }
+    revalidatePath(`/article/${article.slug}`);
+
+    return Response.json({ success: true, deletedId: id });
+  } catch (e) {
+    return Response.json(
+      { error: e instanceof Error ? e.message : "Cannot delete article" },
+      {
+        status: e instanceof Error && e.message === "Unauthorized" ? 401 : 400,
+      },
+    );
+  }
 }

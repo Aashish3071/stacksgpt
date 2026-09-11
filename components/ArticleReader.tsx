@@ -363,7 +363,7 @@ export default function ArticleReader({
             ) : (
               "the original announcement"
             )}{" "}
-            with editorial review by Stacksgpt. See our{" "}
+            with editorial review by StacksGPT. See our{" "}
             <Link
               href="/editorial-standards"
               className="underline decoration-rule-strong hover:text-ink"

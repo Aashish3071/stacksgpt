@@ -1,6 +1,6 @@
 import prisma from "./db";
 export const defaultSettings = {
-  name: "Stacksgpt",
+  name: "StacksGPT",
   tagline:
     "We track the latest AI and tech developments so you do not have to, delivering what is new and why it matters.",
   contactEmail: "support@stacksgpt.com",

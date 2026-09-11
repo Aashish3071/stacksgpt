@@ -56,8 +56,8 @@ export async function POST(req: Request) {
       const link = siteUrl(`/newsletter/confirm?token=${subscriber.token}`);
       sendMail(
         email,
-        "Confirm your Stacksgpt briefing subscription",
-        `<p>You requested high-signal AI and tech briefings from Stacksgpt.</p><p><a href="${link}">Confirm your subscription</a></p><p>If you did not request this, you can safely ignore this message.</p>`,
+        "Confirm your StacksGPT briefing subscription",
+        `<p>You requested high-signal AI and tech briefings from StacksGPT.</p><p><a href="${link}">Confirm your subscription</a></p><p>If you did not request this, you can safely ignore this message.</p>`,
       ).catch((err) => {
         console.warn("SMTP sendMail error:", err);
       });
@@ -67,7 +67,7 @@ export async function POST(req: Request) {
       ok: true,
       message: hasSmtp
         ? "Check your inbox to confirm your subscription."
-        : "You are subscribed to Stacksgpt briefings.",
+        : "You are subscribed to StacksGPT briefings.",
     });
   } catch (e) {
     return Response.json(

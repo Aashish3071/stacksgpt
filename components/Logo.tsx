@@ -10,7 +10,7 @@ interface LogoProps {
 }
 
 /**
- * Concept 2: Editorial Monogram for Stacksgpt
+ * Concept 2: Editorial Monogram for StacksGPT
  * Features the signature folded ribbon 'S' with indigo/violet fold accent.
  */
 export default function Logo({
@@ -26,7 +26,7 @@ export default function Logo({
       <div className={`inline-flex items-center gap-2.5 ${className}`}>
         <Image
           src="/images/logos/logo.jpg"
-          alt="Stacksgpt Logo"
+          alt="StacksGPT Logo"
           width={dimension}
           height={dimension}
           className="rounded-lg object-contain shadow-sm"

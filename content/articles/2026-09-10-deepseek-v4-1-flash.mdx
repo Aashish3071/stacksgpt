@@ -1,0 +1,55 @@
+---
+type: "ANNOUNCEMENT"
+title: "DeepSeek Launches V4.1 Flash with Smarter Routing and Half-Price Off-Peak Rates"
+slug: "deepseek-v4-1-flash"
+category: "Research"
+summary: >
+  DeepSeek has released DeepSeek-V4.1-Flash, introducing an asymmetric model
+  architecture designed to deliver higher intelligence at reduced operational cost.
+  The model handles text and visual tasks using smaller active parameter counts
+  during input processing and generation.
+
+  Alongside the launch, the lab announced a 50 percent discount during off-peak
+  hours to balance demand, though specific dollar rates were not published in the
+  announcement text.
+sourceName: "DeepSeek"
+sourceUrl: "https://deepseek.com/en/news/deepseek-v4-1-flash/"
+toolName: "DeepSeek"
+
+publishedDate: "2026-09-10"
+retrievedAt: "2026-09-11T05:59:50Z"
+
+seoTitle: "DeepSeek-V4.1-Flash: Smarter MoE with 50% Off-Peak Rates"
+metaDescription: >
+  DeepSeek launches DeepSeek-V4.1-Flash with asymmetric MoE architecture, native
+  vision, compressed memory caches, and 50% off-peak pricing discounts.
+keywords: ["deepseek", "deepseek-v4.1-flash", "moe", "ai models", "api routing"]
+
+heroImage: "/images/articles/2026-09-10-deepseek-v4-1-flash.png"
+heroImageAlt: "DeepSeek logo mark showing the blue whale emblem beside the DeepSeek company wordmark on a clean light gradient background"
+heroImageCredit: "Illustration generated for StacksGPT"
+heroImageOrigin: "generated"
+
+keyPoints:
+  - "Features an asymmetric causal encoder-decoder architecture with 8B active parameters for input and 16B for output within a 552B total MoE framework."
+  - "Includes native visual understanding built directly into the base model rather than relying on an external vision adapter."
+  - "Reduces key-value cache memory footprints to one-quarter the HBM and one-eighth the SSD storage of the prior generation."
+  - "Routes API traffic through the deepseek-flash identifier, retiring older flash versions and phasing out V4-Pro."
+  - "Applies a 50 percent billing discount during off-peak windows, though exact token dollar amounts were not published in the announcement text."
+
+verdict: >
+  For organizations processing large volumes of text and image requests, the
+  architectural efficiency and off-peak discounts offer meaningful savings on
+  infrastructure overhead. Teams planning large agent deployments should evaluate
+  the model through the unified API endpoint before shifting production traffic.
+---
+
+DeepSeek has introduced DeepSeek-V4.1-Flash, a new artificial intelligence model designed to deliver high speed and lower operational costs for everyday computing tasks. The organization describes the release as "Introducing the smallest model in our new architecture family, with native visual understanding." Rather than relying on a separate vision adapter, the model natively processes both images and text inside a single framework.
+
+The model is built on an asymmetric causal encoder-decoder framework within a "552B-parameter MoE." In conventional designs, models activate the same number of computing parameters regardless of whether they are reading an incoming prompt or writing a response. DeepSeek approaches this differently by using "just 8B active parameters for input, 16B for output." By activating only eight billion parameters during prompt ingestion and sixteen billion during token generation, the system minimizes computational overhead while maintaining deep reasoning capability. DeepSeek summarized the design philosophy as "Asymmetric architecture. More intelligence, less cost."
+
+In addition to parameter tuning, the release addresses memory bottlenecks. Running continuous interactions or multi-step AI agents normally requires storing extensive conversational history in memory, known as the key-value cache. DeepSeek-V4.1-Flash cuts this footprint down to "1/4 the HBM" and "1/8 the SSD storage" compared with prior systems. As the announcement highlights, "Compressing the cache cuts those costs significantly." For developers building complex agentic loops, smaller memory demands translate into higher hardware concurrency and reduced server load.
+
+On the developer side, DeepSeek has consolidated its model catalogue. Users are instructed to "Set your model to deepseek-flash." Older variants including "V4-Flash & V4-Flash-Vision-Exp are retired." Furthermore, the team announced "We’re phasing out V4-Pro." Starting at 04:00 UTC on September 14, 2026, existing requests to the older pro endpoint will automatically route to V4.1-Flash at the new rates until a future pro version is released. Tool partners WorkBuddy and OpenCode have also added immediate support.
+
+DeepSeek also introduced dynamic load-balancing rates, noting that "Off-peak rates are 50% of peak rates." However, exact dollar figures were not published in the announcement text. Organizations evaluating token budgets must check dashboard pricing tables directly to determine per-token expenses. Model weights and a technical report have been published on Hugging Face, giving research teams full access to explore the architecture.

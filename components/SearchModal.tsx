@@ -68,7 +68,7 @@ export default function SearchModal({ isOpen, onClose }: Props) {
       <div className="relative w-full max-w-xl rounded-xl border border-rule bg-surface p-6 shadow-2xl transition-all">
         <div className="flex items-center justify-between border-b border-rule pb-4">
           <h2 className="font-serif text-lg font-semibold text-ink">
-            Search Stacksgpt
+            Search StacksGPT
           </h2>
           <button
             type="button"

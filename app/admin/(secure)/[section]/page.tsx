@@ -5,7 +5,7 @@ import { requireEditor, requireAdmin } from "@/lib/editor-auth";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import NewsroomResource from "@/components/NewsroomResource";
-import { NewArticle, LeadActions } from "@/components/NewsroomQueue";
+import { NewArticle, LeadActions, ArticleActions } from "@/components/NewsroomQueue";
 import { getSettings } from "@/lib/settings";
 
 export const dynamic = "force-dynamic";
@@ -94,12 +94,7 @@ export default async function Page({
               {a.rejectionReason && (
                 <p className="text-sm text-accent my-1">{a.rejectionReason}</p>
               )}
-              <Link
-                href={`/admin/preview/${a.id}`}
-                className="underline text-sm text-ink"
-              >
-                Private preview ↗
-              </Link>
+              <ArticleActions article={a} />
             </article>
           ))
         )}

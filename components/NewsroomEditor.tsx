@@ -133,20 +133,48 @@ export default function NewsroomEditor({
             {dirty ? " · Unsaved changes" : ""}
           </p>
         </div>
-        <div className="flex gap-3 items-center">
+        <div className="flex gap-2.5 items-center">
           <Link
             target="_blank"
             href={`/admin/preview/${a.id}`}
-            className="underline"
+            className="rounded border border-rule px-3 py-2 text-xs font-semibold text-muted hover:text-ink hover:border-ink transition-colors"
           >
-            Preview saved draft ↗
+            Preview draft ↗
           </Link>
           <button
             disabled={busy}
             onClick={() => send()}
-            className="bg-ink text-paper px-5 py-3"
+            className="rounded bg-ink text-paper px-4 py-2 text-xs font-semibold hover:bg-ink/90 transition-colors disabled:opacity-50"
           >
-            Save draft
+            {busy ? "Saving..." : "Save changes"}
+          </button>
+          <button
+            type="button"
+            disabled={busy}
+            onClick={async () => {
+              if (
+                !confirm(
+                  `Permanently delete "${a.title || "this article"}"? This action cannot be undone.`,
+                )
+              )
+                return;
+              setBusy(true);
+              try {
+                const r = await fetch(
+                  `/api/articles?id=${encodeURIComponent(a.id)}`,
+                  { method: "DELETE" },
+                );
+                const d = await r.json();
+                if (!r.ok) throw Error(d.error || "Failed to delete");
+                window.location.assign("/admin");
+              } catch (e) {
+                setMessage(e instanceof Error ? e.message : "Failed to delete");
+                setBusy(false);
+              }
+            }}
+            className="rounded border border-accent/40 bg-accent-soft text-accent px-3 py-2 text-xs font-semibold hover:bg-accent hover:text-surface transition-colors disabled:opacity-50"
+          >
+            Delete article
           </button>
         </div>
       </div>
@@ -419,8 +447,46 @@ export default function NewsroomEditor({
           <button
             disabled={busy || reason.length < 5}
             onClick={() => send("reject")}
+            className="border p-2 text-xs"
           >
             Reject
+          </button>
+        </div>
+
+        <div className="border-t border-rule pt-6 mt-6">
+          <h3 className="font-serif text-lg font-semibold text-accent mb-1">
+            Danger Zone
+          </h3>
+          <p className="text-xs text-muted mb-3">
+            Permanently delete this article, its revisions, and redirects from the publication.
+          </p>
+          <button
+            type="button"
+            disabled={busy}
+            onClick={async () => {
+              if (
+                !confirm(
+                  `Permanently delete "${a.title || "this article"}"? This action cannot be undone.`,
+                )
+              )
+                return;
+              setBusy(true);
+              try {
+                const r = await fetch(
+                  `/api/articles?id=${encodeURIComponent(a.id)}`,
+                  { method: "DELETE" },
+                );
+                const d = await r.json();
+                if (!r.ok) throw Error(d.error || "Failed to delete");
+                window.location.assign("/admin");
+              } catch (e) {
+                setMessage(e instanceof Error ? e.message : "Failed to delete");
+                setBusy(false);
+              }
+            }}
+            className="rounded border border-accent/40 bg-accent-soft text-accent px-4 py-2 text-xs font-semibold hover:bg-accent hover:text-surface transition-colors disabled:opacity-50"
+          >
+            Permanently delete article
           </button>
         </div>
       </section>

@@ -5,7 +5,7 @@ export default function Page() {
   return (
     <LegalPage title="How we report">
       <p>
-        Stacksgpt delivers rigorous, high-signal analysis of AI and technology
+        StacksGPT delivers rigorous, high-signal analysis of AI and technology
         breakthroughs. We start with the original announcement, technical
         documentation, or a verified system demonstration.
       </p>

@@ -110,7 +110,7 @@ export default function Navbar({
         <div className="mx-auto flex h-14 max-w-shell items-center justify-between gap-2 sm:gap-4 px-3 sm:px-6">
           {/* Left: Brand + Core Nav Links */}
           <div className="flex items-center gap-4 lg:gap-8 min-w-0">
-            <Link href="/" className="group shrink-0 flex items-center" aria-label="Stacksgpt Home">
+            <Link href="/" className="group shrink-0 flex items-center" aria-label="StacksGPT Home">
               <Logo size="md" />
             </Link>
 

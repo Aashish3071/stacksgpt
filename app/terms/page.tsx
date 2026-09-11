@@ -5,7 +5,7 @@ export default function Page() {
   return (
     <LegalPage title="Terms of use">
       <p>
-        Stacksgpt publishes general information about AI and technology.
+        StacksGPT publishes general information about AI and technology.
         Availability, prices, and product features can change after an article
         is published. Check the linked provider for current details before
         relying on an offer or making a purchase.

@@ -22,8 +22,8 @@ export default async function Page({
     >
       <p>
         {action === "confirm"
-          ? "Confirm that you would like to receive the Stacksgpt newsletter."
-          : "Stop receiving the Stacksgpt newsletter. You can subscribe again whenever you wish."}
+          ? "Confirm that you would like to receive the StacksGPT newsletter."
+          : "Stop receiving the StacksGPT newsletter. You can subscribe again whenever you wish."}
       </p>
       <form method="POST" action={`/api/newsletter/${action}?token=${token}`}>
         <button className="bg-ink text-paper px-5 py-3">
