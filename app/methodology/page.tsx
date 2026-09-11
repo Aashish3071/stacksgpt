@@ -16,18 +16,17 @@ export default function Page() {
         in the source list. A company claim is attributed to the company; it is
         not presented as an independent test.
       </p>
-      <h2>AI assistance and human review</h2>
+      <h2>Editorial review</h2>
       <p>
-        External research agents can gather sources, prepare drafts, and create
-        illustrations. Their submissions enter a private queue. An editor
+        Every story enters a private queue before publication. An editor
         reviews the source links, dates, factual claims, wording, image and
         credit before approval. Later changes require approval again.
       </p>
       <h2>Illustrations</h2>
       <p>
-        Generated images are labelled as illustrations. They should not be
-        mistaken for product screenshots, real photographs, or evidence of an
-        event. Provider and licensed media require a credit.
+        Illustrations should not be mistaken for product screenshots, real
+        photographs, or evidence of an event. Provider and licensed media
+        require a credit.
       </p>
       <h2>Useful reporting</h2>
       <p>
