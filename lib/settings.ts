@@ -3,7 +3,7 @@ export const defaultSettings = {
   name: "Stacksgpt",
   tagline:
     "We track the latest AI and tech developments so you do not have to, delivering what is new and why it matters.",
-  contactEmail: "",
+  contactEmail: "support@stacksgpt.com",
   socialLinks: [] as { label: string; url: string }[],
   adsEnabled: false,
   adsProvider: "disabled",

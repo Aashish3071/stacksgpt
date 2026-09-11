@@ -8,7 +8,7 @@ export const revalidate = 3600;
 export const metadata: Metadata = {
   title: "AI tools directory",
   description:
-    "A plain-English reference to the AI tools we write about: what each one does, who it suits, and what it costs.",
+    "A curated technical index of modern AI tools: core capabilities, practical use cases, and transparent pricing models.",
   alternates: { canonical: siteUrl("/tools") },
 };
 
@@ -47,8 +47,8 @@ export default async function ToolsDirectoryPage() {
           AI tools directory
         </h1>
         <p className="mt-3 font-serif text-dek text-muted">
-          A reference to the tools that come up in our reporting — what each one
-          does, who it suits, and what it costs.
+          A curated index of the tools featured in our reporting: real-world
+          capabilities, optimal workflows, and transparent pricing.
         </p>
         <p className="meta mt-4 leading-relaxed">
           Entries are listed alphabetically within each section. We do not rank

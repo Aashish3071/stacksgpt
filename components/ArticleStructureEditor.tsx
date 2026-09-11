@@ -22,7 +22,7 @@ export default function ArticleStructureEditor({
       title: "Terms explained",
       fields: [
         ["technicalTerm", "Term"],
-        ["plainEnglish", "Plain-English explanation"],
+        ["plainEnglish", "Context & analysis"],
       ],
       empty: { technicalTerm: "", plainEnglish: "" },
     },

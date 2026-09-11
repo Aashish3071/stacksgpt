@@ -5,9 +5,9 @@ export default function Page() {
   return (
     <LegalPage title="How we report">
       <p>
-        Stacksgpt explains AI announcements in plain English. We start with the
-        original announcement, documentation, or a clearly attributed
-        demonstration.
+        Stacksgpt delivers rigorous, high-signal analysis of AI and technology
+        breakthroughs. We start with the original announcement, technical
+        documentation, or a verified system demonstration.
       </p>
       <h2>Sources and dates</h2>
       <p>

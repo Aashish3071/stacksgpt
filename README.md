@@ -1,6 +1,6 @@
 # Stacksgpt
 
-AI and technology news in plain English. Antigravity researches the original provider announcements or the X/Twitter links supplied by the owner, writes reported articles, and generates relevant illustrations. RSS supplies fallback leads only when no source has been provided.
+High-signal AI and technology reporting. Antigravity researches the original provider announcements or the X/Twitter links supplied by the owner, writes reported articles, and generates relevant illustrations. RSS supplies fallback leads only when no source has been provided.
 
 ## Working publication
 

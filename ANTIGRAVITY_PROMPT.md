@@ -83,15 +83,15 @@ site:
 
 **Every type is reported journalism and uses the same structure.** There is no
 tutorial format on this site: no copy-paste prompt templates, no step-by-step
-walkthroughs, no jargon glossaries. Even a use case is *reported* — you are
+walkthroughs, no jargon glossaries. Even a use case is *reported*: you are
 describing what someone did and what came of it, not instructing the reader.
 
 | Field | What it is |
 |---|---|
-| **Headline** (`title`) | What happened and why it matters, in plain English |
-| **Summary** (`summary`) | 1–2 paragraphs of plain-English standfirst explaining what the story is |
-| **What's New** (`keyPoints`) | 2–6 concise bullets of the concrete facts and updates |
-| **Why It Matters** (`verdict`) | 1–3 clear sentences: the honest takeaway and impact for ordinary people |
+| **Headline** (`title`) | What happened and why it matters: sharp, clever, and high-signal |
+| **Summary** (`summary`) | 1-2 paragraphs of persuasive standfirst explaining the core breakthrough |
+| **What's New** (`keyPoints`) | 2-6 concise bullets of the concrete facts and updates |
+| **Why It Matters** (`verdict`) | 1-3 clear sentences: the strategic takeaway and practical leverage |
 | **Body prose** (below the frontmatter) | 200+ words of reported context, background, pricing and caveats |
 
 Write the body as a journalist would: what happened, what is genuinely new, who
@@ -159,14 +159,14 @@ Record PASS or FAIL with a reason for every item.
 - [ ] `publishedDate` and `retrievedAt` match what the Researcher recorded.
 
 **Editorial**
-- [ ] The headline says what happened and why it matters, in plain English.
+- [ ] The headline says what happened and why it matters: sharp, clever, and high-signal.
 - [ ] `seoTitle` is ≤60 characters and reads well standing alone in results.
 - [ ] `metaDescription` is 110–160 characters and gives a reason to click.
 - [ ] `slug` is readable, keyword-bearing and under 70 characters.
 - [ ] `keywords` are terms a real person would type, not stuffed variants.
-- [ ] Summary is plain English and explains the core significance.
+- [ ] Summary is persuasive and high-signal, explaining the core strategic impact.
 - [ ] What's New has 2–6 clear, scannable bullets based on reported facts.
-- [ ] Why It Matters gives a clear, honest takeaway for ordinary people.
+- [ ] Why It Matters gives a clear, objective takeaway for builders and decision-makers.
 - [ ] Body prose is reported context, with no DIY prompts or tutorial jargon.
 - [ ] No em dashes anywhere in the content.
 

@@ -89,7 +89,7 @@ export default async function HomePage() {
 
         <div className="mx-auto max-w-2xl py-16 text-center sm:py-24">
           <span className="font-mono text-xs uppercase tracking-widest text-accent font-semibold">
-            Plain English AI Intelligence
+            High-Signal AI Intelligence
           </span>
           <h1 className="mt-4 font-serif text-3xl font-bold leading-tight text-ink sm:text-5xl">
             {SITE_TAGLINE}

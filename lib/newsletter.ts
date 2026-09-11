@@ -4,10 +4,8 @@ import { siteUrl } from "./site";
 import { safeMarkdown } from "./safe-markdown";
 export function emailConfigured() {
   return !!(
-    process.env.SMTP_HOST &&
-    process.env.SMTP_USER &&
     process.env.SMTP_PASSWORD &&
-    process.env.NEWSLETTER_FROM
+    (process.env.SMTP_USER || "support@stacksgpt.com")
   );
 }
 export async function sendMail(
@@ -17,16 +15,19 @@ export async function sendMail(
   unsubscribe?: string,
 ) {
   if (!emailConfigured()) throw Error("Email sending is not configured.");
+  const host = process.env.SMTP_HOST || "smtppro.zoho.com";
+  const user = process.env.SMTP_USER || "support@stacksgpt.com";
+  const from = process.env.NEWSLETTER_FROM || `Stacksgpt <${user}>`;
   const transport = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
+    host,
     port: Number(process.env.SMTP_PORT || 465),
     secure: process.env.SMTP_SECURE !== "false",
-    auth: { user: process.env.SMTP_USER!, pass: process.env.SMTP_PASSWORD! },
+    auth: { user, pass: process.env.SMTP_PASSWORD! },
     connectionTimeout: 10000,
     socketTimeout: 15000,
   });
   return transport.sendMail({
-    from: process.env.NEWSLETTER_FROM,
+    from,
     to,
     subject,
     html,

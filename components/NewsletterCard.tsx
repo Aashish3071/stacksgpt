@@ -38,12 +38,12 @@ export default function NewsletterCard() {
   return (
     <section id="newsletter" className="border-t border-rule py-10 sm:py-12">
       <div className="max-w-measure-wide">
-        <h2 className="kicker">The Stacksgpt briefing</h2>
+        <h2 className="kicker">The Stacksgpt Briefing</h2>
         <p className="mt-2 font-serif text-head-md text-ink">
-          AI news worth understanding, delivered to your inbox.
+          Stay ahead of the AI curve with essential intelligence.
         </p>
         <p className="meta mt-2 leading-relaxed">
-          Clear reporting, original sources, and why the news matters.
+          Deep technical signal, breakthrough model updates, and practical takeaways.
         </p>
 
         {status === "success" ? (

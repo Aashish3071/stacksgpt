@@ -1,8 +1,8 @@
 # Writing articles for Stacksgpt
 
-This repository powers a news site that explains AI and tech developments to
-non-technical readers in plain English. Agents contribute by committing article files. Nothing
-else in the repo should be modified to publish an article.
+This repository powers a news site that delivers high-signal AI and tech reporting
+for builders, leaders, and operators: clever, persuasive, and stripped of vendor hype.
+Agents contribute by committing article files. Nothing else in the repo should be modified to publish an article.
 
 ## What to do
 
@@ -44,10 +44,10 @@ Every article, whatever its type, needs all five of these:
 
 | Field | What it is |
 |---|---|
-| **Headline** (`title`) | What happened and why it matters, in plain English |
-| **Summary** (`summary`) | 1–2 paragraphs of plain-English standfirst |
-| **What's New** (`keyPoints`) | 2–6 concise bullets of concrete facts |
-| **Why It Matters** (`verdict`) | 1–3 sentences: the honest takeaway for ordinary people |
+| **Headline** (`title`) | What happened and why it matters: sharp, clever, and high-signal |
+| **Summary** (`summary`) | 1-2 paragraphs of persuasive, high-signal standfirst |
+| **What's New** (`keyPoints`) | 2-6 concise bullets of concrete facts |
+| **Why It Matters** (`verdict`) | 1-3 sentences: the honest takeaway for builders and buyers |
 | **Body prose** | 200+ words of reported context, background, pricing and caveats |
 
 ## House style
@@ -55,8 +55,9 @@ Every article, whatever its type, needs all five of these:
 **No em dashes.** Use a comma, a full stop or a colon. This is enforced at build
 time across the headline, summary, key points, verdict and body.
 
-Write for someone who does not work in AI. If a sentence needs a glossary entry
-to parse, rewrite the sentence rather than adding the glossary.
+Write with intellectual clarity and persuasive authority. Do not patronize readers
+or write as if they know nothing. Communicate sharp technical leverage, real capabilities,
+and commercial realities.
 
 ## The file
 
@@ -70,8 +71,8 @@ title: "What OpenAI's new voice API actually lets you do"
 slug: "openai-realtime-voice-api"
 category: "Productivity"
 summary: >
-  A plain-English paragraph, 40 characters minimum, explaining why a normal
-  person should care. This is the standfirst under the headline.
+  A concise, persuasive paragraph, 40 characters minimum, explaining why this
+  development matters to builders and teams. This is the standfirst under the headline.
 sourceName: "OpenAI"
 sourceUrl: "https://openai.com/index/introducing-the-realtime-api/"
 toolName: "ChatGPT"
@@ -108,7 +109,7 @@ structured sections above. Most articles do not need it.
 |---|---|
 | `type` | One of ANNOUNCEMENT, NEWS, UPDATE, TOOL, USE_CASE, SHOWCASE. See the table above. |
 | `title` | 15+ characters. For reported news, say what happened and why it matters. For practical pieces, say what the reader can do. |
-| `summary` | 40+ characters. Plain English, no jargon. |
+| `summary` | 40+ characters. Persuasive and high-signal, zero fluff. |
 | `category` | Exactly one of: Productivity, Writing, Coding, Research, Design, Automation. |
 | `sourceName` | Who published the original, e.g. "Anthropic", "Mistral". |
 | `sourceUrl` | Link to the original announcement. **Every article must have one.** |
@@ -151,13 +152,14 @@ Fix the file rather than removing the field.
   the site owner, through the admin panel, and only after a real agreement.
 - **No fabricated authority.** No star ratings, "Editor's Choice" badges,
   reader counts, or claims that the team tested something it did not test.
-- **Write for someone who does not work in AI.** A small business owner, a
-  student, someone in operations. If a sentence needs a glossary, rewrite it.
+- **Write with clever, persuasive authority.** Respect the reader's intellect.
+  Explain technical leverage, commercial implications, and practical trade-offs
+  without buzzwords or dumbed-down generalities.
 
 ## Images
 
 - Commit the file to `public/images/articles/`, named to match the article file.
-- Reference it as `/images/articles/<name>.png` — a path from `public`, not a
+- Reference it as `/images/articles/<name>.png`: a path from `public`, not a
   filesystem path and not an external URL.
 - Landscape, at least 1200×630, under about 300KB. It is served self-hosted and
   optimised by Next.
@@ -166,7 +168,7 @@ Fix the file rather than removing the field.
 
 ## Sources worth watching
 
-Model providers publish their own announcements — Anthropic, OpenAI, Qwen,
+Model providers publish their own announcements: Anthropic, OpenAI, Qwen,
 Mistral, DeepSeek, Ollama, Nous Research (Hermes) and similar. Prefer a
 provider's own post over secondhand coverage, and always link to the provider.
 

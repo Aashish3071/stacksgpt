@@ -77,7 +77,7 @@ model ToolAffiliate {
 model Article {
   id              String         @id @default(cuid())
   slug            String         @unique
-  title           String         // Plain English / Jargon-free headline
+  title           String         // Clear, high-signal headline
   originalTitle   String?
   summary         String         // The 10-second takeaway
   jargonBuster    String         // JSON: [{ technicalTerm, plainEnglish }]
