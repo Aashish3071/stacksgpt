@@ -30,7 +30,7 @@ export async function POST(req: Request) {
       res.cookies.set(AUTH_COOKIE, token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
+        sameSite: "lax",
         path: "/",
         maxAge: 86400 * 7,
       });
@@ -66,7 +66,7 @@ export async function POST(req: Request) {
         res.cookies.set(AUTH_COOKIE, token, {
           httpOnly: true,
           secure: process.env.NODE_ENV === "production",
-          sameSite: "strict",
+          sameSite: "lax",
           path: "/",
           maxAge: 86400 * 7,
         });
@@ -92,7 +92,7 @@ export async function POST(req: Request) {
           const opts = {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
-            sameSite: "strict" as const,
+            sameSite: "lax" as const,
             path: "/",
           };
           res.cookies.set(AUTH_COOKIE, data.session.access_token, {

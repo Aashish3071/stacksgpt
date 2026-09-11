@@ -30,11 +30,6 @@ const CATEGORY_ITEMS: CategoryItem[] = [
     description: "Image generation, UI kits, and creative tech",
   },
   {
-    name: "Writing",
-    slug: "writing",
-    description: "Editorial tools, content models, and text AI",
-  },
-  {
     name: "Automation",
     slug: "automation",
     description: "Workflows, robotics, and unattended operations",
@@ -67,11 +62,23 @@ export default function Navbar({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Close on route change
+  // Close menus on route change
   useEffect(() => {
     setDropdownOpen(false);
     setMobileOpen(false);
   }, [pathname]);
+
+  // Lock background scroll when mobile drawer is open
+  useEffect(() => {
+    if (mobileOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileOpen]);
 
   // Global keyboard shortcut for search (Cmd+K or Ctrl+K)
   useEffect(() => {
@@ -90,15 +97,20 @@ export default function Navbar({
 
   const isCategoryActive = CATEGORY_ITEMS.some(
     (c) => pathname === `/category/${c.slug}`,
-  ) || pathname === "/archive";
+  );
+
+  // Suppress public navbar on all administrative routes
+  if (pathname?.startsWith("/admin")) {
+    return null;
+  }
 
   return (
     <>
       <header className="sticky top-0 z-50 border-b border-rule bg-surface/95 backdrop-blur">
-        <div className="mx-auto flex h-14 max-w-shell items-center justify-between gap-4 px-4 sm:px-6">
+        <div className="mx-auto flex h-14 max-w-shell items-center justify-between gap-2 sm:gap-4 px-3 sm:px-6">
           {/* Left: Brand + Core Nav Links */}
-          <div className="flex items-center gap-6 lg:gap-8">
-            <Link href="/" className="group shrink-0" aria-label="Stacksgpt Home">
+          <div className="flex items-center gap-4 lg:gap-8 min-w-0">
+            <Link href="/" className="group shrink-0 flex items-center" aria-label="Stacksgpt Home">
               <Logo size="md" />
             </Link>
 
@@ -208,34 +220,18 @@ export default function Navbar({
                         );
                       })}
                     </div>
-
-                    <div className="my-1.5 border-t border-rule" />
-
-                    <Link
-                      href="/archive"
-                      prefetch={true}
-                      onClick={() => setDropdownOpen(false)}
-                      className={`flex items-center justify-between rounded-lg px-3 py-2 text-[13px] font-medium transition-colors ${
-                        pathname === "/archive"
-                          ? "bg-paper font-semibold text-ink"
-                          : "text-muted hover:bg-paper hover:text-ink"
-                      }`}
-                    >
-                      <span>Full Archive</span>
-                      <span className="text-xs text-muted">All stories →</span>
-                    </Link>
                   </div>
                 )}
               </div>
             </nav>
           </div>
 
-          {/* Right: Search Icon + Subscribe CTA */}
-          <div className="flex items-center gap-2.5 sm:gap-3">
+          {/* Right: Search Icon + Subscribe CTA + Mobile Toggle */}
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             <button
               type="button"
               onClick={() => setSearchOpen(true)}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-muted hover:bg-paper hover:text-ink transition-colors"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-muted hover:bg-paper hover:text-ink transition-colors shrink-0"
               aria-label="Search articles"
               title="Search (⌘K)"
             >
@@ -254,10 +250,11 @@ export default function Navbar({
               </svg>
             </button>
 
+            {/* Desktop Subscribe CTA */}
             <button
               type="button"
               onClick={() => setSubscribeOpen(true)}
-              className="rounded-full bg-ink px-4 py-1.5 font-sans text-xs sm:text-[13px] font-semibold text-surface transition-all hover:bg-ink/90 shadow-sm hover:scale-[1.02] active:scale-[0.98]"
+              className="hidden sm:inline-flex rounded-full bg-ink px-4 py-1.5 font-sans text-xs sm:text-[13px] font-semibold text-surface transition-all hover:bg-ink/90 shadow-sm hover:scale-[1.02] active:scale-[0.98] shrink-0"
             >
               Subscribe
             </button>
@@ -266,22 +263,37 @@ export default function Navbar({
             <button
               type="button"
               onClick={() => setMobileOpen((prev) => !prev)}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-muted hover:bg-paper hover:text-ink sm:hidden transition-colors"
-              aria-label="Toggle mobile menu"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-muted hover:bg-paper hover:text-ink sm:hidden transition-colors shrink-0"
+              aria-label={mobileOpen ? "Close mobile menu" : "Open mobile menu"}
             >
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-              >
-                <line x1="3" y1="6" x2="21" y2="6" />
-                <line x1="3" y1="12" x2="21" y2="12" />
-                <line x1="3" y1="18" x2="21" y2="18" />
-              </svg>
+              {mobileOpen ? (
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                >
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              ) : (
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                >
+                  <line x1="3" y1="6" x2="21" y2="6" />
+                  <line x1="3" y1="12" x2="21" y2="12" />
+                  <line x1="3" y1="18" x2="21" y2="18" />
+                </svg>
+              )}
             </button>
           </div>
         </div>
@@ -290,17 +302,18 @@ export default function Navbar({
         {mobileOpen && (
           <div className="fixed inset-0 z-[100] sm:hidden">
             <div
-              className="absolute inset-0 bg-black/40 backdrop-blur-xs"
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
               onClick={() => setMobileOpen(false)}
+              aria-hidden="true"
             />
-            <div className="absolute right-0 top-0 h-full w-80 max-w-[85vw] bg-surface p-6 shadow-2xl flex flex-col justify-between overflow-y-auto">
+            <div className="fixed inset-y-0 right-0 z-[101] w-full max-w-[320px] bg-surface p-6 shadow-2xl flex flex-col justify-between overflow-y-auto border-l border-rule animate-in slide-in-from-right duration-200">
               <div>
                 <div className="flex items-center justify-between border-b border-rule pb-4">
                   <Logo size="sm" />
                   <button
                     type="button"
                     onClick={() => setMobileOpen(false)}
-                    className="rounded p-1 text-muted hover:bg-paper hover:text-ink"
+                    className="rounded-lg p-1.5 text-muted hover:bg-paper hover:text-ink transition-colors"
                     aria-label="Close menu"
                   >
                     <svg
@@ -361,7 +374,7 @@ export default function Navbar({
                 {/* Category section */}
                 <div className="mt-6 border-t border-rule pt-4">
                   <p className="px-3 text-xs font-semibold uppercase tracking-wider text-muted">
-                    Category
+                    Categories
                   </p>
                   <div className="mt-2 space-y-1 font-sans text-sm">
                     {CATEGORY_ITEMS.map((item) => (
@@ -379,34 +392,40 @@ export default function Navbar({
                         {item.name}
                       </Link>
                     ))}
-                    <Link
-                      href="/archive"
-                      prefetch={true}
-                      onClick={() => setMobileOpen(false)}
-                      className={`block rounded-lg px-3 py-2 transition-colors ${
-                        pathname === "/archive"
-                          ? "bg-paper font-medium text-ink"
-                          : "text-muted hover:bg-paper hover:text-ink"
-                      }`}
-                    >
-                      Archive
-                    </Link>
                   </div>
                 </div>
               </div>
 
-              {/* Mobile CTA */}
-              <div className="border-t border-rule pt-6 mt-6">
+              {/* Mobile CTA and Social */}
+              <div className="border-t border-rule pt-6 mt-6 space-y-3">
                 <button
                   type="button"
                   onClick={() => {
                     setMobileOpen(false);
                     setSubscribeOpen(true);
                   }}
-                  className="w-full rounded-lg bg-ink py-2.5 text-center font-sans text-sm font-semibold text-surface shadow-sm"
+                  className="w-full rounded-lg bg-ink py-2.5 text-center font-sans text-sm font-semibold text-surface shadow-sm transition-all hover:bg-ink/90"
                 >
                   Subscribe
                 </button>
+
+                <a
+                  href="https://x.com/StacksGPT01"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 rounded-lg border border-rule bg-paper py-2 font-sans text-xs font-medium text-ink transition-colors hover:border-ink hover:bg-surface"
+                >
+                  <svg
+                    width="13"
+                    height="13"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    className="shrink-0"
+                  >
+                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                  </svg>
+                  <span>Follow @StacksGPT01 on X</span>
+                </a>
               </div>
             </div>
           </div>

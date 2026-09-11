@@ -1,4 +1,4 @@
-import { admin } from "@/lib/editor-auth";
+import { requireAdmin } from "@/lib/editor-auth";
 import prisma from "@/lib/db";
 import { safeMarkdown } from "@/lib/safe-markdown";
 import { notFound } from "next/navigation";
@@ -8,7 +8,7 @@ export default async function Page({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  await admin();
+  await requireAdmin();
   const n = await prisma.newsletter.findUnique({
     where: { id: (await params).id },
   });

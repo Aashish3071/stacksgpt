@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { SITE_NAME } from "@/lib/site";
 import Logo from "@/components/Logo";
 
@@ -9,6 +12,13 @@ export default function Footer({
   tagline?: string;
   socialLinks?: { label: string; url: string }[];
 }) {
+  const pathname = usePathname();
+
+  // Suppress public footer on all administrative routes
+  if (pathname?.startsWith("/admin")) {
+    return null;
+  }
+
   const twitterLink =
     socialLinks.find(
       (l) =>
@@ -16,7 +26,7 @@ export default function Footer({
         l.label.toLowerCase().includes("x") ||
         l.url.includes("x.com") ||
         l.url.includes("twitter.com"),
-    )?.url || "https://x.com/stacksgpt";
+    )?.url || "https://x.com/StacksGPT01";
 
   return (
     <footer className="mt-20 border-t border-rule bg-surface">
@@ -62,7 +72,7 @@ export default function Footer({
                 >
                   <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
                 </svg>
-                <span>Follow @stacksgpt on X</span>
+                <span>Follow @StacksGPT01 on X</span>
               </a>
             </div>
           </div>
@@ -98,15 +108,6 @@ export default function Footer({
                   className="text-muted hover:text-ink transition-colors"
                 >
                   AI Tools Directory
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/archive"
-                  prefetch={true}
-                  className="text-muted hover:text-ink transition-colors"
-                >
-                  Full Archive
                 </Link>
               </li>
               <li>
@@ -152,15 +153,6 @@ export default function Footer({
                   className="text-muted hover:text-ink transition-colors"
                 >
                   Design
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/category/writing"
-                  prefetch={true}
-                  className="text-muted hover:text-ink transition-colors"
-                >
-                  Writing
                 </Link>
               </li>
               <li>

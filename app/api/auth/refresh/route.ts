@@ -1,10 +1,14 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { supabase, AUTH_COOKIE } from "@/lib/editor-auth";
+import { supabase, AUTH_COOKIE, verifyMasterSession } from "@/lib/editor-auth";
 import { sameOrigin } from "@/lib/security";
 export async function POST(req: Request) {
   try {
     sameOrigin(req);
+    const sessionToken = (await cookies()).get(AUTH_COOKIE)?.value;
+    if (sessionToken && verifyMasterSession(sessionToken)) {
+      return NextResponse.json({ ok: true });
+    }
     const token = (await cookies()).get("stacksgpt_refresh")?.value;
     if (!token) throw Error("Sign in again.");
     const { data, error } = await supabase().auth.refreshSession({
@@ -15,7 +19,7 @@ export async function POST(req: Request) {
     const o = {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict" as const,
+      sameSite: "lax" as const,
       path: "/",
     };
     res.cookies.set(AUTH_COOKIE, data.session.access_token, {

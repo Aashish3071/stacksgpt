@@ -5,6 +5,7 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PrivacyControls from "@/components/PrivacyControls";
+import SiteChrome from "@/components/SiteChrome";
 import { getSettings } from "@/lib/settings";
 import prisma from "@/lib/db";
 
@@ -111,9 +112,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           />
         </noscript>
         <PrivacyControls settings={publicSettings}>
-          <Navbar categories={categories} />
-          <main className="flex-1">{children}</main>
-          <Footer tagline={s.tagline} socialLinks={s.socialLinks} />
+          <SiteChrome
+            navbar={<Navbar categories={categories} />}
+            footer={<Footer tagline={s.tagline} socialLinks={s.socialLinks} />}
+          >
+            {children}
+          </SiteChrome>
         </PrivacyControls>
       </body>
     </html>

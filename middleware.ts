@@ -27,14 +27,38 @@ export function middleware(req: NextRequest) {
   ) {
     if (!req.cookies.get("stacksgpt_session"))
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    if (
-      !["GET", "HEAD", "OPTIONS"].includes(req.method) &&
-      req.headers.get("origin") !== req.nextUrl.origin
-    )
-      return NextResponse.json(
-        { error: "Invalid request origin" },
-        { status: 403 },
-      );
+    const origin = req.headers.get("origin");
+    if (origin && !["GET", "HEAD", "OPTIONS"].includes(req.method)) {
+      try {
+        const originUrl = new URL(origin);
+        const originHost = originUrl.host.toLowerCase();
+        const reqHost = (
+          req.headers.get("x-forwarded-host") ||
+          req.headers.get("host") ||
+          req.nextUrl.host
+        ).toLowerCase();
+
+        const isAllowed =
+          originHost === reqHost ||
+          originUrl.origin === req.nextUrl.origin ||
+          originHost === "stacksgpt.com" ||
+          originHost.endsWith(".stacksgpt.com") ||
+          originHost.endsWith(".vercel.app") ||
+          originHost.startsWith("localhost");
+
+        if (!isAllowed) {
+          return NextResponse.json(
+            { error: "Invalid request origin" },
+            { status: 403 },
+          );
+        }
+      } catch {
+        return NextResponse.json(
+          { error: "Invalid request origin" },
+          { status: 403 },
+        );
+      }
+    }
   }
   const res = NextResponse.next();
   res.headers.set("X-Content-Type-Options", "nosniff");

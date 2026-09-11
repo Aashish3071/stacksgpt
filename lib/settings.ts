@@ -4,7 +4,10 @@ export const defaultSettings = {
   tagline:
     "We track the latest AI and tech developments so you do not have to, delivering what is new and why it matters.",
   contactEmail: "support@stacksgpt.com",
-  socialLinks: [] as { label: string; url: string }[],
+  socialLinks: [{ label: "X", url: "https://x.com/StacksGPT01" }] as {
+    label: string;
+    url: string;
+  }[],
   adsEnabled: false,
   adsProvider: "disabled",
   adsenseId: "",

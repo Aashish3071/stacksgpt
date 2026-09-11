@@ -1,7 +1,6 @@
 import Link from "next/link";
 import SessionControls from "@/components/SessionControls";
-import { editor } from "@/lib/editor-auth";
-import { redirect } from "next/navigation";
+import { requireEditor } from "@/lib/editor-auth";
 export const dynamic = "force-dynamic";
 export const metadata = {
   title: "Newsroom",
@@ -12,12 +11,7 @@ export default async function Layout({
 }: {
   children: React.ReactNode;
 }) {
-  let p;
-  try {
-    p = await editor();
-  } catch {
-    redirect("/admin/login");
-  }
+  const p = await requireEditor();
   const nav = [
     ["", "Dashboard"],
     ["leads", "Story leads"],

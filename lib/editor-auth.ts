@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
 import crypto from "crypto";
 import prisma from "./db";
@@ -79,4 +80,24 @@ export async function admin() {
   const p = await editor();
   if (p.role !== "ADMIN") throw Error("Administrator access required.");
   return p;
+}
+
+export async function requireEditor() {
+  try {
+    return await editor();
+  } catch {
+    redirect("/admin/login");
+  }
+}
+
+export async function requireAdmin() {
+  try {
+    const p = await editor();
+    if (p.role !== "ADMIN") {
+      redirect("/admin");
+    }
+    return p;
+  } catch {
+    redirect("/admin/login");
+  }
 }

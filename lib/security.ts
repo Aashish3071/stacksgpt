@@ -23,8 +23,31 @@ export function publicUrl(value: string) {
   }
 }
 export function sameOrigin(req: Request) {
-  if (req.headers.get("origin") !== new URL(req.url).origin)
-    throw Error("This request must originate from the publication.");
+  const origin = req.headers.get("origin");
+  if (!origin) return;
+
+  try {
+    const originUrl = new URL(origin);
+    const originHost = originUrl.host.toLowerCase();
+    const reqHost = (
+      req.headers.get("x-forwarded-host") ||
+      req.headers.get("host") ||
+      new URL(req.url).host
+    ).toLowerCase();
+
+    if (
+      originHost === reqHost ||
+      originUrl.origin === new URL(req.url).origin ||
+      originHost === "stacksgpt.com" ||
+      originHost.endsWith(".stacksgpt.com") ||
+      originHost.endsWith(".vercel.app") ||
+      originHost.startsWith("localhost")
+    ) {
+      return;
+    }
+  } catch {}
+
+  throw Error("This request must originate from the publication.");
 }
 export function requireSecret(req: Request, key: string) {
   const secret = process.env[key];
