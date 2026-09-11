@@ -20,6 +20,17 @@ export default function EditorialStandardsPage() {
         publication.
       </p>
       <p>
+        <strong>AI assistance.</strong> We use AI research agents to gather
+        sources, prepare first drafts, and produce illustrations. Nothing
+        reaches the site automatically. Every draft enters a private queue where
+        a human editor checks the source links, dates, and factual claims,
+        edits the wording, and approves it before it is published; later changes
+        require approval again. Generated illustrations are labelled as such
+        wherever they appear. Our{" "}
+        <Link href="/methodology">methodology page</Link> describes this process
+        in full.
+      </p>
+      <p>
         <strong>Attribution.</strong> Every article names the source it is based
         on and links to the original announcement. We summarise and explain in
         our own words rather than reproducing someone else&rsquo;s reporting,

@@ -168,13 +168,32 @@ export default function ArticleReader({
               sizes="(max-width: 768px) 100vw, 680px"
               className="h-auto w-full border border-rule"
             />
-            {article.heroImageCredit &&
-              !article.heroImageCredit.toLowerCase().includes("stacksgpt") &&
-              !article.heroImageCredit.toLowerCase().includes("illustration generated") &&
-              !article.heroImageCredit.toLowerCase().includes("ai-generated") && (
+            {/*
+              Generated artwork is always labelled. /methodology promises
+              readers that "generated images are labelled as illustrations...
+              they should not be mistaken for product screenshots, real
+              photographs, or evidence of an event", and an unlabelled
+              synthetic image next to a factual claim breaks that promise.
+              The label is driven by heroImageOrigin rather than by matching
+              words in the credit, so a credit like "StacksGPT Newsroom"
+              cannot quietly hide that the image was generated.
+            */}
+            {article.heroImageOrigin === "generated" ? (
               <figcaption className="meta mt-2">
-                {article.heroImageCredit}
+                AI-generated illustration
+                {article.heroImageCredit &&
+                !/stacksgpt|illustration generated|ai-generated/i.test(
+                  article.heroImageCredit,
+                )
+                  ? ` · ${article.heroImageCredit}`
+                  : ""}
               </figcaption>
+            ) : (
+              article.heroImageCredit && (
+                <figcaption className="meta mt-2">
+                  {article.heroImageCredit}
+                </figcaption>
+              )
             )}
           </figure>
         )}

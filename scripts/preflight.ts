@@ -27,7 +27,56 @@ function fail(title: string, lines: string[]): never {
   process.exit(1);
 }
 
+/**
+ * Every canonical tag, sitemap entry, RSS link and JSON-LD url is built from
+ * NEXT_PUBLIC_SITE_URL. If it is wrong the site still builds and still looks
+ * fine, while quietly telling Google that the authoritative copy lives
+ * somewhere else — which is why this is checked rather than left to be noticed
+ * months later in Search Console.
+ */
+function checkSiteUrl() {
+  const raw = process.env.NEXT_PUBLIC_SITE_URL || "";
+
+  // localhost is correct for a local build, so only a real deploy is held to
+  // the public-domain requirement.
+  const deploying = !!process.env.VERCEL || !!process.env.CI;
+  if (!deploying) return;
+
+  if (!raw || /^https?:\/\/localhost(:\d+)?\/?$/i.test(raw)) {
+    fail("NEXT_PUBLIC_SITE_URL is missing or points at localhost", [
+      `Current value: ${raw || "(unset)"}`,
+      "",
+      "Canonical tags, the sitemap, the RSS feed and all structured data are",
+      "derived from this value. Deploying without it publishes a site that",
+      "points search engines at localhost.",
+      "",
+      "Set NEXT_PUBLIC_SITE_URL to the public domain, e.g.",
+      "  https://www.example.com",
+    ]);
+  }
+
+  let host: string;
+  try {
+    host = new URL(raw).host.toLowerCase();
+  } catch {
+    fail("NEXT_PUBLIC_SITE_URL is not a valid URL", [`Current value: ${raw}`]);
+  }
+
+  // A *.vercel.app value builds and serves correctly, so this stays a warning
+  // rather than a hard failure — but it hands every ranking signal to the
+  // preview domain instead of the real one.
+  if (host.endsWith(".vercel.app")) {
+    console.warn(
+      `\n⚠️  NEXT_PUBLIC_SITE_URL is set to a *.vercel.app domain (${host}).\n` +
+        "   Canonical tags, sitemap and feed URLs will all point there, so search\n" +
+        "   engines will credit the preview domain instead of your real domain.\n" +
+        "   Set it to your custom domain if you have one.\n",
+    );
+  }
+}
+
 async function main() {
+  checkSiteUrl();
   const url = process.env.DATABASE_URL || "";
 
   if (!url.startsWith("postgres://") && !url.startsWith("postgresql://")) {
