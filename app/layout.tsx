@@ -48,7 +48,10 @@ export async function generateMetadata(): Promise<Metadata> {
   const s = await getSettings();
   return {
     ...baseMetadata,
-    title: { default: `${s.name} — ${s.tagline}`, template: `%s — ${s.name}` },
+    title: {
+      default: `${s.name}: ${s.tagline}`,
+      template: `%s · ${s.name}`,
+    },
     verification: s.searchConsoleId ? { google: s.searchConsoleId } : undefined,
   };
 }

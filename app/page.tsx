@@ -4,7 +4,8 @@ import prisma from "@/lib/db";
 import ArticleCard, { ArticleCardData } from "@/components/ArticleCard";
 import NewsletterCard from "@/components/NewsletterCard";
 import AdSlot from "@/components/AdSlot";
-import { CATEGORIES, categoryHref, siteUrl } from "@/lib/site";
+import { CATEGORIES, categoryHref, siteUrl, SITE_NAME } from "@/lib/site";
+import { jsonLd } from "@/lib/safe-markdown";
 
 export const revalidate = 300;
 
@@ -30,13 +31,11 @@ const CARD_FIELDS = {
 const PER_CATEGORY = 4;
 
 /**
- * The homepage.
- *
- * Layout sequence requested:
- * 1. Hero article
- * 2. Suggested articles time-added-wise in the square cards section
- * 3. Article category-wise sections
- * 4. Subscribe to mail list section
+ * Homepage layout:
+ * 1. Hero article (latest published, full-width)
+ * 2. Latest articles grid (next 4-8 newest, square cards)
+ * 3. Category sections (Productivity, Coding, Research, Design, Automation)
+ * 4. Newsletter subscribe CTA
  * 5. Footer (rendered via RootLayout)
  */
 export default async function HomePage() {
@@ -45,7 +44,6 @@ export default async function HomePage() {
     articles = await prisma.article.findMany({
       where: { isPublished: true },
       orderBy: [
-        { featured: "desc" },
         { publishedAt: "desc" },
         { createdAt: "desc" },
       ],
@@ -75,42 +73,78 @@ export default async function HomePage() {
 
   const [hero, ...rest] = articles as ArticleCardData[];
 
-  // Suggested articles ordered time added-wise (newest first, square cards)
-  const suggestedArticles = rest.slice(0, 8);
+  // Latest articles: next 8 newest across all categories
+  const latestArticles = rest.slice(0, 8);
 
-  // Category-wise sections
-  const categories = await prisma.taxonomy.findMany({
-    where: { kind: "CATEGORY", active: true },
-    select: { name: true },
-  });
-  const sections = categories
-    .map((c) => c.name)
+  // Category sections: only show categories with published content
+  const sections = CATEGORIES
     .map((category) => ({
       category,
       items: rest.filter((a) => a.category === category).slice(0, PER_CATEGORY),
     }))
     .filter((s) => s.items.length >= 1);
 
+  // Schema.org structured data for the homepage
+  const homepageSchema = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        name: SITE_NAME,
+        url: siteUrl(),
+        potentialAction: {
+          "@type": "SearchAction",
+          target: {
+            "@type": "EntryPoint",
+            urlTemplate: siteUrl("/search?q={search_term_string}"),
+          },
+          "query-input": "required name=search_term_string",
+        },
+      },
+      {
+        "@type": "Organization",
+        name: SITE_NAME,
+        url: siteUrl(),
+        logo: siteUrl("/images/logos/logo.jpg"),
+        description:
+          "We track the latest AI and tech developments so you do not have to, delivering what is new and why it matters.",
+      },
+    ],
+  };
+
   return (
     <div className="mx-auto max-w-shell px-4 sm:px-6">
-      {/* 1 — Hero Article */}
+      {/* Homepage JSON-LD structured data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: jsonLd(homepageSchema),
+        }}
+      />
+
+      {/* 1: Hero Article */}
       <section className="border-b border-rule py-8 sm:py-10">
         <ArticleCard article={hero} variant="lead" />
       </section>
 
       <AdSlot placement="home-leaderboard" />
 
-      {/* 2 — Suggested Articles (Time Added-wise in Square Cards) */}
-      {suggestedArticles.length > 0 && (
+      {/* 2: Latest Stories (newest additions, square cards) */}
+      {latestArticles.length > 0 && (
         <section className="border-b border-rule py-8 sm:py-10">
           <div className="flex items-baseline justify-between border-b border-rule pb-2">
             <h2 className="kicker text-ink font-semibold tracking-wide">
-              Suggested Articles
+              Latest Stories
             </h2>
-            <span className="meta text-xs">Newest additions</span>
+            <Link
+              href="/latest"
+              className="meta text-xs hover:text-accent"
+            >
+              View all
+            </Link>
           </div>
           <div className="grid grid-cols-2 gap-x-6 gap-y-8 pt-6 sm:gap-x-8 lg:grid-cols-4">
-            {suggestedArticles.map((article) => (
+            {latestArticles.map((article) => (
               <ArticleCard
                 key={article.id}
                 article={article}
@@ -123,7 +157,7 @@ export default async function HomePage() {
 
       <AdSlot placement="home-in-feed" />
 
-      {/* 3 — Category-wise Sections */}
+      {/* 3: Category Sections */}
       {sections.map(({ category, items }) => (
         <section key={category} className="border-b border-rule py-8 sm:py-10">
           <div className="flex items-baseline justify-between border-b border-rule pb-2">
@@ -134,7 +168,7 @@ export default async function HomePage() {
               href={categoryHref(category)}
               className="meta text-xs hover:text-accent"
             >
-              More in {category.toLowerCase()} →
+              More in {category.toLowerCase()}
             </Link>
           </div>
           <div className="grid grid-cols-2 gap-x-6 gap-y-8 pt-6 sm:gap-x-8 lg:grid-cols-4">
@@ -149,8 +183,10 @@ export default async function HomePage() {
         </section>
       ))}
 
-      {/* 4 — Subscribe to Mail List Section */}
-      <NewsletterCard />
+      {/* 4: Newsletter Subscribe CTA */}
+      <div id="newsletter">
+        <NewsletterCard />
+      </div>
     </div>
   );
 }

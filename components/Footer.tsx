@@ -26,7 +26,6 @@ export default function Footer({
           <nav className="font-sans text-meta">
             <ul className="space-y-2">
               {[
-                "archive",
                 "search",
                 "methodology",
                 "corrections",
@@ -53,11 +52,6 @@ export default function Footer({
                   </a>
                 </li>
               ))}
-              <li>
-                <Link href="/latest" className="text-muted hover:text-ink">
-                  Latest
-                </Link>
-              </li>
               <li>
                 <Link href="/tools" className="text-muted hover:text-ink">
                   AI tools directory

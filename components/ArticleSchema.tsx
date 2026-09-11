@@ -35,7 +35,16 @@ export default function ArticleSchema({
       author: authorName
         ? { "@type": "Person", name: authorName }
         : { "@type": "Organization", name: SITE_NAME, url: siteUrl() },
-      publisher: { "@type": "Organization", name: SITE_NAME, url: siteUrl() },
+      publisher: {
+        "@type": "Organization",
+        name: SITE_NAME,
+        url: siteUrl(),
+        logo: {
+          "@type": "ImageObject",
+          url: siteUrl("/images/logos/logo.jpg"),
+        },
+      },
+      articleSection: category,
     },
     {
       "@type": "BreadcrumbList",

@@ -61,7 +61,6 @@ export function keyPointsLabel(type: string): string {
 
 export const CATEGORIES = [
   "Productivity",
-  "Writing",
   "Coding",
   "Research",
   "Design",
