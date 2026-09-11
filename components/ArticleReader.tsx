@@ -168,11 +168,11 @@ export default function ArticleReader({
               sizes="(max-width: 768px) 100vw, 680px"
               className="h-auto w-full border border-rule"
             />
-            {article.heroImageCredit && (
+            {article.heroImageCredit &&
+              !article.heroImageCredit.toLowerCase().includes("stacksgpt") &&
+              !article.heroImageCredit.toLowerCase().includes("illustration generated") &&
+              !article.heroImageCredit.toLowerCase().includes("ai-generated") && (
               <figcaption className="meta mt-2">
-                {article.heroImageOrigin === "generated"
-                  ? "AI-generated illustration · "
-                  : ""}
                 {article.heroImageCredit}
               </figcaption>
             )}
