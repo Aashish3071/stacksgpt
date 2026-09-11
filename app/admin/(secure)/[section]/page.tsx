@@ -36,12 +36,38 @@ export default async function Page({
   let body;
 
   if (statuses[s]) {
-    const where: any = {
-      OR: [{ status: statuses[s] }, { pendingStatus: statuses[s] }],
-      ...(search.q
-        ? { title: { contains: search.q, mode: "insensitive" } }
-        : {}),
-    };
+    let where: any;
+    if (s === "drafts") {
+      where = {
+        status: "DRAFT",
+        isPublished: false,
+      };
+    } else if (s === "published") {
+      where = {
+        isPublished: true,
+      };
+    } else if (s === "approved") {
+      where = {
+        status: "APPROVED",
+        isPublished: false,
+      };
+    } else if (s === "in-review") {
+      where = {
+        status: "IN_REVIEW",
+        isPublished: false,
+      };
+    } else {
+      where = {
+        status: statuses[s],
+      };
+    }
+
+    if (search.q) {
+      where.title = { contains: search.q, mode: "insensitive" };
+    }
+
+    const orderBy: any =
+      s === "published" ? { publishedAt: "desc" } : { createdAt: "desc" };
 
     let items: any[] = [];
     let total = 0;
@@ -50,7 +76,7 @@ export default async function Page({
       [items, total] = await prisma.$transaction([
         prisma.article.findMany({
           where,
-          orderBy: { createdAt: "desc" },
+          orderBy,
           take: 25,
           skip,
         }),

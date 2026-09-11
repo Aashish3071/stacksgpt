@@ -27,7 +27,7 @@ const sans = Inter({
 const baseMetadata: Metadata = {
   metadataBase: new URL(siteUrl()),
   title: {
-    default: `${SITE_NAME}: ${SITE_TAGLINE}`,
+    default: "Simplifying the AI for you",
     template: `%s · ${SITE_NAME}`,
   },
   description:
@@ -50,8 +50,8 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     ...baseMetadata,
     title: {
-      default: `${s.name}: ${s.tagline}`,
-      template: `%s · ${s.name}`,
+      default: "Simplifying the AI for you",
+      template: `%s · ${s.name || SITE_NAME}`,
     },
     verification: s.searchConsoleId ? { google: s.searchConsoleId } : undefined,
   };
@@ -114,7 +114,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         <PrivacyControls settings={publicSettings}>
           <SiteChrome
             navbar={<Navbar categories={categories} />}
-            footer={<Footer tagline={s.tagline} socialLinks={s.socialLinks} />}
+            footer={<Footer socialLinks={s.socialLinks} />}
           >
             {children}
           </SiteChrome>

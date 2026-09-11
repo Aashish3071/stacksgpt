@@ -193,12 +193,14 @@ export async function transitionArticle(
         });
         if (!author?.active) throw Error("Choose an active author.");
       }
+      const reviewer = a.reviewedBy
+        ? a.reviewedBy === "master-admin"
+          ? { active: true }
+          : await tx.profile.findUnique({ where: { id: a.reviewedBy } })
+        : null;
       if (
         ["publish", "schedule"].includes(action) &&
-        (!a.reviewedBy ||
-          !a.approvedAt ||
-          !(await tx.profile.findUnique({ where: { id: a.reviewedBy } }))
-            ?.active)
+        (!a.reviewedBy || !a.approvedAt || !reviewer?.active)
       )
         throw Error("A human must approve this exact version first.");
       if (

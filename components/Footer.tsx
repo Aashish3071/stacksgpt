@@ -39,8 +39,7 @@ export default function Footer({
               <Logo size="md" />
             </Link>
             <p className="meta mt-3 max-w-md text-sm leading-relaxed text-muted">
-              {tagline ||
-                "We track the latest AI and tech developments so you do not have to, delivering what is new and why it matters."}
+              We track the latest AI and tech developments so you do not have to, delivering what is new and why it matters.
             </p>
 
             <div className="mt-5 flex flex-col gap-2 font-sans text-xs">

@@ -99,13 +99,23 @@ export const editor = perRequest(async function editor() {
 
   const master = verifyMasterSession(token);
   if (master) {
+    let profile = await prisma.profile.findUnique({
+      where: { email: master.email },
+    });
+    if (!profile) {
+      profile = await prisma.profile.create({
+        data: {
+          id: crypto.randomUUID(),
+          email: master.email,
+          displayName:
+            master.role === "ADMIN" ? "Newsroom Admin" : "Editorial Editor",
+          role: master.role,
+          active: true,
+        },
+      });
+    }
     return {
-      id: "master-admin",
-      email: master.email,
-      displayName:
-        master.role === "ADMIN" ? "Editorial Admin" : "Editorial Editor",
-      role: master.role,
-      active: true,
+      ...profile,
       token,
     };
   }

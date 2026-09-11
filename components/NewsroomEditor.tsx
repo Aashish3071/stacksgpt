@@ -332,7 +332,7 @@ export default function NewsroomEditor({
               onClick={() => approveAndPublish()}
               className="rounded bg-emerald-600 text-white px-4 py-2 text-xs font-bold hover:bg-emerald-700 transition-colors disabled:opacity-50"
             >
-              Approve &amp; Publish now
+              ✓ Approve &amp; Publish to website
             </button>
           )}
           {status === "APPROVED" && (
@@ -341,7 +341,7 @@ export default function NewsroomEditor({
               onClick={() => send("publish")}
               className="rounded bg-emerald-600 text-white px-4 py-2 text-xs font-bold hover:bg-emerald-700 transition-colors disabled:opacity-50"
             >
-              Publish live
+              🚀 Publish to website now
             </button>
           )}
         </div>
@@ -753,19 +753,7 @@ export default function NewsroomEditor({
                 onClick={() => approveAndPublish()}
                 className="rounded bg-emerald-600 text-white px-5 py-2.5 text-xs font-bold hover:bg-emerald-700 transition-colors disabled:opacity-50 flex items-center gap-1.5 shadow-sm"
               >
-                ✓ Approve &amp; Publish now
-              </button>
-              <button
-                disabled={busy}
-                onClick={() => {
-                  const allChecks = Object.fromEntries(
-                    REVIEW_CHECKS.map(([key]) => [key, true]),
-                  );
-                  send("approve", allChecks);
-                }}
-                className="rounded bg-ink text-paper px-4 py-2.5 text-xs font-semibold hover:bg-ink/90 transition-colors disabled:opacity-50"
-              >
-                Approve version
+                ✓ Approve &amp; Publish to website
               </button>
               <button
                 disabled={busy}

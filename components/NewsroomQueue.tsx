@@ -74,9 +74,46 @@ export function DeleteArticleButton({
   );
 }
 
+export function PublishArticleButton({ article }: { article: any }) {
+  const [busy, setBusy] = useState(false);
+  return (
+    <button
+      type="button"
+      disabled={busy}
+      onClick={async () => {
+        setBusy(true);
+        try {
+          const r = await fetch("/api/articles", {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              id: article.id,
+              action: "publish",
+              version: article.version,
+            }),
+          });
+          const d = await r.json();
+          if (!r.ok) throw Error(d.error || "Publication failed");
+          window.location.reload();
+        } catch (e) {
+          alert(e instanceof Error ? e.message : "Failed to publish");
+          setBusy(false);
+        }
+      }}
+      className="rounded bg-emerald-600 text-white px-3 py-1 font-sans text-xs font-bold hover:bg-emerald-700 transition-colors disabled:opacity-50"
+    >
+      {busy ? "Publishing..." : "Publish now"}
+    </button>
+  );
+}
+
 export function ArticleActions({ article }: { article: any }) {
+  const isApproved =
+    article.status === "APPROVED" || article.pendingStatus === "APPROVED";
+
   return (
     <div className="mt-3 flex flex-wrap items-center gap-2.5">
+      {isApproved && <PublishArticleButton article={article} />}
       <Link
         href={`/admin/articles/${article.id}`}
         className="rounded border border-rule bg-paper px-3 py-1 font-sans text-xs font-semibold text-ink hover:border-ink hover:bg-surface transition-colors"
@@ -84,11 +121,15 @@ export function ArticleActions({ article }: { article: any }) {
         Edit article
       </Link>
       <Link
-        href={`/admin/preview/${article.id}`}
+        href={
+          article.isPublished
+            ? `/article/${article.slug}`
+            : `/admin/preview/${article.id}`
+        }
         target="_blank"
         className="rounded border border-rule px-3 py-1 font-sans text-xs font-semibold text-muted hover:text-ink hover:border-ink transition-colors"
       >
-        Private preview ↗
+        {article.isPublished ? "View live ↗" : "Private preview ↗"}
       </Link>
       <DeleteArticleButton id={article.id} title={article.title} />
     </div>
