@@ -1,3 +1,4 @@
+import { perRequest } from "./per-request-cache";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
@@ -10,27 +11,44 @@ export const AUTH_COOKIE = "stacksgpt_session";
 // anyone forge session tokens. Fail closed instead.
 const MASTER_SECRET = process.env.ADMIN_SESSION_SECRET;
 
-export function createMasterSession(email = "admin@stacksgpt.com"): string {
+export type EditorRole = "ADMIN" | "EDITOR";
+
+// The role travels inside the signed payload, so a session cannot be edited
+// to grant itself a higher role. Previously every master session was treated
+// as ADMIN, which silently promoted anyone who signed in through the direct
+// database path.
+export function createMasterSession(
+  email = "admin@stacksgpt.com",
+  role: EditorRole = "ADMIN",
+): string {
   if (!MASTER_SECRET) throw Error("ADMIN_SESSION_SECRET is not configured.");
   const expiresAt = Date.now() + 1000 * 60 * 60 * 24 * 7;
-  const payload = `master:${email}:${expiresAt}`;
+  const payload = `master:${email}:${role}:${expiresAt}`;
   const hmac = crypto
     .createHmac("sha256", MASTER_SECRET)
     .update(payload)
     .digest("hex");
-  return `master.${expiresAt}.${hmac}.${Buffer.from(email).toString("base64url")}`;
+  const claims = Buffer.from(`${email}:${role}`).toString("base64url");
+  return `master.${expiresAt}.${hmac}.${claims}`;
 }
 
-export function verifyMasterSession(token: string): { email: string } | null {
+export function verifyMasterSession(
+  token: string,
+): { email: string; role: EditorRole } | null {
   if (!MASTER_SECRET) return null;
   if (!token.startsWith("master.")) return null;
   const parts = token.split(".");
   if (parts.length !== 4) return null;
-  const [, expStr, hmac, emailB64] = parts;
+  const [, expStr, hmac, claimsB64] = parts;
   const exp = parseInt(expStr, 10);
   if (isNaN(exp) || Date.now() > exp) return null;
-  const email = Buffer.from(emailB64, "base64url").toString("utf8");
-  const payload = `master:${email}:${expStr}`;
+  const claims = Buffer.from(claimsB64, "base64url").toString("utf8");
+  const split = claims.lastIndexOf(":");
+  if (split < 1) return null;
+  const email = claims.slice(0, split);
+  const role = claims.slice(split + 1);
+  if (role !== "ADMIN" && role !== "EDITOR") return null;
+  const payload = `master:${email}:${role}:${expStr}`;
   const expected = crypto
     .createHmac("sha256", MASTER_SECRET)
     .update(payload)
@@ -40,7 +58,7 @@ export function verifyMasterSession(token: string): { email: string } | null {
     !crypto.timingSafeEqual(Buffer.from(hmac), Buffer.from(expected))
   )
     return null;
-  return { email };
+  return { email, role };
 }
 
 export function supabase(token?: string) {
@@ -55,7 +73,10 @@ export function supabase(token?: string) {
   });
 }
 
-export async function editor() {
+// Deduped per request: the admin layout and the admin page both authenticate
+// independently. For Supabase-issued sessions each call is an HTTP round trip
+// to Supabase plus a Profile lookup, so this halves the auth cost per page.
+export const editor = perRequest(async function editor() {
   const token = (await cookies()).get(AUTH_COOKIE)?.value;
   if (!token) throw Error("Unauthorized");
 
@@ -64,8 +85,9 @@ export async function editor() {
     return {
       id: "master-admin",
       email: master.email,
-      displayName: "Editorial Admin",
-      role: "ADMIN",
+      displayName:
+        master.role === "ADMIN" ? "Editorial Admin" : "Editorial Editor",
+      role: master.role,
       active: true,
       token,
     };
@@ -79,7 +101,7 @@ export async function editor() {
   if (!profile?.active || !["ADMIN", "EDITOR"].includes(profile.role))
     throw Error("Editorial access required.");
   return { ...profile, token };
-}
+});
 
 export async function admin() {
   const p = await editor();

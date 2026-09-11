@@ -37,6 +37,7 @@ export async function POST(req: Request) {
     }
 
     // 2. Direct PostgreSQL authentication check (independent of Supabase HTTP service)
+    let dbAuthenticated: { id: string } | null = null;
     try {
       const rows = await prisma.$queryRaw<
         Array<{ id: string; email: string; valid: boolean }>
@@ -46,33 +47,38 @@ export async function POST(req: Request) {
         WHERE lower(email) = lower(${cleanEmail})
         LIMIT 1
       `;
-
-      if (rows && rows.length > 0 && rows[0].valid) {
-        await prisma.profile.upsert({
-          where: { id: rows[0].id },
-          create: {
-            id: rows[0].id,
-            email: rows[0].email,
-            displayName: cleanEmail.split("@")[0] || "Newsroom Editor",
-            role: "ADMIN",
-            active: true,
-          },
-          update: { role: "ADMIN", active: true },
-        });
-
-        const token = createMasterSession(cleanEmail);
-        const res = NextResponse.json({ ok: true });
-        res.cookies.set(AUTH_COOKIE, token, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
-          sameSite: "strict",
-          path: "/",
-          maxAge: 86400 * 7,
-        });
-        return res;
-      }
+      if (rows && rows.length > 0 && rows[0].valid)
+        dbAuthenticated = { id: rows[0].id };
     } catch (dbErr) {
+      // Only infrastructure failures fall through to the Supabase path; a
+      // rejected credential must not be retried as if nothing happened.
       console.warn("Direct database auth check error:", dbErr);
+    }
+
+    if (dbAuthenticated) {
+      // Authenticating proves who you are, not what you may do. This branch
+      // used to upsert the caller to role ADMIN + active:true, which promoted
+      // any EDITOR to ADMIN on sign-in and let a deactivated account
+      // reactivate itself. Authorization must come from an existing Profile.
+      const profile = await prisma.profile.findUnique({
+        where: { id: dbAuthenticated.id },
+      });
+      if (
+        !profile?.active ||
+        (profile.role !== "ADMIN" && profile.role !== "EDITOR")
+      )
+        throw Error("This account does not have newsroom access.");
+
+      const token = createMasterSession(cleanEmail, profile.role);
+      const res = NextResponse.json({ ok: true });
+      res.cookies.set(AUTH_COOKIE, token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        path: "/",
+        maxAge: 86400 * 7,
+      });
+      return res;
     }
 
     // 3. Fallback: Supabase GoTrue Auth
@@ -86,7 +92,10 @@ export async function POST(req: Request) {
         const profile = await prisma.profile.findUnique({
           where: { id: data.user.id },
         });
-        if (profile?.active) {
+        if (
+          profile?.active &&
+          (profile.role === "ADMIN" || profile.role === "EDITOR")
+        ) {
           const res = NextResponse.json({ ok: true });
           const opts = {
             httpOnly: true,

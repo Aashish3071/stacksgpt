@@ -1,3 +1,4 @@
+import { perRequest } from "./per-request-cache";
 import prisma from "./db";
 export const defaultSettings = {
   name: "StacksGPT",
@@ -17,7 +18,10 @@ export const defaultSettings = {
   searchConsoleId: "",
   rssFallbackEnabled: true,
 };
-export async function getSettings() {
+// Deduped per request: the root layout alone calls this twice (once in
+// generateMetadata, once in the layout body), and several routes call it
+// again on top of that. Without cache() each call is a separate round trip.
+export const getSettings = perRequest(async function getSettings() {
   try {
     const row = await prisma.siteSetting.findUnique({
       where: { key: "publication" },
@@ -27,4 +31,4 @@ export async function getSettings() {
     console.warn("Could not fetch publication settings, using defaults:", err);
     return defaultSettings;
   }
-}
+});

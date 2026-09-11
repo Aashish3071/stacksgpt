@@ -84,7 +84,8 @@ async function main() {
 
     await client.query("COMMIT");
     console.log("Admin profile verified in public.Profile!");
-    console.log(`Credentials -> Email: ${email} | Password: ${password}`);
+    // Never echo the password: terminal scrollback and CI logs outlive it.
+    console.log(`Credentials -> Email: ${email} | Password: (as supplied)`);
   } catch (err) {
     await client.query("ROLLBACK");
     console.error("Failed to create admin:", err);

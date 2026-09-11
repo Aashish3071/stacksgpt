@@ -22,14 +22,22 @@ export default async function Page() {
   let failures: any[] = [];
 
   try {
-    counts = await Promise.all(
-      statuses.map((status) =>
-        prisma.article
-          .count({
-            where: { OR: [{ status }, { pendingStatus: status }] },
-          })
-          .catch(() => 0),
-      ),
+    // One query instead of six counts — round trips dominate this page. The
+    // DISTINCT keeps an article from being counted twice when its status and
+    // pendingStatus are equal, so this matches the `OR` used by the per-status
+    // queue pages exactly. No interpolation: the query is entirely static.
+    const grouped = await prisma.$queryRaw<{ status: string; count: number }[]>`
+      SELECT s AS status, COUNT(*)::int AS count
+      FROM (
+        SELECT DISTINCT id, s
+        FROM "Article", LATERAL unnest(ARRAY["status", "pendingStatus"]) AS s
+      ) t
+      WHERE s IS NOT NULL
+      GROUP BY s
+    `.catch(() => [] as { status: string; count: number }[]);
+
+    counts = statuses.map(
+      (status) => grouped.find((r) => r.status === status)?.count ?? 0,
     );
 
     const [leadCount, recentArticles, sourceFailures] = await Promise.all([
