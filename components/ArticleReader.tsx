@@ -196,6 +196,8 @@ export default function ArticleReader({
           </section>
         )}
 
+        <AdBanner bannerId="2028053" />
+
         {/* The Reported News Article Body */}
         {article.bodyHtml && (
           <div
@@ -268,7 +270,6 @@ export default function ArticleReader({
             </Link>
           )}
         </nav>
-        <AdBanner bannerId="2028053" />
 
         {/* Tool reference */}
         {tool && (
