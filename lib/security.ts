@@ -112,19 +112,33 @@ export async function validateFeedUrl(value: string) {
     throw Error("Feed resolves to a non-public address.");
   return value;
 }
+/**
+ * Rejects addresses that must never be reachable from a server-side fetch.
+ *
+ * Each special-use range is matched at its real prefix length. Several of
+ * these were previously matched a full octet too wide — `192.0.0.0/16` instead
+ * of the reserved `192.0.0.0/24` and `192.0.2.0/24` — which silently blocked
+ * legitimate public hosts: both techcrunch.com and technologyreview.com sit on
+ * WordPress VIP at 192.0.66.x and failed every ingestion run with "Feed
+ * resolves to a non-public address". The genuinely reserved blocks below stay
+ * blocked; only the routable space around them is allowed through.
+ */
 export function isPublicAddress(ip: string) {
   if (ip.includes(":")) return !/^(::|fc|fd|fe[89ab]|ff|2001:db8)/i.test(ip);
   const n = ip.split(".").map(Number);
   return !(
-    n[0] === 0 ||
-    n[0] === 10 ||
-    n[0] === 127 ||
-    n[0] >= 224 ||
-    (n[0] === 169 && n[1] === 254) ||
-    (n[0] === 172 && n[1] >= 16 && n[1] <= 31) ||
-    (n[0] === 192 && (n[1] === 168 || n[1] === 0)) ||
-    (n[0] === 100 && n[1] >= 64 && n[1] <= 127) ||
-    (n[0] === 198 && [18, 19, 51].includes(n[1])) ||
-    (n[0] === 203 && n[1] === 0)
+    n[0] === 0 || // 0.0.0.0/8, "this network"
+    n[0] === 10 || // 10.0.0.0/8, private
+    n[0] === 127 || // 127.0.0.0/8, loopback
+    n[0] >= 224 || // multicast and reserved
+    (n[0] === 169 && n[1] === 254) || // 169.254.0.0/16, link-local
+    (n[0] === 172 && n[1] >= 16 && n[1] <= 31) || // 172.16.0.0/12, private
+    (n[0] === 192 && n[1] === 168) || // 192.168.0.0/16, private
+    (n[0] === 192 && n[1] === 0 && n[2] === 0) || // 192.0.0.0/24, IETF protocol assignments
+    (n[0] === 192 && n[1] === 0 && n[2] === 2) || // 192.0.2.0/24, TEST-NET-1
+    (n[0] === 100 && n[1] >= 64 && n[1] <= 127) || // 100.64.0.0/10, CGNAT
+    (n[0] === 198 && (n[1] === 18 || n[1] === 19)) || // 198.18.0.0/15, benchmarking
+    (n[0] === 198 && n[1] === 51 && n[2] === 100) || // 198.51.100.0/24, TEST-NET-2
+    (n[0] === 203 && n[1] === 0 && n[2] === 113) // 203.0.113.0/24, TEST-NET-3
   );
 }

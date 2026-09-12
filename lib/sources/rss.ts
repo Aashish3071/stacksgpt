@@ -86,16 +86,49 @@ function extractContent(item: Record<string, any>): string {
     : "";
 }
 
+const MAX_REDIRECTS = 3;
+
+/**
+ * Fetches a feed, following redirects manually so every hop can be re-checked.
+ *
+ * The previous `redirect: "error"` was protecting against a real risk: the
+ * allowlist and public-IP check in validateFeedUrl only cover the URL we are
+ * about to request, so a redirect could otherwise carry us to an internal
+ * address or an off-allowlist host. But refusing redirects outright also
+ * refuses legitimate feeds — OpenAI (/blog/rss.xml -> /news/rss.xml) and the
+ * Google AI blog both 30x to a new path on the same host, and both were
+ * failing every single ingestion run because of it.
+ *
+ * Re-running validateFeedUrl on each hop keeps the original guarantee — every
+ * URL actually fetched has passed the allowlist and resolves to a public
+ * address — while letting ordinary feed moves work.
+ */
+async function fetchFeedFollowingRedirects(feedUrl: string): Promise<Response> {
+  let current = feedUrl;
+  for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
+    await validateFeedUrl(current);
+    const response = await fetch(current, {
+      redirect: "manual",
+      signal: AbortSignal.timeout(15000),
+    });
+    if (response.status >= 300 && response.status < 400) {
+      const location = response.headers.get("location");
+      if (!location)
+        throw Error(`Feed returned ${response.status} without a location`);
+      current = new URL(location, current).toString();
+      continue;
+    }
+    if (!response.ok) throw Error(`Feed returned ${response.status}`);
+    return response;
+  }
+  throw Error("Feed redirected too many times");
+}
+
 export async function fetchRssFeed(
   feedUrl: string,
   fallbackAuthor = "",
 ): Promise<IngestedItem[]> {
-  await validateFeedUrl(feedUrl);
-  const response = await fetch(feedUrl, {
-    redirect: "error",
-    signal: AbortSignal.timeout(15000),
-  });
-  if (!response.ok) throw Error(`Feed returned ${response.status}`);
+  const response = await fetchFeedFollowingRedirects(feedUrl);
   const reader = response.body!.getReader();
   let text = "",
     size = 0;

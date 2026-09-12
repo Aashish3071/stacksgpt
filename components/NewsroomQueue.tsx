@@ -158,7 +158,7 @@ export function SocialPostActions({ post }: { post: any }) {
         action === "send"
           ? "Sent."
           : action === "approve"
-            ? "Approved. Sends within 15 minutes, or click Send now."
+            ? "Approved. Goes out on the next delivery run, or click Send now to post immediately."
             : "Rejected.",
       );
     } catch (e) {
@@ -196,7 +196,7 @@ export function SocialPostActions({ post }: { post: any }) {
             onClick={() => act("approve")}
             className="rounded border border-rule bg-paper px-3 py-1.5 text-xs font-semibold text-ink hover:border-ink transition-colors disabled:opacity-50"
           >
-            {busy === "approve" ? "Saving..." : "Approve (send within 15 min)"}
+            {busy === "approve" ? "Saving..." : "Approve (queue for delivery)"}
           </button>
           <button
             disabled={busy !== null}

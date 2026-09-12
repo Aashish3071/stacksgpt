@@ -1,0 +1,99 @@
+name: Scheduled tasks
+
+# Vercel's Hobby plan caps cron jobs at ONE RUN PER DAY — a more frequent
+# expression in vercel.json fails the deployment outright, it does not
+# silently degrade. Daily is fine for ingestion, but not for publishing a
+# scheduled article, sending a queued newsletter, or posting an approved
+# social post, where a delay of up to 24 hours makes the feature close to
+# useless.
+#
+# So vercel.json keeps daily crons as a safety net, and this workflow does the
+# frequent triggering. GitHub-hosted runners are free for public repositories.
+# Both paths hit the same endpoints and both are guarded by CRON_SECRET, so
+# running both is harmless: each run just finds nothing left to do.
+#
+# Requires two repository settings:
+#   - Secret   CRON_SECRET  — must match the CRON_SECRET set in Vercel
+#   - Variable SITE_URL     — e.g. https://www.stacksgpt.com (optional;
+#                             defaults to the production domain below)
+#
+# Note: GitHub disables scheduled workflows on a public repository after 60
+# days with no commits. Active repos are unaffected.
+
+on:
+  schedule:
+    # Every 15 minutes: publish due articles, send queued newsletters and
+    # approved social posts.
+    - cron: "*/15 * * * *"
+    # Hourly: additionally poll RSS sources. runIngestion() takes only 3
+    # channels per run (oldest-polled first), so with 9 active channels a
+    # daily-only schedule would poll each source once every three days —
+    # far too slow for news. Hourly cycles all nine in about three hours.
+    - cron: "0 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: scheduled-tasks
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish due articles and send queued newsletters
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: ${{ vars.SITE_URL || 'https://www.stacksgpt.com' }}
+        run: |
+          if [ -z "$CRON_SECRET" ]; then
+            echo "CRON_SECRET is not set as a repository secret; skipping."
+            exit 0
+          fi
+          code=$(curl -sS -o /tmp/publish.json -w '%{http_code}' \
+            --max-time 60 \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            "$SITE_URL/api/cron/publish")
+          echo "publish -> HTTP $code"
+          cat /tmp/publish.json || true
+          echo
+          [ "$code" = "200" ]
+
+      - name: Send approved social posts
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: ${{ vars.SITE_URL || 'https://www.stacksgpt.com' }}
+        run: |
+          if [ -z "$CRON_SECRET" ]; then
+            echo "CRON_SECRET is not set as a repository secret; skipping."
+            exit 0
+          fi
+          code=$(curl -sS -o /tmp/social.json -w '%{http_code}' \
+            --max-time 60 \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            "$SITE_URL/api/cron/social")
+          echo "social -> HTTP $code"
+          cat /tmp/social.json || true
+          echo
+          [ "$code" = "200" ]
+
+      - name: Poll RSS sources for new story leads
+        if: github.event.schedule == '0 * * * *' || github.event_name == 'workflow_dispatch'
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: ${{ vars.SITE_URL || 'https://www.stacksgpt.com' }}
+        run: |
+          if [ -z "$CRON_SECRET" ]; then
+            echo "CRON_SECRET is not set as a repository secret; skipping."
+            exit 0
+          fi
+          code=$(curl -sS -o /tmp/ingest.json -w '%{http_code}' \
+            --max-time 120 \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            "$SITE_URL/api/cron/ingest")
+          echo "ingest -> HTTP $code"
+          cat /tmp/ingest.json || true
+          echo
+          [ "$code" = "200" ]

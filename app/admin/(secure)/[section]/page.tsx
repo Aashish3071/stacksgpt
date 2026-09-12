@@ -229,8 +229,8 @@ export default async function Page({
       <>
         <p className="mb-5 text-sm text-muted">
           Drafted automatically the first time an article publishes. Nothing
-          here sends until you approve it — approving queues it for delivery
-          within 15 minutes, or use Send now for an immediate result.
+          here sends until you approve it — approving queues it for the next
+          delivery run, or use Send now to post immediately.
         </p>
         <form className="flex gap-3 my-4">
           <select
