@@ -167,13 +167,22 @@ export async function transitionArticle(
           ["TAG", candidate.tags],
           ["AUDIENCE", candidate.audiences],
         ] as const) {
-          if (
-            slugs?.length &&
-            (await tx.taxonomy.count({
-              where: { kind, slug: { in: slugs }, active: true },
-            })) !== slugs.length
-          )
-            throw Error("Choose active tags and audiences.");
+          if (!slugs?.length) continue;
+          const active = await tx.taxonomy.findMany({
+            where: { kind, slug: { in: slugs }, active: true },
+            select: { slug: true },
+          });
+          if (active.length !== slugs.length) {
+            // Name the offending slugs. This used to read "Choose active tags
+            // and audiences.", which gave an editor no way to tell which of an
+            // article's tags was the problem, and it fires on the very first
+            // transition, so it read as "publishing is broken".
+            const known = new Set(active.map((t) => t.slug));
+            const missing = slugs.filter((s: string) => !known.has(s));
+            throw Error(
+              `These ${kind.toLowerCase()}s are not active in the taxonomy: ${missing.join(", ")}. Add them under ${kind === "TAG" ? "Tags" : "Audiences"}, or remove them from the article.`,
+            );
+          }
         }
         const image = await verifyHeroImage(candidate.heroImage);
         const knownImage = await tx.mediaAsset.findUnique({
