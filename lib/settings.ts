@@ -4,7 +4,10 @@ export const defaultSettings = {
   name: "StacksGPT",
   tagline: "Simplifying the AI for you",
   contactEmail: "support@stacksgpt.com",
-  socialLinks: [{ label: "X", url: "https://x.com/StacksGPT01" }] as {
+  socialLinks: [
+    { label: "X", url: "https://x.com/StacksGPT01" },
+    { label: "LinkedIn", url: "https://www.linkedin.com/company/stacksgpt/" },
+  ] as {
     label: string;
     url: string;
   }[],

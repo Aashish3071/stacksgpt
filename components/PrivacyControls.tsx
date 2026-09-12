@@ -17,7 +17,13 @@ const Context = createContext<{
   analytics: boolean;
   ads: boolean;
   settings: PublicSettings;
-}>({ analytics: false, ads: false, settings: {} as PublicSettings });
+  openPrivacyChoices: () => void;
+}>({
+  analytics: false,
+  ads: false,
+  settings: {} as PublicSettings,
+  openPrivacyChoices: () => {},
+});
 export const usePrivacy = () => useContext(Context);
 export function track(event: string, slug?: string) {
   void fetch("/api/events", {
@@ -85,8 +91,10 @@ export default function PrivacyControls({
   useEffect(() => {
     if (analytics && pathname === "/search") track("search");
   }, [analytics, pathname]);
+  const openPrivacyChoices = () => setOpen(true);
+
   return (
-    <Context.Provider value={{ analytics, ads, settings }}>
+    <Context.Provider value={{ analytics, ads, settings, openPrivacyChoices }}>
       {children}
       {analytics && (
         <>
@@ -100,16 +108,6 @@ export default function PrivacyControls({
             </>
           )}
         </>
-      )}
-      {!privatePage && (
-        <div className="flex justify-center pb-6">
-          <button
-            className="text-xs text-muted hover:text-ink underline py-2.5 px-4 min-h-[44px] inline-flex items-center justify-center transition-colors"
-            onClick={() => setOpen(true)}
-          >
-            Privacy choices
-          </button>
-        </div>
       )}
       {open &&
         !privatePage && (

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { SITE_NAME } from "@/lib/site";
 import Logo from "@/components/Logo";
+import { usePrivacy } from "@/components/PrivacyControls";
 
 export default function Footer({
   tagline,
@@ -13,6 +14,7 @@ export default function Footer({
   socialLinks?: { label: string; url: string }[];
 }) {
   const pathname = usePathname();
+  const { openPrivacyChoices } = usePrivacy();
 
   // Suppress public footer on all administrative routes
   if (pathname?.startsWith("/admin")) {
@@ -27,6 +29,13 @@ export default function Footer({
         l.url.includes("x.com") ||
         l.url.includes("twitter.com"),
     )?.url || "https://x.com/StacksGPT01";
+
+  const linkedinLink =
+    socialLinks.find(
+      (l) =>
+        l.label.toLowerCase().includes("linkedin") ||
+        l.url.includes("linkedin.com"),
+    )?.url || "https://www.linkedin.com/company/stacksgpt/";
 
   return (
     <footer className="mt-20 border-t border-rule bg-surface">
@@ -54,12 +63,13 @@ export default function Footer({
               </span>
             </div>
 
-            {/* Twitter / X follow button */}
-            <div className="mt-5">
+            {/* Social follow buttons */}
+            <div className="mt-5 flex flex-wrap items-center gap-3">
               <a
                 href={twitterLink}
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label="Follow StacksGPT on X"
                 className="inline-flex items-center gap-2 rounded-lg border border-rule bg-paper px-3.5 py-2.5 font-sans text-xs font-medium text-ink transition-colors hover:border-ink hover:bg-surface min-h-[44px]"
               >
                 <svg
@@ -68,10 +78,31 @@ export default function Footer({
                   viewBox="0 0 24 24"
                   fill="currentColor"
                   className="shrink-0"
+                  aria-hidden="true"
                 >
                   <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
                 </svg>
-                <span>Follow @StacksGPT01 on X</span>
+                <span>Follow on X</span>
+              </a>
+
+              <a
+                href={linkedinLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Follow StacksGPT on LinkedIn"
+                className="inline-flex items-center gap-2 rounded-lg border border-rule bg-paper px-3.5 py-2.5 font-sans text-xs font-medium text-ink transition-colors hover:border-ink hover:bg-surface min-h-[44px]"
+              >
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="shrink-0"
+                  aria-hidden="true"
+                >
+                  <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z" />
+                </svg>
+                <span>Follow on LinkedIn</span>
               </a>
             </div>
           </div>
@@ -237,14 +268,13 @@ export default function Footer({
             <Link href="/partners" className="py-2.5 inline-flex items-center min-h-[44px] hover:text-ink transition-colors">
               Partner Disclosures
             </Link>
-            <a
-              href={twitterLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="py-2.5 inline-flex items-center min-h-[44px] hover:text-ink transition-colors"
+            <button
+              type="button"
+              onClick={openPrivacyChoices}
+              className="py-2.5 inline-flex items-center min-h-[44px] text-muted hover:text-ink transition-colors"
             >
-              X (Twitter)
-            </a>
+              Privacy choices
+            </button>
           </div>
         </div>
       </div>
