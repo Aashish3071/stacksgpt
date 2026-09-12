@@ -122,25 +122,6 @@ export default async function HomePage() {
     });
   }
 
-  // Compute top trending tags in memory across all articles
-  const tagCounts: Record<string, number> = {};
-  for (const a of articles) {
-    if (Array.isArray(a.tags)) {
-      for (const t of a.tags) {
-        if (t && typeof t === "string") {
-          tagCounts[t] = (tagCounts[t] || 0) + 1;
-        }
-      }
-    }
-  }
-  const trendingTags = Object.entries(tagCounts)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 12)
-    .map(([slug]) => ({
-      slug,
-      name: slug.replaceAll("-", " "),
-    }));
-
   if (articles.length === 0) {
     return (
       <div className="mx-auto max-w-shell px-4 sm:px-6">
@@ -205,26 +186,6 @@ export default async function HomePage() {
       <section className="border-b border-rule py-8 sm:py-10">
         <ArticleCard article={hero} variant="lead" />
       </section>
-
-      {/* 2: Trending Topics Bar for internal linking and discovery */}
-      {trendingTags.length > 0 && (
-        <section className="border-b border-rule py-3 sm:py-4">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="font-mono text-xs font-semibold uppercase tracking-wider text-accent mr-1">
-              Trending Topics:
-            </span>
-            {trendingTags.map((tag) => (
-              <Link
-                key={tag.slug}
-                href={`/tag/${tag.slug}`}
-                className="inline-flex items-center rounded-full border border-rule bg-surface px-2.5 py-1 font-sans text-xs font-medium text-ink hover:border-ink hover:bg-paper transition-colors"
-              >
-                #{tag.name}
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
 
       <AdBanner bannerId="2028053" />
 
