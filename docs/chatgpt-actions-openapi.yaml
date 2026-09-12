@@ -1,0 +1,165 @@
+# OpenAPI schema for a ChatGPT Custom GPT Action.
+#
+# Custom GPTs are included with ChatGPT Plus and do NOT require an OpenAI API
+# key — ChatGPT's servers call these endpoints directly.
+#
+# Setup:
+#   1. ChatGPT → Explore GPTs → Create → Configure → Actions → Create new action
+#   2. Paste this whole file into the schema box.
+#   3. Authentication → API Key → Auth Type "Bearer", and paste the value of
+#      INGEST_SECRET (the same one set in Vercel).
+#
+# Note on auth scope: only the write endpoint checks the bearer token. The two
+# read endpoints are public — they return the same article content the website
+# and RSS feed already publish — so they work whether or not auth is attached.
+
+openapi: 3.1.0
+info:
+  title: StacksGPT social posting
+  description: >-
+    Read published StacksGPT articles and submit written social copy for
+    editorial approval. Submitting a post never publishes it: every post waits
+    in a human approval queue at /admin/social-posts.
+  version: 1.0.0
+servers:
+  - url: https://www.stacksgpt.com
+
+paths:
+  /api/public/articles:
+    get:
+      operationId: listArticles
+      summary: List published articles, newest first.
+      description: >-
+        Use needsSocial=true with a platform to find articles that still have
+        no post written for them.
+      parameters:
+        - name: needsSocial
+          in: query
+          description: When "true", only return articles with no social post yet.
+          schema:
+            type: string
+            enum: ["true"]
+        - name: platform
+          in: query
+          description: Which platform to check against when needsSocial is true.
+          schema:
+            type: string
+            enum: [X, LINKEDIN]
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+      responses:
+        "200":
+          description: Matching articles.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  articles:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        slug: { type: string }
+                        title: { type: string }
+                        summary: { type: string }
+                        category: { type: string }
+                        publishedAt: { type: string }
+                        url: { type: string }
+
+  /api/public/articles/{slug}:
+    get:
+      operationId: getArticle
+      summary: Read one published article in full.
+      description: >-
+        Returns the headline, summary, key points, the "why it matters"
+        verdict, the full body, the source, and the canonical URL. Use this as
+        the source material when writing a post — do not invent details that
+        are not in the response.
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: The article.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  slug: { type: string }
+                  title: { type: string }
+                  summary: { type: string }
+                  body: { type: string }
+                  verdict: { type: string }
+                  keyPoints:
+                    type: array
+                    items: { type: string }
+                  category: { type: string }
+                  tags:
+                    type: array
+                    items: { type: string }
+                  sourceAuthor: { type: string }
+                  sourceUrl: { type: string }
+                  url: { type: string }
+                  heroImageUrl: { type: string }
+        "404":
+          description: No published article with that slug.
+
+  /api/import/social:
+    post:
+      operationId: submitSocialPost
+      summary: Submit written social copy for approval.
+      description: >-
+        Stores the copy against a published article and queues it for a human
+        to approve. Submitting again for the same article and platform replaces
+        the previous draft and returns it to the queue. A post that has already
+        been sent cannot be rewritten.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [slug, platform, body]
+              properties:
+                slug:
+                  type: string
+                  description: The published article this post is about.
+                platform:
+                  type: string
+                  enum: [X, LINKEDIN]
+                body:
+                  type: string
+                  description: >-
+                    The post copy. For X the limit is 280 characters, where any
+                    link counts as 23 regardless of its real length. For
+                    LinkedIn the limit is 3000.
+                imageUrl:
+                  type: string
+                  description: Optional; defaults to the article's hero image.
+      responses:
+        "201":
+          description: Post created and queued for approval.
+        "200":
+          description: Existing draft replaced and returned to the queue.
+        "404":
+          description: No article with that slug.
+        "409":
+          description: Article is not published, or the post was already sent.
+        "422":
+          description: The copy is too long, or a field is invalid.
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer

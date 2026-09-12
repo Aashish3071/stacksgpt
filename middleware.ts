@@ -10,6 +10,10 @@ const publicApi = [
   "/api/views",
   "/api/affiliate/",
   "/api/partners/",
+  // Read-only JSON of already-public article content, for the agent that
+  // writes the social copy. Exposes nothing the article pages and RSS feed
+  // do not already publish.
+  "/api/public/",
 ];
 export function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;

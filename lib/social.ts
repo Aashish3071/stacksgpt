@@ -47,6 +47,36 @@ function truncate(value: string, max: number) {
  */
 const X_LINK_RESERVED = 24; // 23 for the t.co-shortened link + 1 leading space
 const X_MAX = 280;
+const T_CO_LENGTH = 23;
+export const LINKEDIN_MAX = 3000;
+
+/**
+ * X's real limit counts every URL as 23 characters regardless of its actual
+ * length, so a naive body.length check both over- and under-rejects. Worth
+ * getting right at ingest time: X rejects an over-long post at send time, and
+ * by then the copy is already sitting approved in the queue.
+ */
+export function effectiveXLength(body: string): number {
+  const withoutUrls = body.replace(/https?:\/\/\S+/g, "");
+  const urlCount = (body.match(/https?:\/\/\S+/g) || []).length;
+  return withoutUrls.length + urlCount * T_CO_LENGTH;
+}
+
+/** Returns an error string when the copy will not fit, otherwise null. */
+export function socialBodyError(
+  platform: SocialPlatform,
+  body: string,
+): string | null {
+  if (!body.trim()) return "The post body is empty.";
+  if (platform === "X") {
+    const length = effectiveXLength(body);
+    if (length > X_MAX)
+      return `An X post must be ${X_MAX} characters or fewer; this one is ${length} (links count as ${T_CO_LENGTH}).`;
+  } else if (body.length > LINKEDIN_MAX) {
+    return `A LinkedIn post must be ${LINKEDIN_MAX} characters or fewer; this one is ${body.length}.`;
+  }
+  return null;
+}
 
 function buildBody(
   article: { title: string; summary: string; slug: string },
@@ -79,6 +109,14 @@ export async function draftSocialPost(
   },
   platform: SocialPlatform,
 ) {
+  // Never clobber an existing row. The auto-draft is only a fallback: the
+  // intended author of this copy is an external writer posting through
+  // /api/import/social, and that copy may well arrive before or after the
+  // publish transition that triggers this. Whatever is already there wins.
+  const existing = await db.socialPost.findFirst({
+    where: { articleId: article.id, platform },
+  });
+  if (existing) return existing;
   return db.socialPost.create({
     data: {
       articleId: article.id,
