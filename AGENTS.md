@@ -166,6 +166,35 @@ Fix the file rather than removing the field.
 - `heroImageAlt` describes the image for screen readers and search engines.
   Describe what is shown, not the article topic.
 
+### Editorial Hero Image Framework
+
+Every article image must follow this generation prompt and strict guidelines:
+
+```
+Create a relevant editorial hero image for the article below.
+
+Article title: {{ARTICLE_TITLE}}
+Article type: {{ARTICLE_TYPE}}
+Article summary: {{ARTICLE_SUMMARY}}
+Company or product: {{COMPANY_OR_PRODUCT}}
+Company logo: {{LOGO_REFERENCE_OR_URL}}
+
+Follow these rules:
+
+1. Match the image directly to the article's subject, not merely to the broader AI or technology category.
+2. If the article is technical, about a model, product launch, software update, API, infrastructure, or research release, create a clean editorial composition using the company or product name and its official logo. Use tasteful typography, brand-inspired colors, and relevant visual symbols. Do not depict technical workflows, system architecture, code pipelines, data flows, dashboards, or step-by-step processes.
+3. If the article is a use case, create a specific visual representation of how the technology is being used in the reported situation. Show the relevant people, environment, objects, or outcome. Prefer clear vector-style illustrations, editorial diagrams, or explanatory scenes over generic futuristic imagery.
+4. If the article is a showcase or demonstration, visually communicate the demonstrated capability and its real-world result without inventing details.
+5. Never create a generic image of robots, glowing circuits, humanoid AI, brains, abstract neon technology, or random server rooms unless the article specifically concerns that subject.
+6. The image should communicate what the article is about at a glance, while remaining simple enough to work as a website hero image.
+7. Do not add unsupported claims, fake interface text, fabricated statistics, invented people, or unverified product features.
+8. Use a polished editorial-news style with strong composition, generous negative space, high contrast, and accessible visual hierarchy.
+9. Use a landscape aspect ratio of 1200×630 or wider. Keep important subjects away from the edges. Do not place text near the bottom-right corner.
+10. Include only essential, correctly spelled text. If the official logo or company name is provided, reproduce it accurately and do not redesign it.
+
+Return one finished image prompt and one final image concept. The image must feel specific to this article, visually relevant, and suitable for publication on a serious technology news site.
+```
+
 ## Sources worth watching
 
 Model providers publish their own announcements. Prefer a provider's own post over secondhand coverage, and always link to the provider. Prioritize these official feeds for the ongoing pipeline:
