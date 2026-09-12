@@ -1,0 +1,58 @@
+---
+type: "ANNOUNCEMENT"
+title: "Cursor Launches Projects: Cloud Coordinator Agents and Subagent Fleets for Long-Running Tasks"
+slug: "cursor-projects"
+category: "Coding"
+summary: >
+  Cursor has introduced Projects in public beta, moving AI coding beyond ephemeral
+  chat windows into long-running coordinator agents. Projects run continuously in
+  dedicated cloud environments, orchestrate parallel subagents, sync shared codebase
+  memory over months, and execute recurring development work without human prompting.
+sourceName: "Cursor"
+sourceUrl: "https://cursor.com/blog/projects"
+toolName: "Cursor"
+publishedDate: "2026-09-10"
+retrievedAt: "2026-09-12T17:00:00Z"
+heroImage: "/images/articles/2026-09-10-cursor-projects.png"
+heroImageAlt: "Cursor branding and official logo above title Announcing Cursor Projects with icons for Long-Running Cloud Agents, Subagent Fleets, and Continuous Orchestration."
+heroImageCredit: "Editorial composition for StacksGPT"
+keyPoints:
+  - "Projects introduces a cloud-hosted coordinator agent that plans and delegates tasks to parallel subagents."
+  - "Maintains persistent shared context across cloud and local machines that compounds over months of development."
+  - "Includes event subscriptions to monitor Slack channels, pull requests, CI failures, and recurring schedules."
+  - "Spins up local agents on the developer's laptop when hardware-dependent testing or verification is required."
+  - "Internal testing at Cursor showed new users merged 30% more PRs, while primary Projects users merged six times as many."
+verdict: >
+  Cursor Projects elevates software engineers from prompt writers to engineering managers directing fleets of agents. Teams handling large refactors, architectural migrations, or ongoing code health will see substantial compounding leverage.
+seoTitle: "Cursor Projects: Cloud Agents for Long-Running Coding"
+metaDescription: "Cursor launches Projects in beta, introducing cloud-hosted coordinator agents that direct subagent fleets, maintain shared context, and automate PRs."
+keywords:
+  - "cursor"
+  - "cursor projects"
+  - "ai coding"
+  - "developer tools"
+  - "subagents"
+  - "software engineering"
+---
+
+Cursor has released Projects in public beta, introducing an architectural shift from short-lived prompt sessions to persistent, long-running agent fleets. Rather than requiring developers to shepherd an individual AI assistant through each code change, Projects establishes a dedicated cloud coordinator agent that manages entire features, multi-step codebase migrations, and continuous codebase maintenance.
+
+The launch delivers on Cursor's conceptual vision for a third era of software development, where developers operate at a higher level of abstraction by directing autonomous systems rather than writing every unit implementation or supervising line-by-line diffs.
+
+### Decoupled coordinator architecture and cloud compute
+
+Traditional in-editor AI assistants block the user interface while executing and lose their operational state when an IDE window closes. Cursor Projects addresses this by decoupling planning from execution. 
+
+Developers interact with an always-responsive coordinator agent that never writes code directly. Instead, the coordinator assesses the task, formulates an execution plan, and spawns lightweight subagents in parallel to carry out research, implementation, and test suites. Because the coordinator runs in its own cloud environment, long-running tasks continue uninterrupted when a developer closes their laptop or switches branches. When a task requires hardware-specific validation, the coordinator automatically spins up a local agent on the developer's workstation to execute tests natively.
+
+### Persistent shared context that compounds over time
+
+A recurring inefficiency in AI assisted engineering is the requirement to repeatedly onboard models to repository conventions, architecture quirks, and testing requirements. Each Project maintains an evolving repository of files that automatically syncs across all cloud and local environments used by its worker agents.
+
+As subagents explore the codebase, fix compilation errors, or deduce how to run particular integration suites, they write these learnings directly into the Project's shared context. Subsequent agents read and apply these accumulated instructions automatically. Over months of feature development and refactoring, the coordinator accumulates detailed institutional knowledge regarding the repository, reducing hallucination rates and repeated diagnostic cycles.
+
+### Event-driven automation and continuous codebase gardening
+
+Projects also extends beyond active chat prompts through event subscriptions. Coordinators can watch repository pull requests, listen to designated Slack channels for bug reports, inspect continuous integration failures, or execute on recurring cron schedules. 
+
+Cursor highlighted three primary real-world workflows from its internal team: large-scale framework migrations spanning hundreds of pull requests, parallelized greenfield feature planning and delivery, and continuous design-system gardening where an agent monitors every opened pull request, extracts reusable components, and automatically generates lint rules when anti-patterns recur. According to Cursor, early users merged 30 percent more pull requests, while engineers who made Projects their primary development mode merged six times as many. Projects is rolling out to all Cursor users starting today.
