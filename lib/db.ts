@@ -18,7 +18,22 @@ function resolveAndNormalizeUrl(): string | undefined {
     if (isPooler) {
       parsed.searchParams.set("pgbouncer", "true");
       if (!parsed.searchParams.has("connection_limit")) {
-        parsed.searchParams.set("connection_limit", "1");
+        // One connection is right at *runtime*: each serverless invocation
+        // handles a single request, and many concurrent lambdas each holding
+        // a pool would exhaust pgbouncer's client limit.
+        //
+        // It is wrong during `next build`, which is one long-lived process
+        // rendering every static page concurrently. With a pool of one, pages
+        // queue behind a single connection and time out after 10s (P2024) —
+        // and because every call site catches its own database error and
+        // falls back to empty data, the build still "succeeds" while quietly
+        // emitting stub pages. Measured here: 3 of 7 articles built as ~10KB
+        // shells with no headline, against ~50KB for the healthy ones.
+        const building =
+          process.env.NEXT_PHASE === "phase-production-build" ||
+          process.env.npm_lifecycle_event === "build";
+        parsed.searchParams.set("connection_limit", building ? "5" : "1");
+        if (building) parsed.searchParams.set("pool_timeout", "30");
       }
     }
 
