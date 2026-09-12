@@ -1,7 +1,6 @@
-# ads.txt — authorised digital sellers (IAB Tech Lab spec)
+# ads.txt: authorised digital sellers (IAB Tech Lab spec)
 #
 # Required by AdSense and most ad networks to prove you authorised them to sell
-# your inventory. Once your AdSense application is approved, uncomment the line
-# below and replace pub-0000000000000000 with your own publisher ID, then redeploy.
+# your inventory.
 #
-# google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0
+google.com, pub-4670311397990890, DIRECT, f08c47fec0942fa0

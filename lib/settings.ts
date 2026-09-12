@@ -10,7 +10,7 @@ export const defaultSettings = {
   }[],
   adsEnabled: false,
   adsProvider: "disabled",
-  adsenseId: "",
+  adsenseId: "ca-pub-4670311397990890",
   adUnits: {} as Record<string, string>,
   analyticsEnabled: false,
   ga4Id: "",
