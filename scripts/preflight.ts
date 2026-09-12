@@ -62,15 +62,49 @@ function checkSiteUrl() {
     fail("NEXT_PUBLIC_SITE_URL is not a valid URL", [`Current value: ${raw}`]);
   }
 
-  // A *.vercel.app value builds and serves correctly, so this stays a warning
-  // rather than a hard failure — but it hands every ranking signal to the
-  // preview domain instead of the real one.
+  // This was a warning, not a failure, and that is exactly why it shipped:
+  // NEXT_PUBLIC_SITE_URL was set to a *.vercel.app value in production for an
+  // unknown stretch of time, and every canonical tag, sitemap entry and feed
+  // link pointed at the preview domain instead of the real one the whole
+  // time. A build that "still works" is not good enough here — fail it.
   if (host.endsWith(".vercel.app")) {
+    fail(`NEXT_PUBLIC_SITE_URL is a *.vercel.app domain (${host})`, [
+      "Canonical tags, the sitemap and the RSS feed would all point at the",
+      "preview domain, so search engines credit it instead of your real site.",
+      "This exact mistake has shipped to production before.",
+      "",
+      "Set NEXT_PUBLIC_SITE_URL to your real custom domain, e.g.",
+      "  https://www.example.com",
+    ]);
+  }
+}
+
+/**
+ * Every RSS/YouTube channel fetch is rejected unless its hostname is
+ * explicitly listed here (see lib/security.ts validateFeedUrl) — a deliberate
+ * SSRF guard, not a bug. But an empty allowlist fails *silently*: channels
+ * stay "active," the cron runs and reports success, and nothing ever lands in
+ * RawNews. That is exactly what happened here — 9 active channels ran for an
+ * unknown stretch of time producing zero rows, and nothing surfaced it short
+ * of querying the database directly. This turns it into a build-time signal
+ * instead. A warning, not a failure: running with ingestion disabled is a
+ * legitimate choice, silently broken ingestion is not.
+ */
+async function checkRssAllowedHosts() {
+  if (process.env.RSS_ALLOWED_HOSTS?.trim()) return;
+  let activeChannels = 0;
+  try {
+    activeChannels = await prisma.channel.count({ where: { isActive: true } });
+  } catch {
+    return; // Tables may not exist yet; the DB check right after this handles that.
+  }
+  if (activeChannels > 0) {
     console.warn(
-      `\n⚠️  NEXT_PUBLIC_SITE_URL is set to a *.vercel.app domain (${host}).\n` +
-        "   Canonical tags, sitemap and feed URLs will all point there, so search\n" +
-        "   engines will credit the preview domain instead of your real domain.\n" +
-        "   Set it to your custom domain if you have one.\n",
+      `\n⚠️  RSS_ALLOWED_HOSTS is empty, but ${activeChannels} channel(s) are active.\n` +
+        "   Every fetch will be silently rejected and RawNews will stay empty\n" +
+        "   forever, with no error surfaced anywhere but the function logs.\n" +
+        "   Set RSS_ALLOWED_HOSTS to a comma-separated list of each channel's\n" +
+        "   feed hostname (check each Channel.handleOrUrl).\n",
     );
   }
 }
@@ -132,6 +166,8 @@ async function main() {
       "ℹ️  Notice: The database currently has 0 published articles. Site will deploy with empty-state ready for new publishing.",
     );
   }
+
+  await checkRssAllowedHosts();
 
   const liveImages = await prisma.article.findMany({
     where: { isPublished: true, heroImage: { not: null } },
