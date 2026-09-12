@@ -4,6 +4,7 @@ import prisma from "@/lib/db";
 import ArticleCard, { ArticleCardData } from "@/components/ArticleCard";
 import NewsletterCard from "@/components/NewsletterCard";
 import AdSlot from "@/components/AdSlot";
+import AdBanner from "@/components/AdBanner";
 import { CATEGORIES, categoryHref, siteUrl, SITE_NAME, SITE_TAGLINE } from "@/lib/site";
 import { jsonLd } from "@/lib/safe-markdown";
 
@@ -142,7 +143,7 @@ export default async function HomePage() {
         <ArticleCard article={hero} variant="lead" />
       </section>
 
-      <AdSlot placement="home-leaderboard" />
+      <AdBanner bannerId="2028053" />
 
       {/* 2: Latest Stories (newest additions, square cards) */}
       {latestArticles.length > 0 && (
@@ -171,7 +172,7 @@ export default async function HomePage() {
         </section>
       )}
 
-      <AdSlot placement="home-in-feed" />
+      <AdBanner bannerId="2028054" />
 
       {/* 3: Category Sections */}
       {sections.map(({ category, items }) => (

@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import ArticleCard, { ArticleCardData } from "@/components/ArticleCard";
 import AdSlot from "@/components/AdSlot";
+import AdBanner from "@/components/AdBanner";
 import { ARTICLE_TYPES, categoryHref, formatDate, isoDate } from "@/lib/site";
 
 export interface ReaderArticle {
@@ -268,7 +269,7 @@ export default function ArticleReader({
             </Link>
           )}
         </nav>
-        <AdSlot placement="article-after-summary" />
+        <AdBanner bannerId="2028053" />
 
         {/* Tool reference */}
         {tool && (
@@ -312,7 +313,7 @@ export default function ArticleReader({
           </section>
         )}
 
-        <AdSlot placement="article-end" />
+        <AdBanner bannerId="2028054" />
 
         {/* Source attribution */}
         <footer className="mt-12 border-t border-rule pt-5">

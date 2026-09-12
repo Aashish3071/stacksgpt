@@ -100,6 +100,11 @@ export default async function RootLayout({
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4670311397990890"
           crossOrigin="anonymous"
         />
+        <script
+          async
+          src="https://js.mbidadm.com/static/scripts.js"
+          data-admpid="463498"
+        />
       </head>
       <body className="flex min-h-screen flex-col" suppressHydrationWarning>
         <GoogleTagManager gtmId={GTM_ID} />
