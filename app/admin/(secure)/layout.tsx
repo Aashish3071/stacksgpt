@@ -27,6 +27,7 @@ export default async function Layout({
   const nav = [
     ["", "Dashboard"],
     ["leads", "Story leads"],
+    ["social-posts", "Social posts"],
     ["drafts", "Drafts"],
     ["in-review", "In review"],
     ["approved", "Approved"],

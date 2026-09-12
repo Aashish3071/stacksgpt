@@ -5,8 +5,14 @@ import { requireEditor, requireAdmin } from "@/lib/editor-auth";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import NewsroomResource from "@/components/NewsroomResource";
-import { NewArticle, LeadActions, ArticleActions } from "@/components/NewsroomQueue";
+import {
+  NewArticle,
+  LeadActions,
+  ArticleActions,
+  SocialPostActions,
+} from "@/components/NewsroomQueue";
 import { getSettings } from "@/lib/settings";
+import { xEnabled, linkedinEnabled } from "@/lib/social";
 
 export const dynamic = "force-dynamic";
 
@@ -195,6 +201,80 @@ export default async function Page({
           ))
         )}
         <Pager filters={search} page={page} more={items.length > 25} />
+      </>
+    );
+  } else if (s === "social-posts") {
+    let items: any[] = [];
+    let total = 0;
+
+    try {
+      const where = {
+        status: search.status || "PENDING_APPROVAL",
+      };
+      [items, total] = await prisma.$transaction([
+        prisma.socialPost.findMany({
+          where,
+          include: { article: { select: { title: true, slug: true, heroImage: true } } },
+          orderBy: { createdAt: "desc" },
+          take: 25,
+          skip,
+        }),
+        prisma.socialPost.count({ where }),
+      ]);
+    } catch (err) {
+      console.warn("Could not load social posts:", err);
+    }
+
+    body = (
+      <>
+        <p className="mb-5 text-sm text-muted">
+          Drafted automatically the first time an article publishes. Nothing
+          here sends until you approve it — approving queues it for delivery
+          within 15 minutes, or use Send now for an immediate result.
+        </p>
+        <form className="flex gap-3 my-4">
+          <select
+            aria-label="Social post status"
+            name="status"
+            defaultValue={search.status || "PENDING_APPROVAL"}
+            className="border border-rule p-2 text-sm"
+          >
+            {["PENDING_APPROVAL", "APPROVED", "SENT", "FAILED", "REJECTED"].map(
+              (v) => (
+                <option key={v}>{v}</option>
+              ),
+            )}
+          </select>
+          <button className="border border-rule px-3 text-sm hover:border-ink">
+            Filter
+          </button>
+        </form>
+        <p className="text-sm text-muted">{total} social posts</p>
+        {items.length === 0 ? (
+          <p className="my-6 text-sm text-muted">No social posts found in this state.</p>
+        ) : (
+          items.map((post) => (
+            <article key={post.id} className="border-b border-rule py-6">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted">
+                {post.platform === "X" ? "X (Twitter)" : "LinkedIn"}
+              </p>
+              <Link
+                href={`/article/${post.article.slug}`}
+                target="_blank"
+                className="font-serif text-xl hover:underline"
+              >
+                {post.article.title}
+              </Link>
+              {post.error && (
+                <p className="text-sm text-accent my-1">{post.error}</p>
+              )}
+              <div className="mt-3">
+                <SocialPostActions post={JSON.parse(JSON.stringify(post))} />
+              </div>
+            </article>
+          ))
+        )}
+        <Pager filters={search} page={page} more={skip + 25 < total} />
       </>
     );
   } else if (["imports", "audit", "analytics", "media"].includes(s)) {
@@ -417,12 +497,33 @@ export default async function Page({
     } else notFound();
 
     body = (
-      <NewsroomResource
-        section={s}
-        rows={JSON.parse(JSON.stringify(rows))}
-        initial={initial}
-        fields={fields}
-      />
+      <>
+        {s === "settings" && (
+          <div className="mb-6 flex flex-wrap gap-2 text-xs font-semibold">
+            {[
+              ["X (Twitter)", xEnabled()],
+              ["LinkedIn", linkedinEnabled()],
+            ].map(([label, connected]) => (
+              <span
+                key={label as string}
+                className={`rounded-full border px-3 py-1 ${
+                  connected
+                    ? "border-emerald-600/40 bg-emerald-50 text-emerald-700"
+                    : "border-rule bg-paper text-muted"
+                }`}
+              >
+                {label}: {connected ? "Connected" : "Not connected"}
+              </span>
+            ))}
+          </div>
+        )}
+        <NewsroomResource
+          section={s}
+          rows={JSON.parse(JSON.stringify(rows))}
+          initial={initial}
+          fields={fields}
+        />
+      </>
     );
   }
 

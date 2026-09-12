@@ -158,6 +158,7 @@ model Article {
   heroImageOrigin String @default("generated")
   revisions ArticleRevision[]
   redirects ArticleRedirect[]
+  socialPosts SocialPost[]
   rawNewsId       String?        @unique
   rawNews         RawNews?       @relation(fields: [rawNewsId], references: [id])
   createdAt       DateTime       @default(now())
@@ -186,6 +187,29 @@ model Profile {
  role String @default("EDITOR")
  active Boolean @default(true)
  createdAt DateTime @default(now())
+}
+// A social post is drafted automatically the first time its article is
+// published (see transitionArticle in lib/editorial.ts), but never sent
+// automatically: an editor must approve it in the newsroom queue first,
+// mirroring the article review-queue philosophy. deliverApprovedSocialPosts()
+// in lib/social.ts only ever sends rows already APPROVED by a human.
+model SocialPost {
+  id         String    @id @default(cuid())
+  articleId  String
+  article    Article   @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  platform   String    // "X" | "LINKEDIN"
+  body       String    // editable draft text; length/format differs per platform
+  imageUrl   String?   // defaults from the article's heroImage, editable
+  status     String    @default("PENDING_APPROVAL") // PENDING_APPROVAL | APPROVED | SENDING | SENT | FAILED | REJECTED
+  approvedBy String?
+  approvedAt DateTime?
+  sentAt     DateTime?
+  error      String?
+  externalId String?   // tweet id / LinkedIn post URN once sent
+  createdAt  DateTime  @default(now())
+
+  @@index([status])
+  @@index([articleId])
 }
 model ArticleRevision {
  id String @id @default(cuid())

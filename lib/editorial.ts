@@ -1,6 +1,7 @@
 import {REVIEW_CHECKS} from "./review-checks";
 import prisma from "./db";
 import { verifyHeroImage } from "./media-validation";
+import { draftSocialPost } from "./social";
 import {
   editableFields,
   publicationErrors,
@@ -128,7 +129,14 @@ export async function transitionArticle(
   reason?: string,
   checks?:Record<string,boolean>,
 ) {
-  return prisma.$transaction(
+  // Set inside the transaction below, read after it commits. Deliberately not
+  // acted on inside the transaction itself: a Postgres transaction aborts on
+  // the first error and refuses every later statement until rollback, so a
+  // missing SocialPost table (or any other drafting failure) would silently
+  // take the actual article-publish update down with it. Drafting a social
+  // post is a side effect of publishing, not a requirement for it.
+  let firstPublish = false;
+  const updated = await prisma.$transaction(
     async (tx) => {
       await tx.$queryRaw`SELECT id FROM "Article" WHERE id=${id} FOR UPDATE`;
       const a = await tx.article.findUniqueOrThrow({ where: { id } });
@@ -139,6 +147,7 @@ export async function transitionArticle(
       const status = a.pendingStatus || a.status;
       if (!canTransition(status, action))
         throw Error(`Cannot ${action} an article in ${status}.`);
+      firstPublish = action === "publish" && a.status !== "PUBLISHED";
       if (
         action === "publish" &&
         status === "SCHEDULED" &&
@@ -321,4 +330,22 @@ export async function transitionArticle(
     },
     { timeout: 20000 },
   );
+  if (firstPublish) {
+    // Outside the transaction and on the plain client, deliberately: this
+    // must never be able to take the publish itself down (see the comment
+    // where firstPublish is declared). A failure here — table not migrated
+    // yet, or any other issue — is logged and otherwise swallowed; the
+    // article is already published either way.
+    for (const platform of ["X", "LINKEDIN"] as const) {
+      try {
+        await draftSocialPost(prisma, updated, platform);
+      } catch (e) {
+        console.warn(
+          `Could not draft a ${platform} post for ${updated.id}:`,
+          e instanceof Error ? e.message : e,
+        );
+      }
+    }
+  }
+  return updated;
 }

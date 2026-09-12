@@ -136,6 +136,82 @@ export function ArticleActions({ article }: { article: any }) {
   );
 }
 
+export function SocialPostActions({ post }: { post: any }) {
+  const [body, setBody] = useState(post.body);
+  const [message, setMessage] = useState("");
+  const [busy, setBusy] = useState<string | null>(null);
+  const [status, setStatus] = useState(post.status);
+
+  async function act(action: "approve" | "reject" | "send") {
+    setBusy(action);
+    setMessage("");
+    try {
+      const r = await fetch("/api/newsroom/social-posts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: post.id, action, body }),
+      });
+      const d = await r.json();
+      if (!r.ok) throw Error(d.error || "Action failed");
+      setStatus(d.post.status);
+      setMessage(
+        action === "send"
+          ? "Sent."
+          : action === "approve"
+            ? "Approved. Sends within 15 minutes, or click Send now."
+            : "Rejected.",
+      );
+    } catch (e) {
+      setMessage(e instanceof Error ? e.message : "Action failed");
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  const done = status !== "PENDING_APPROVAL" && status !== "APPROVED";
+
+  return (
+    <div className="space-y-3">
+      <textarea
+        className="border border-rule block w-full p-2 text-sm rounded bg-surface font-mono"
+        rows={post.platform === "X" ? 3 : 6}
+        value={body}
+        disabled={done}
+        onChange={(e) => setBody(e.target.value)}
+      />
+      <p className="text-xs text-muted">
+        {status} · {body.length} characters
+      </p>
+      {!done && (
+        <div className="flex flex-wrap gap-2">
+          <button
+            disabled={busy !== null}
+            onClick={() => act("send")}
+            className="rounded bg-ink text-paper px-3 py-1.5 text-xs font-semibold hover:bg-ink/90 transition-colors disabled:opacity-50"
+          >
+            {busy === "send" ? "Sending..." : "Send now"}
+          </button>
+          <button
+            disabled={busy !== null}
+            onClick={() => act("approve")}
+            className="rounded border border-rule bg-paper px-3 py-1.5 text-xs font-semibold text-ink hover:border-ink transition-colors disabled:opacity-50"
+          >
+            {busy === "approve" ? "Saving..." : "Approve (send within 15 min)"}
+          </button>
+          <button
+            disabled={busy !== null}
+            onClick={() => act("reject")}
+            className="rounded border border-accent/40 bg-surface px-3 py-1.5 text-xs font-semibold text-accent hover:bg-accent-soft hover:border-accent transition-colors disabled:opacity-50"
+          >
+            {busy === "reject" ? "..." : "Reject"}
+          </button>
+        </div>
+      )}
+      {message && <p role="status" className="text-xs text-accent">{message}</p>}
+    </div>
+  );
+}
+
 export function LeadActions({ lead }: { lead: any }) {
   const [status, setStatus] = useState(lead.status);
   const [notes, setNotes] = useState(lead.notes || "");

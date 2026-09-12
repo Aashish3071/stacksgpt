@@ -4,6 +4,7 @@ import { editor, admin, supabase } from "@/lib/editor-auth";
 import prisma from "@/lib/db";
 import { limitedJson, publicUrl, sameOrigin } from "@/lib/security";
 import { saveDraft } from "@/lib/editorial";
+import { sendXPost, sendLinkedInPost } from "@/lib/social";
 import { emailConfigured } from "@/lib/newsletter";
 import { getSettings } from "@/lib/settings";
 import { z } from "zod";
@@ -108,6 +109,61 @@ export async function POST(
     if (section === "new-article") {
       const a = await saveDraft({}, p.id);
       return Response.json({ id: a.id });
+    }
+    if (section === "social-posts") {
+      const v = z
+        .object({
+          id: z.string(),
+          action: z.enum(["approve", "reject", "send"]),
+          body: z.string().min(1).max(3000).optional(),
+        })
+        .parse(b);
+      const existing = await prisma.socialPost.findUniqueOrThrow({
+        where: { id: v.id },
+      });
+      if (existing.status !== "PENDING_APPROVAL" && existing.status !== "APPROVED")
+        throw Error(`This post is already ${existing.status.toLowerCase()}.`);
+      if (v.action === "reject") {
+        const post = await prisma.socialPost.update({
+          where: { id: v.id },
+          data: { status: "REJECTED" },
+        });
+        return Response.json({ ok: true, post });
+      }
+      const approved = await prisma.socialPost.update({
+        where: { id: v.id },
+        data: {
+          ...(v.body ? { body: v.body } : {}),
+          status: "APPROVED",
+          approvedBy: p.id,
+          approvedAt: new Date(),
+        },
+      });
+      if (v.action === "approve")
+        return Response.json({ ok: true, post: approved });
+      // "send": queue for delivery, then try to send immediately so the
+      // editor sees the result rather than waiting for the next cron tick.
+      try {
+        const { externalId } =
+          approved.platform === "X"
+            ? await sendXPost(approved)
+            : await sendLinkedInPost(approved);
+        const sent = await prisma.socialPost.update({
+          where: { id: v.id },
+          data: { status: "SENT", sentAt: new Date(), externalId },
+        });
+        return Response.json({ ok: true, post: sent });
+      } catch (e) {
+        const message = e instanceof Error ? e.message : "Send failed";
+        const failed = await prisma.socialPost.update({
+          where: { id: v.id },
+          data: { status: "FAILED", error: message },
+        });
+        return Response.json(
+          { ok: false, error: message, post: failed },
+          { status: 502 },
+        );
+      }
     }
     await admin();
     let result: any;
