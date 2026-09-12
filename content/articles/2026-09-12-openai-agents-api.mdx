@@ -1,0 +1,58 @@
+---
+type: "ANNOUNCEMENT"
+title: "OpenAI Launches Agents API with Managed Cloud Sandboxes and Subagent Orchestration"
+slug: "openai-agents-api"
+category: "Coding"
+summary: >
+  OpenAI has introduced its Agents API in public beta, exposing the production
+  harness and cloud sandboxing infrastructure behind Codex to external developers.
+  The managed API bundles automatic context compaction, on-demand tool search,
+  and multi-agent delegation without requiring custom orchestration code.
+sourceName: "OpenAI"
+sourceUrl: "https://openai.com/index/introducing-the-agents-api/"
+toolName: "OpenAI Agents API"
+publishedDate: "2026-09-12"
+retrievedAt: "2026-09-12T14:20:00Z"
+heroImage: "/images/articles/2026-09-12-openai-agents-api.png"
+heroImageAlt: "OpenAI logo centered above clean editorial typography reading OpenAI Agents API with icons for Cloud Sandboxes, Tool Search, and Multi-Agent Orchestration."
+heroImageCredit: "Editorial composition for StacksGPT"
+keyPoints:
+  - "The Agents API exposes the Codex execution harness as a managed API in public beta."
+  - "Supports OpenAI-hosted secure sandboxes or third-party environments including Cloudflare, Modal, Vercel, and Daytona."
+  - "Includes native context compaction to preserve working memory across long-running autonomous sessions."
+  - "Offers dynamic tool search, programmatic tool calling, and multi-agent delegation out of the box."
+  - "No platform access surcharge: usage is billed strictly on tokens consumed and tools executed."
+verdict: >
+  The Agents API removes the heavy backend engineering of sandboxing, context compaction, and multi-agent routing. Teams building autonomous agents can now offload stateful infrastructure to OpenAI or connected cloud providers.
+seoTitle: "OpenAI Launches Agents API for Cloud Sandboxes"
+metaDescription: "OpenAI launches its Agents API in public beta, offering managed cloud sandboxes, tool search, context compaction, and subagent orchestration."
+keywords:
+  - "openai"
+  - "agents api"
+  - "codex"
+  - "autonomous agents"
+  - "sandboxing"
+  - "developer tools"
+---
+
+OpenAI has launched the Agents API in public beta, releasing the underlying execution harness and sandboxing infrastructure that powers products like Codex and ChatGPT for Work directly to developers. Instead of building brittle custom loops to coordinate tools, manage long-running memory, and isolate code execution, engineering teams can now configure an autonomous agent through a single API endpoint.
+
+The release marks a deliberate architectural shift away from simple stateless completions toward durable, stateful agent runtimes. Operating production agents for extended tasks has historically required teams to solve three complex distributed systems problems: persisting state without exhausting token budgets, running unverified code safely, and orchestrating parallel workflows across subagents.
+
+### Managed sandboxes and cloud provider ecosystems
+
+A central bottleneck in autonomous coding and data work has been environment provisioning. The Agents API introduces two primary execution tracks: OpenAI hosted sandboxes and integrations with third-party infrastructure providers.
+
+OpenAI hosted sandboxes supply preconfigured environments managed directly by OpenAI, tailored for executing code, processing file trees, and returning intermediate artifacts. For teams with stringent VPC, compliance, or specialized hardware needs, OpenAI partnered with providers including Modal, Cloudflare, Daytona, DigitalOcean, E2B, Blaxel, Oracle, Runloop, and Vercel. These integrations allow organizations to deploy agents inside private clouds with custom CPU, GPU, memory profiles, and secret management.
+
+### Context compaction and dynamic tool discovery
+
+As agents work through multi-hour tasks, token windows fill quickly, forcing developers to manually implement sliding windows or custom summarization prompts. The Agents API handles this natively through automated compaction. When an agent session approaches token thresholds, the harness compresses preceding interactions while retaining core task instructions, intermediate outputs, and file state.
+
+Tool discovery is similarly decoupled from context bloat. Rather than cramming hundreds of tool schemas into every prompt, the Agents API employs tool search to dynamically retrieve relevant definitions as needed. Combined with programmatic tool calling, agents can run operations in parallel, chain commands, and filter large datasets in execution before returning condensed outputs into model context. The runtime supports custom functions, Model Context Protocol (MCP) servers, and built-in primitives like web search.
+
+### Multi-agent delegation and pricing structure
+
+For intricate development or research pipelines, the API supports subagent coordination. A lead agent can decompose a complex objective into distinct subtasks, dispatching them to parallel child agents that run in isolated context windows. The primary agent collects the child outputs and synthesizes the finished artifact, avoiding cross-task contamination.
+
+OpenAI stated that the Agents API carries no base subscription or platform markup during its public beta. Billing adheres to standard model token consumption and underlying compute or tool usage. Developers can access the beta today through the OpenAI Developer Platform.
