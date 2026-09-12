@@ -90,9 +90,19 @@ export async function processImport(
     }
     const before = await prisma.article.findUnique({
       where: { externalId },
-      select: { sourceHash: true, pendingHash: true },
+      select: { sourceHash: true, pendingHash: true, isPublished: true, heroImage: true },
     });
     const article = await saveDraft(fields, null, true);
+    if (before?.isPublished && fields.heroImage && fields.heroImage !== before.heroImage) {
+      await prisma.article.update({
+        where: { id: article.id },
+        data: {
+          heroImage: fields.heroImage,
+          heroImageAlt: fields.heroImageAlt,
+          heroImageCredit: fields.heroImageCredit,
+        },
+      });
+    }
     const status =
       before && (before.pendingHash || before.sourceHash) === fields.sourceHash
         ? "UNCHANGED"
