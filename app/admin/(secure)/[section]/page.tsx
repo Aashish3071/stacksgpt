@@ -9,6 +9,7 @@ import {
   NewArticle,
   LeadActions,
   ArticleActions,
+  ArticleTile,
   SocialPostActions,
 } from "@/components/NewsroomQueue";
 import { getSettings } from "@/lib/settings";
@@ -111,24 +112,11 @@ export default async function Page({
         {items.length === 0 ? (
           <p className="my-6 text-sm text-muted">No articles found in this state.</p>
         ) : (
-          items.map((a) => (
-            <article key={a.id} className="border-b border-rule py-5">
-              <Link
-                href={`/admin/articles/${a.id}`}
-                className="font-serif text-2xl hover:underline"
-              >
-                {a.title || "Untitled article"}
-              </Link>
-              <p className="my-2 text-sm text-muted">
-                {a.pendingStatus || a.status} · {a.category} ·{" "}
-                {a.sourceAuthor || "Source not set"}
-              </p>
-              {a.rejectionReason && (
-                <p className="text-sm text-accent my-1">{a.rejectionReason}</p>
-              )}
-              <ArticleActions article={a} />
-            </article>
-          ))
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+            {items.map((a) => (
+              <ArticleTile key={a.id} article={JSON.parse(JSON.stringify(a))} />
+            ))}
+          </div>
         )}
         <Pager filters={search} page={page} more={skip + 25 < total} />
       </>
@@ -277,7 +265,127 @@ export default async function Page({
         <Pager filters={search} page={page} more={skip + 25 < total} />
       </>
     );
-  } else if (["imports", "audit", "analytics", "media"].includes(s)) {
+  } else if (s === "media") {
+    let assets: any[] = [];
+    let total = 0;
+    let usedBy: Record<string, { slug: string; title: string }[]> = {};
+
+    try {
+      const where = search.q
+        ? { alt: { contains: search.q, mode: "insensitive" as const } }
+        : {};
+      [assets, total] = await prisma.$transaction([
+        prisma.mediaAsset.findMany({
+          where,
+          orderBy: { createdAt: "desc" },
+          take: 24,
+          skip,
+        }),
+        prisma.mediaAsset.count({ where }),
+      ]);
+      // A media asset carries no relation back to the articles using it, so
+      // "is this actually in use?" otherwise means opening every article by
+      // hand. One extra query answers it for the whole page at once.
+      const urls = assets.map((a) => a.url);
+      if (urls.length) {
+        const inUse = await prisma.article.findMany({
+          where: { heroImage: { in: urls } },
+          select: { slug: true, title: true, heroImage: true },
+        });
+        for (const a of inUse) {
+          (usedBy[a.heroImage!] ||= []).push({ slug: a.slug, title: a.title });
+        }
+      }
+    } catch (err) {
+      console.warn("Could not load media assets:", err);
+    }
+
+    body = (
+      <>
+        <p className="mb-5 text-sm text-muted">
+          Every image an article has used as its hero, in one browsable
+          library. Upload new images from Sources &amp; image in the article
+          editor — this page is for reviewing and correcting what already
+          exists.
+        </p>
+        <form className="my-4 flex gap-3">
+          <input
+            aria-label="Search media by description"
+            name="q"
+            defaultValue={search.q}
+            placeholder="Search by image description"
+            className="border border-rule p-3 text-sm focus:border-ink outline-none"
+          />
+          <button className="border border-rule px-4 text-sm hover:border-ink transition-colors">
+            Search
+          </button>
+        </form>
+        <p className="text-sm text-muted">{total} images</p>
+        {assets.length === 0 ? (
+          <p className="my-6 text-sm text-muted">No images found.</p>
+        ) : (
+          <div className="mt-4 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {assets.map((asset) => {
+              const usage = usedBy[asset.url] || [];
+              return (
+                <div
+                  key={asset.id}
+                  className="flex flex-col overflow-hidden rounded-lg border border-rule bg-surface"
+                >
+                  <div className="relative aspect-[16/9] w-full bg-paper">
+                    <Image
+                      src={asset.url}
+                      alt={asset.alt || ""}
+                      fill
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      className="object-cover"
+                    />
+                  </div>
+                  <div className="flex flex-1 flex-col gap-2 p-4">
+                    <p className="text-xs text-muted">
+                      {asset.width && asset.height
+                        ? `${asset.width}×${asset.height}`
+                        : "Dimensions unknown"}
+                      {asset.byteSize
+                        ? ` · ${Math.round(asset.byteSize / 1024)} KB`
+                        : ""}
+                      {" · "}
+                      {asset.origin}
+                    </p>
+                    {usage.length > 0 ? (
+                      <p className="text-xs text-emerald-700">
+                        In use by{" "}
+                        {usage.map((u, i) => (
+                          <span key={u.slug}>
+                            {i > 0 && ", "}
+                            <Link
+                              href={`/article/${u.slug}`}
+                              target="_blank"
+                              className="underline"
+                            >
+                              {u.title}
+                            </Link>
+                          </span>
+                        ))}
+                      </p>
+                    ) : (
+                      <p className="text-xs text-muted">
+                        Not currently used as a hero image.
+                      </p>
+                    )}
+                    <div className="mt-auto pt-2">
+                      <MediaDetails asset={JSON.parse(JSON.stringify(asset))} />
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+        <Pager filters={search} page={page} more={skip + 24 < total} />
+      </>
+    );
+  } else if (["imports", "audit", "analytics"].includes(s)) {
     let rows: any[] = [];
 
     try {
@@ -294,17 +402,11 @@ export default async function Page({
                 take: 26,
                 skip,
               })
-            : s === "analytics"
-              ? await prisma.eventDaily.findMany({
-                  orderBy: { day: "desc" },
-                  take: 26,
-                  skip,
-                })
-              : await prisma.mediaAsset.findMany({
-                  orderBy: { createdAt: "desc" },
-                  take: 26,
-                  skip,
-                });
+            : await prisma.eventDaily.findMany({
+                orderBy: { day: "desc" },
+                take: 26,
+                skip,
+              });
     } catch (err) {
       console.warn(`Could not load records for ${s}:`, err);
     }
@@ -317,18 +419,13 @@ export default async function Page({
             identities are not stored.
           </p>
         )}
-        {s === "media" && (
-          <p className="text-sm text-muted mb-4">
-            Upload article images from Sources & image in the article editor.
-          </p>
-        )}
         {rows.length === 0 ? (
           <p className="my-6 text-sm text-muted">No records found.</p>
         ) : (
           rows.slice(0, 25).map((r: any) => (
             <article key={r.id || r.key} className="border-b border-rule py-4">
               <strong className="block text-ink">
-                {r.externalId || r.action || r.event || r.alt || r.url}
+                {r.externalId || r.action || r.event}
               </strong>
               <p className="text-sm text-muted my-1">
                 {r.status ||
@@ -342,18 +439,6 @@ export default async function Page({
                     <li key={i}>{String(e)}</li>
                   ))}
                 </ul>
-              )}
-              {s === "media" && (
-                <MediaDetails asset={JSON.parse(JSON.stringify(r))} />
-              )}
-              {r.url && (
-                <Image
-                  src={r.url}
-                  alt={r.alt || ""}
-                  width={300}
-                  height={160}
-                  className="max-w-xs mt-3 border border-rule rounded"
-                />
               )}
             </article>
           ))

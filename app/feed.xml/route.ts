@@ -1,17 +1,8 @@
 import prisma from "@/lib/db";
 import { SITE_NAME, SITE_TAGLINE, siteUrl } from "@/lib/site";
+import { xml } from "@/lib/xml";
 
 export const revalidate = 900;
-
-/** Escapes text for inclusion in XML character data. */
-function xml(text: string): string {
-  return text
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&apos;");
-}
 
 export async function GET() {
   let articles: any[] = [];
@@ -20,7 +11,16 @@ export async function GET() {
       where: { isPublished: true },
       orderBy: { publishedAt: { sort: "desc", nulls: "last" } },
       take: 50,
-      select: { slug: true, title: true, summary: true, publishedAt: true, createdAt: true },
+      select: {
+        slug: true,
+        title: true,
+        summary: true,
+        category: true,
+        heroImage: true,
+        sourceAuthor: true,
+        publishedAt: true,
+        createdAt: true,
+      },
     });
   } catch (err) {
     console.warn("Could not load articles for feed.xml during build:", err);
@@ -30,11 +30,21 @@ export async function GET() {
     .map((a) => {
       const url = siteUrl(`/article/${a.slug}`);
       const date = (a.publishedAt ?? a.createdAt).toUTCString();
+      const imgUrl = a.heroImage
+        ? a.heroImage.startsWith("https://")
+          ? a.heroImage
+          : siteUrl(a.heroImage)
+        : null;
+      const enclosure = imgUrl
+        ? `\n      <enclosure url="${xml(imgUrl)}" length="0" type="image/png" />`
+        : "";
+
       return `    <item>
       <title>${xml(a.title)}</title>
       <link>${xml(url)}</link>
       <guid isPermaLink="true">${xml(url)}</guid>
       <description>${xml(a.summary)}</description>
+      <category>${xml(a.category)}</category>${enclosure}
       <pubDate>${date}</pubDate>
     </item>`;
     })
@@ -46,7 +56,7 @@ export async function GET() {
     <title>${xml(SITE_NAME)}</title>
     <link>${xml(siteUrl())}</link>
     <description>${xml(SITE_TAGLINE)}</description>
-    <language>en</language>
+    <language>en-us</language>
     <atom:link href="${xml(siteUrl("/feed.xml"))}" rel="self" type="application/rss+xml" />
 ${items}
   </channel>

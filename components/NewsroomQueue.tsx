@@ -2,6 +2,97 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
+
+const STATUS_STYLE: Record<string, string> = {
+  DRAFT: "bg-surface text-muted border-rule",
+  IN_REVIEW: "bg-amber-50 text-amber-800 border-amber-200",
+  APPROVED: "bg-sky-50 text-sky-800 border-sky-200",
+  SCHEDULED: "bg-violet-50 text-violet-800 border-violet-200",
+  PUBLISHED: "bg-emerald-50 text-emerald-800 border-emerald-200",
+  REJECTED: "bg-rose-50 text-rose-800 border-rose-200",
+  ARCHIVED: "bg-surface text-muted border-rule",
+};
+
+function StatusBadge({ status }: { status: string }) {
+  return (
+    <span
+      className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide ${
+        STATUS_STYLE[status] || "bg-surface text-muted border-rule"
+      }`}
+    >
+      {status.replace("_", " ")}
+    </span>
+  );
+}
+
+/**
+ * One article, as a browsable card rather than a plain text row.
+ *
+ * Every status queue (drafts, in review, approved, scheduled, published,
+ * rejected, archived) renders these in a responsive grid. A CMS content list
+ * is scanned by eye via its thumbnails — a queue of bare title links gives an
+ * editor nothing to recognise an article by until they click into it.
+ *
+ * The whole card is a link to the editor, matching how every other CMS treats
+ * "click the item to edit it" — the explicit Edit button in the footer exists
+ * for keyboard and screen-reader users who tab through actions rather than
+ * activate the card region, and for anyone scanning the row of buttons rather
+ * than the card itself.
+ */
+export function ArticleTile({ article: a }: { article: any }) {
+  const status = a.pendingStatus || a.status;
+  const editHref = `/admin/articles/${a.id}`;
+  return (
+    <article className="group relative flex flex-col overflow-hidden rounded-lg border border-rule bg-surface transition-colors focus-within:border-ink hover:border-ink">
+      <Link
+        href={editHref}
+        className="absolute inset-0 z-10 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2"
+        aria-label={`Edit "${a.title || "Untitled article"}"`}
+      />
+      <div className="relative aspect-[16/9] w-full shrink-0 bg-paper">
+        {a.heroImage ? (
+          <Image
+            src={a.heroImage}
+            alt=""
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            className="object-cover"
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center text-xs text-muted">
+            No image
+          </div>
+        )}
+        <div className="absolute left-2 top-2 flex flex-wrap gap-1.5">
+          <StatusBadge status={status} />
+        </div>
+      </div>
+      <div className="flex flex-1 flex-col gap-2 p-4">
+        <h3 className="font-serif text-lg font-semibold leading-snug text-ink line-clamp-2">
+          {a.title || "Untitled article"}
+        </h3>
+        <p className="text-xs text-muted">
+          {a.category}
+          {a.sourceAuthor ? ` · ${a.sourceAuthor}` : ""}
+          {a.scheduledFor
+            ? ` · Scheduled ${new Date(a.scheduledFor).toLocaleDateString()}`
+            : a.publishedAt
+              ? ` · ${new Date(a.publishedAt).toLocaleDateString()}`
+              : ""}
+        </p>
+        {a.rejectionReason && (
+          <p className="rounded border border-rose-200 bg-rose-50 px-2 py-1 text-xs text-rose-800">
+            {a.rejectionReason}
+          </p>
+        )}
+        <div className="relative z-20 mt-auto pt-2">
+          <ArticleActions article={a} />
+        </div>
+      </div>
+    </article>
+  );
+}
 
 export function NewArticle() {
   const [message, setMessage] = useState("");

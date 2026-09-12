@@ -37,6 +37,21 @@ const baseMetadata: Metadata = {
     siteName: SITE_NAME,
     type: "website",
     locale: "en_US",
+    images: [
+      {
+        url: "/images/logos/logo.jpg",
+        width: 1200,
+        height: 630,
+        alt: `${SITE_NAME} - Simplifying AI for you`,
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${SITE_NAME} · Simplifying AI for you`,
+    description:
+      "We track the latest AI and tech developments so you do not have to, delivering what is new and why it matters.",
+    images: ["/images/logos/logo.jpg"],
   },
   icons: {
     icon: "/images/logos/logo.jpg",

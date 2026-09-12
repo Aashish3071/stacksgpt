@@ -4,6 +4,7 @@ import prisma from "@/lib/db";
 import ArticleCard, { ArticleCardData } from "@/components/ArticleCard";
 import NewsletterCard from "@/components/NewsletterCard";
 import AdBanner from "@/components/AdBanner";
+import AdSlot from "@/components/AdSlot";
 import { CATEGORIES, categoryHref, siteUrl, SITE_NAME, SITE_TAGLINE } from "@/lib/site";
 import { jsonLd } from "@/lib/safe-markdown";
 
@@ -11,6 +12,29 @@ export const revalidate = 60;
 
 export const metadata: Metadata = {
   alternates: { canonical: siteUrl() },
+  openGraph: {
+    title: `${SITE_NAME} · ${SITE_TAGLINE}`,
+    description:
+      "We track the latest AI and tech developments so you do not have to, delivering what is new and why it matters.",
+    url: siteUrl(),
+    siteName: SITE_NAME,
+    type: "website",
+    images: [
+      {
+        url: siteUrl("/images/logos/logo.jpg"),
+        width: 1200,
+        height: 630,
+        alt: `${SITE_NAME} - ${SITE_TAGLINE}`,
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${SITE_NAME} · ${SITE_TAGLINE}`,
+    description:
+      "We track the latest AI and tech developments so you do not have to, delivering what is new and why it matters.",
+    images: [siteUrl("/images/logos/logo.jpg")],
+  },
 };
 
 const CARD_FIELDS = {
@@ -25,15 +49,16 @@ const CARD_FIELDS = {
   heroImage: true,
   heroImageAlt: true,
   type: true,
+  tags: true,
 } as const;
 
 /** How many stories each category strip shows. */
 const PER_CATEGORY = 4;
 
 export default async function HomePage() {
-  let articles: ArticleCardData[] = [];
+  let articles: (ArticleCardData & { tags?: string[] })[] = [];
   try {
-    articles = await prisma.article.findMany({
+    articles = (await prisma.article.findMany({
       where: { isPublished: true },
       orderBy: [
         { publishedAt: { sort: "desc", nulls: "last" } },
@@ -41,7 +66,7 @@ export default async function HomePage() {
       ],
       take: 60,
       select: CARD_FIELDS,
-    });
+    })) as any;
   } catch (err) {
     console.warn(
       "Could not query articles on HomePage during build/render:",
@@ -50,13 +75,14 @@ export default async function HomePage() {
   }
 
   // Schema.org structured data for the homepage
-  const homepageSchema = {
+  const homepageSchema: any = {
     "@context": "https://schema.org",
     "@graph": [
       {
         "@type": "WebSite",
         name: SITE_NAME,
         url: siteUrl(),
+        description: SITE_TAGLINE,
         potentialAction: {
           "@type": "SearchAction",
           target: {
@@ -70,12 +96,50 @@ export default async function HomePage() {
         "@type": "Organization",
         name: SITE_NAME,
         url: siteUrl(),
-        logo: siteUrl("/images/logos/logo.jpg"),
+        logo: {
+          "@type": "ImageObject",
+          url: siteUrl("/images/logos/logo.jpg"),
+          width: 512,
+          height: 512,
+        },
         description:
           "We track the latest AI and tech developments so you do not have to, delivering what is new and why it matters.",
       },
     ],
   };
+
+  if (articles.length > 0) {
+    homepageSchema["@graph"].push({
+      "@type": "ItemList",
+      name: "Top AI News & Reports",
+      numberOfItems: Math.min(10, articles.length),
+      itemListElement: articles.slice(0, 10).map((a, idx) => ({
+        "@type": "ListItem",
+        position: idx + 1,
+        name: a.title,
+        url: siteUrl(`/article/${a.slug}`),
+      })),
+    });
+  }
+
+  // Compute top trending tags in memory across all articles
+  const tagCounts: Record<string, number> = {};
+  for (const a of articles) {
+    if (Array.isArray(a.tags)) {
+      for (const t of a.tags) {
+        if (t && typeof t === "string") {
+          tagCounts[t] = (tagCounts[t] || 0) + 1;
+        }
+      }
+    }
+  }
+  const trendingTags = Object.entries(tagCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 12)
+    .map(([slug]) => ({
+      slug,
+      name: slug.replaceAll("-", " "),
+    }));
 
   if (articles.length === 0) {
     return (
@@ -142,9 +206,29 @@ export default async function HomePage() {
         <ArticleCard article={hero} variant="lead" />
       </section>
 
+      {/* 2: Trending Topics Bar for internal linking and discovery */}
+      {trendingTags.length > 0 && (
+        <section className="border-b border-rule py-3 sm:py-4">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="font-mono text-xs font-semibold uppercase tracking-wider text-accent mr-1">
+              Trending Topics:
+            </span>
+            {trendingTags.map((tag) => (
+              <Link
+                key={tag.slug}
+                href={`/tag/${tag.slug}`}
+                className="inline-flex items-center rounded-full border border-rule bg-surface px-2.5 py-1 font-sans text-xs font-medium text-ink hover:border-ink hover:bg-paper transition-colors"
+              >
+                #{tag.name}
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
       <AdBanner bannerId="2028053" />
 
-      {/* 2: Latest Stories (newest additions, square cards) */}
+      {/* 3: Latest Stories (newest additions, square cards) */}
       {latestArticles.length > 0 && (
         <section className="border-b border-rule py-8 sm:py-10">
           <div className="flex items-baseline justify-between border-b border-rule pb-2">
@@ -173,7 +257,10 @@ export default async function HomePage() {
 
       <AdBanner bannerId="2028054" />
 
-      {/* 3: Category Sections */}
+      {/* In-feed unit, between the latest stories and the category sections. */}
+      <AdSlot placement="home-in-feed" />
+
+      {/* 4: Category Sections */}
       {sections.map(({ category, items }) => (
         <section key={category} className="border-b border-rule py-8 sm:py-10">
           <div className="flex items-baseline justify-between border-b border-rule pb-2">
@@ -200,7 +287,7 @@ export default async function HomePage() {
         </section>
       ))}
 
-      {/* 4: Newsletter Subscribe CTA */}
+      {/* 5: Newsletter Subscribe CTA */}
       <div id="newsletter">
         <NewsletterCard />
       </div>

@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import ArticleCard, { ArticleCardData } from "@/components/ArticleCard";
 import AdBanner from "@/components/AdBanner";
+import AdSlot from "@/components/AdSlot";
 import { ARTICLE_TYPES, categoryHref, formatDate, isoDate } from "@/lib/site";
 
 export interface ReaderArticle {
@@ -205,6 +206,11 @@ export default function ArticleReader({
             dangerouslySetInnerHTML={{ __html: article.bodyHtml }}
           />
         )}
+
+        {/* In-article unit, after the body rather than inside it: it sits at a
+            natural break between the reporting and the assessment, so it never
+            interrupts a sentence or pushes the article's own content down. */}
+        <AdSlot placement="article-mid-body" />
 
         {article.structuredVerdict && (
           <section className="mt-8 border-t pt-5 space-y-3">

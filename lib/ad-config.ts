@@ -22,6 +22,48 @@ export interface AdSize {
   label: string;
 }
 
+/**
+ * The three ad unit shapes created in AdSense, and the markup each needs.
+ *
+ * These are not interchangeable: an in-article unit needs
+ * data-ad-layout="in-article", an in-feed unit needs the layout key generated
+ * with it, and only the display unit takes full-width-responsive. Rendering
+ * the wrong attributes gives an ad that either never fills or fills badly.
+ *
+ * Slot IDs are public — they ship in the page source of every site running
+ * AdSense — so keeping them here rather than in the database means a
+ * placement works on deploy instead of waiting on someone pasting IDs into
+ * the settings screen. A value in SiteSetting.adUnits still overrides.
+ */
+export type AdFormat = "display" | "in-feed" | "in-article";
+
+export interface AdUnit {
+  format: AdFormat;
+  slot: string;
+  /** Only in-feed units carry a layout key, generated alongside the unit. */
+  layoutKey?: string;
+}
+
+export const AD_UNITS: Record<AdFormat, AdUnit> = {
+  display: { format: "display", slot: "9783016430" },
+  "in-feed": {
+    format: "in-feed",
+    slot: "3656591787",
+    layoutKey: "-71+cz-1y-c+hp",
+  },
+  "in-article": { format: "in-article", slot: "4641149208" },
+};
+
+/** Which unit shape each placement on the site should render. */
+export const PLACEMENT_FORMAT: Record<AdPlacement, AdFormat> = {
+  "home-leaderboard": "display",
+  "home-in-feed": "in-feed",
+  "home-rail": "display",
+  "article-after-summary": "in-article",
+  "article-mid-body": "in-article",
+  "article-end": "display",
+};
+
 export const AD_SIZES: Record<AdPlacement, AdSize> = {
   "home-leaderboard": {
     mobile: { width: 320, height: 100 },

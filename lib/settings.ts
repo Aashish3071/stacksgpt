@@ -11,8 +11,11 @@ export const defaultSettings = {
     label: string;
     url: string;
   }[],
-  adsEnabled: false,
-  adsProvider: "disabled",
+  // AdSense is approved and the units exist, so placements render by default.
+  // Consent still gates them: PrivacyControls keeps `ads` false until the
+  // reader accepts, so nothing loads for someone who declined.
+  adsEnabled: true,
+  adsProvider: "adsense",
   adsenseId: "ca-pub-4670311397990890",
   adUnits: {} as Record<string, string>,
   analyticsEnabled: false,
