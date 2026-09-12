@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 import prisma from "@/lib/db";
 import ArticleCard, { ArticleCardData } from "@/components/ArticleCard";
 import NewsletterCard from "@/components/NewsletterCard";
-import AdSlot from "@/components/AdSlot";
 import AdBanner from "@/components/AdBanner";
 import { CATEGORIES, categoryHref, siteUrl, SITE_NAME, SITE_TAGLINE } from "@/lib/site";
 import { jsonLd } from "@/lib/safe-markdown";

@@ -10,17 +10,22 @@ export default function AdBanner({
   className?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
+  const numericId = Number(bannerId);
 
   useEffect(() => {
     try {
+      if (ref.current && ref.current.children.length > 0) {
+        return;
+      }
+
       const win = window as any;
-      if (typeof win.mbidadm?.refresh === "function") {
-        win.mbidadm.refresh();
-      } else if (typeof win.mbidadm?.init === "function") {
-        win.mbidadm.init();
+      if (typeof win.AdManager?.runFormatSpot === "function") {
+        win.AdManager.runFormatSpot("banner", { spot_id: numericId });
+      } else if (typeof win.a3klsam?.runFormatSpot === "function") {
+        win.a3klsam.runFormatSpot("banner", { spot_id: numericId });
       }
     } catch {}
-  }, [bannerId]);
+  }, [numericId]);
 
   return (
     <aside
@@ -33,6 +38,7 @@ export default function AdBanner({
       <div
         ref={ref}
         data-banner-id={String(bannerId)}
+        data-clickadilla-banner={String(bannerId)}
         className="min-h-[90px] min-w-[300px] max-w-full flex items-center justify-center overflow-hidden"
       />
     </aside>

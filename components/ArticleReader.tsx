@@ -4,7 +4,6 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import ArticleCard, { ArticleCardData } from "@/components/ArticleCard";
-import AdSlot from "@/components/AdSlot";
 import AdBanner from "@/components/AdBanner";
 import { ARTICLE_TYPES, categoryHref, formatDate, isoDate } from "@/lib/site";
 
