@@ -168,9 +168,18 @@ Fix the file rather than removing the field.
 
 ## Sources worth watching
 
-Model providers publish their own announcements: Anthropic, OpenAI, Qwen,
-Mistral, DeepSeek, Ollama, Nous Research (Hermes) and similar. Prefer a
-provider's own post over secondhand coverage, and always link to the provider.
+Model providers publish their own announcements. Prefer a provider's own post over secondhand coverage, and always link to the provider. Prioritize these official feeds for the ongoing pipeline:
+
+- [Mistral News](https://mistral.ai/news/)
+- [Google AI Blog](https://blog.google/innovation-and-ai/)
+- [Ollama Blog](https://ollama.com/blog)
+- [Hugging Face Blog](https://huggingface.co/blog)
+- [NVIDIA Blog](https://blogs.nvidia.com/)
+- [NVIDIA Newsroom](https://nvidianews.nvidia.com/)
+- [Meta AI](https://ai.meta.com/blog/)
+- [Qwen GitHub](https://github.com/QwenLM)
+- [DeepSeek GitHub](https://github.com/deepseek-ai)
+- [Nous Research GitHub](https://github.com/NousResearch)
 
 ## Checking your work before committing
 
