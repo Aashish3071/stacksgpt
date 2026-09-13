@@ -176,7 +176,7 @@ export default async function HomePage() {
                 <div className="relative aspect-[16/9] w-full overflow-hidden rounded-[2px] bg-ink">
                   <Image
                     src="/images/homepage-hero-workflows.png"
-                    alt="AI Agent Workflows and Automation Engineering Architecture Diagram"
+                    alt="Team collaborating around AI blueprints for growth forecasting, lead scoring, and content automation"
                     fill
                     priority
                     className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
@@ -185,9 +185,9 @@ export default async function HomePage() {
                 </div>
                 <div className="px-3 pt-3 pb-1 flex items-center justify-between text-xs text-muted font-sans border-t border-rule/60 mt-2">
                   <span className="font-mono text-[11px] uppercase tracking-wider text-accent font-semibold">
-                    Production Architecture
+                    Putting AI to Work
                   </span>
-                  <span>End-to-end AI agent orchestration</span>
+                  <span>Step-by-step blueprints &amp; workflows</span>
                 </div>
               </div>
             </div>
