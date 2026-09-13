@@ -19,7 +19,17 @@ import {
   siteUrl,
   SITE_NAME,
 } from "@/lib/site";
-import { BarChart, ChevronRight, Clock, Users } from "lucide-react";
+import {
+  AlertCircle,
+  BarChart,
+  ChevronRight,
+  ClipboardList,
+  Clock,
+  Gift,
+  Users,
+  Workflow,
+  type LucideIcon,
+} from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -58,6 +68,35 @@ function splitTechnicalDetails(markdown: string): { guide: string; technical: st
     technical: markdown.slice(match.index + match[0].length).trim(),
   };
 }
+
+// The four free overview sections get highlighted cards so readers can tell them apart from the setup guide.
+const OVERVIEW_SECTIONS: Record<string, LucideIcon> = {
+  "the problem": AlertCircle,
+  "what you'll get": Gift,
+  "how it works": Workflow,
+  "what you need": ClipboardList,
+};
+
+function splitSections(markdown: string): { intro: string; sections: { title: string; body: string }[] } {
+  const [intro = "", ...parts] = markdown.split(/^##\s+/m);
+  return {
+    intro: intro.trim(),
+    sections: parts.map((part) => {
+      const lineEnd = part.indexOf("\n");
+      return {
+        title: (lineEnd === -1 ? part : part.slice(0, lineEnd)).trim(),
+        body: lineEnd === -1 ? "" : part.slice(lineEnd + 1).trim(),
+      };
+    }),
+  };
+}
+
+function headingId(text: string): string {
+  return text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+}
+
+const CARD_PROSE =
+  "prose prose-slate mt-3 max-w-none text-[15px] leading-relaxed text-ink/85 prose-p:my-2 prose-ul:my-2 prose-ol:my-2 prose-li:my-1 prose-a:text-accent prose-strong:text-ink";
 
 const PROSE =
   "prose prose-slate max-w-none text-[16px] leading-relaxed text-ink/90 prose-headings:font-serif prose-headings:font-bold prose-headings:text-ink prose-h2:mt-12 prose-h2:mb-4 prose-h2:text-2xl prose-h3:mt-6 prose-h3:text-lg prose-p:leading-relaxed prose-li:my-1 prose-a:text-accent prose-pre:bg-zinc-900 prose-pre:text-zinc-100 prose-code:font-mono";
@@ -101,7 +140,15 @@ export default async function BlueprintDetailPage({ params }: Props) {
   const templates = getTemplatesForBlueprint(blueprint.slug);
   const downloads = templates.map((t) => ({ slug: t.slug, title: t.title }));
 
-  const freeHtml = await safeMarkdown(blueprint.freeBody);
+  const { intro: freeIntro, sections: freeSections } = splitSections(blueprint.freeBody);
+  const freeIntroHtml = freeIntro ? await safeMarkdown(freeIntro) : "";
+  const renderedFreeSections = await Promise.all(
+    freeSections.map(async (section) => ({
+      ...section,
+      icon: OVERVIEW_SECTIONS[section.title.toLowerCase().replace(/’/g, "'")],
+      html: await safeMarkdown(section.body),
+    })),
+  );
   const { guide, technical } = splitTechnicalDetails(blueprint.gatedBody);
   const guideHtml = member.isMember ? await safeMarkdown(guide) : "";
   const technicalHtml = member.isMember && technical ? await safeMarkdown(technical) : "";
@@ -207,7 +254,37 @@ export default async function BlueprintDetailPage({ params }: Props) {
                 />
               </div>
             )}
-            <BlueprintContentRenderer html={freeHtml} className={PROSE} />
+            {freeIntroHtml && <BlueprintContentRenderer html={freeIntroHtml} className={PROSE} />}
+
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+              {renderedFreeSections.map(({ title, html, icon: Icon }) =>
+                Icon ? (
+                  <section
+                    key={title}
+                    aria-labelledby={headingId(title)}
+                    className="rounded-[2px] border border-accent/20 border-t-4 border-t-accent bg-accent-soft p-5 sm:p-6"
+                  >
+                    <h2
+                      id={headingId(title)}
+                      className="flex items-center gap-2.5 font-serif text-xl font-bold text-ink"
+                    >
+                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent text-paper">
+                        <Icon className="h-4 w-4" />
+                      </span>
+                      {title}
+                    </h2>
+                    <BlueprintContentRenderer html={html} className={CARD_PROSE} />
+                  </section>
+                ) : (
+                  <div key={title} className="md:col-span-2">
+                    <h2 id={headingId(title)} className="mt-6 font-serif text-2xl font-bold text-ink">
+                      {title}
+                    </h2>
+                    <BlueprintContentRenderer html={html} className={PROSE} />
+                  </div>
+                ),
+              )}
+            </div>
 
             {member.isMember ? (
               <div className="blueprint-gated mt-12">
