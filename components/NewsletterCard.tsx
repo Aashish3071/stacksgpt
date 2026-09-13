@@ -37,12 +37,12 @@ export default function NewsletterCard() {
 
   return (
     <div id="newsletter" className="py-4 text-center mx-auto max-w-xl">
-      <h2 className="kicker">The StacksGPT Briefing</h2>
+      <h2 className="kicker">The StacksGPT Newsletter</h2>
         <p className="mt-2 font-serif text-head-md text-ink">
-          Stay ahead of the AI curve with essential intelligence.
+          Get new AI blueprints in your inbox
         </p>
         <p className="meta mt-2 leading-relaxed">
-          Deep technical signal, breakthrough model updates, and practical takeaways.
+          Plain-English guides to putting AI to work, plus the AI news worth knowing about.
         </p>
 
         {status === "success" ? (
@@ -72,7 +72,7 @@ export default function NewsletterCard() {
               disabled={status === "loading"}
               className="border border-ink bg-ink px-5 py-2.5 min-h-[44px] font-sans text-meta font-medium text-paper transition-colors hover:bg-accent hover:border-accent disabled:opacity-60"
             >
-              {status === "loading" ? "Subscribing..." : "Subscribe"}
+              {status === "loading" ? "Subscribing..." : "Subscribe free"}
             </button>
           </form>
         )}

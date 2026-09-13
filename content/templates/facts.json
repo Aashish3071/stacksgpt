@@ -1,0 +1,1244 @@
+{
+  "ai-web-researcher-for-sales": {
+    "sourceName": "",
+    "nodeCount": 14,
+    "nodeTypes": [
+      "agent",
+      "googleSheets",
+      "lmChatOpenAi",
+      "manualTrigger",
+      "merge",
+      "outputParserStructured",
+      "scheduleTrigger",
+      "set",
+      "splitInBatches",
+      "stickyNote",
+      "toolSerpApi",
+      "toolWorkflow"
+    ],
+    "triggerTypes": [
+      "manualTrigger",
+      "scheduleTrigger"
+    ],
+    "credentialTypes": [
+      "googleSheetsOAuth2Api",
+      "openAiApi",
+      "serpApi"
+    ]
+  },
+  "apollo-lead-scraper-cold-outreach": {
+    "sourceName": "LinkedIn Scraper + Cold Outreach",
+    "nodeCount": 20,
+    "nodeTypes": [
+      "agent",
+      "chainLlm",
+      "filter",
+      "formTrigger",
+      "googleSheets",
+      "httpRequest",
+      "if",
+      "limit",
+      "lmChatOpenAi",
+      "outputParserStructured",
+      "splitInBatches",
+      "stickyNote",
+      "tavilyTool"
+    ],
+    "triggerTypes": [
+      "formTrigger"
+    ],
+    "credentialTypes": [
+      "googleSheetsOAuth2Api",
+      "openAiApi"
+    ]
+  },
+  "appointment-lead-follow-up": {
+    "sourceName": "",
+    "nodeCount": 24,
+    "nodeTypes": [
+      "agent",
+      "airtable",
+      "chainLlm",
+      "lmChatOpenAi",
+      "outputParserAutofixing",
+      "outputParserStructured",
+      "scheduleTrigger",
+      "stickyNote",
+      "switch",
+      "toolHttpRequest",
+      "twilio",
+      "twilioTrigger"
+    ],
+    "triggerTypes": [
+      "scheduleTrigger",
+      "twilioTrigger"
+    ],
+    "credentialTypes": [
+      "airtableTokenApi",
+      "calApi",
+      "httpHeaderAuth",
+      "openAiApi",
+      "twilioApi"
+    ]
+  },
+  "bank-statement-transcription": {
+    "sourceName": "",
+    "nodeCount": 12,
+    "nodeTypes": [
+      "aggregate",
+      "chainLlm",
+      "code",
+      "compression",
+      "editImage",
+      "googleDrive",
+      "httpRequest",
+      "informationExtractor",
+      "lmChatGoogleGemini",
+      "manualTrigger",
+      "sort",
+      "stickyNote"
+    ],
+    "triggerTypes": [
+      "manualTrigger"
+    ],
+    "credentialTypes": [
+      "googleDriveOAuth2Api",
+      "googlePalmApi"
+    ]
+  },
+  "brand-voice-blog-writer": {
+    "sourceName": "",
+    "nodeCount": 18,
+    "nodeTypes": [
+      "aggregate",
+      "chainLlm",
+      "html",
+      "httpRequest",
+      "informationExtractor",
+      "limit",
+      "lmChatOpenAi",
+      "manualTrigger",
+      "markdown",
+      "merge",
+      "set",
+      "splitOut",
+      "stickyNote",
+      "wordpress"
+    ],
+    "triggerTypes": [
+      "manualTrigger"
+    ],
+    "credentialTypes": [
+      "openAiApi",
+      "wordpressApi"
+    ]
+  },
+  "branded-linkedin-posts": {
+    "sourceName": "Branded Linkedin Content",
+    "nodeCount": 18,
+    "nodeTypes": [
+      "agent",
+      "code",
+      "convertToFile",
+      "googleDrive",
+      "googleSheets",
+      "httpRequest",
+      "limit",
+      "linkedIn",
+      "lmChatAnthropic",
+      "outputParserStructured",
+      "scheduleTrigger",
+      "stickyNote",
+      "toolWorkflow"
+    ],
+    "triggerTypes": [
+      "scheduleTrigger"
+    ],
+    "credentialTypes": []
+  },
+  "chat-with-postgres": {
+    "sourceName": "Chat with Postgresql Database",
+    "nodeCount": 7,
+    "nodeTypes": [
+      "agent",
+      "chatTrigger",
+      "lmChatOpenAi",
+      "memoryBufferWindow",
+      "postgresTool",
+      "stickyNote"
+    ],
+    "triggerTypes": [
+      "chatTrigger"
+    ],
+    "credentialTypes": [
+      "openAiApi",
+      "postgres"
+    ]
+  },
+  "classify-lemlist-replies": {
+    "sourceName": "",
+    "nodeCount": 10,
+    "nodeTypes": [
+      "chainLlm",
+      "httpRequest",
+      "lemlist",
+      "lemlistTrigger",
+      "lmChatOpenAi",
+      "markdown",
+      "merge",
+      "outputParserStructured",
+      "slack",
+      "stickyNote",
+      "switch"
+    ],
+    "triggerTypes": [
+      "lemlistTrigger"
+    ],
+    "credentialTypes": []
+  },
+  "classify-linear-bugs": {
+    "sourceName": "",
+    "nodeCount": 10,
+    "nodeTypes": [
+      "filter",
+      "httpRequest",
+      "if",
+      "linear",
+      "linearTrigger",
+      "merge",
+      "openAi",
+      "set",
+      "slack",
+      "stickyNote"
+    ],
+    "triggerTypes": [
+      "linearTrigger"
+    ],
+    "credentialTypes": [
+      "linearApi",
+      "linearOAuth2Api",
+      "openAiApi",
+      "slackApi"
+    ]
+  },
+  "company-documents-chatbot": {
+    "sourceName": "RAG Workflow For Company Documents stored in Google Drive",
+    "nodeCount": 15,
+    "nodeTypes": [
+      "agent",
+      "chatTrigger",
+      "documentDefaultDataLoader",
+      "embeddingsGoogleGemini",
+      "googleDrive",
+      "googleDriveTrigger",
+      "lmChatGoogleGemini",
+      "memoryBufferWindow",
+      "stickyNote",
+      "textSplitterRecursiveCharacterTextSplitter",
+      "toolVectorStore",
+      "vectorStorePinecone"
+    ],
+    "triggerTypes": [
+      "chatTrigger",
+      "googleDriveTrigger"
+    ],
+    "credentialTypes": [
+      "googleDriveOAuth2Api",
+      "googlePalmApi",
+      "pineconeApi"
+    ]
+  },
+  "competitor-ad-creative-generator": {
+    "sourceName": "My workflow",
+    "nodeCount": 26,
+    "nodeTypes": [
+      "convertToFile",
+      "filter",
+      "googleDrive",
+      "googleSheets",
+      "httpRequest",
+      "limit",
+      "manualTrigger",
+      "openAi",
+      "set",
+      "splitInBatches",
+      "splitOut",
+      "stickyNote",
+      "wait"
+    ],
+    "triggerTypes": [
+      "manualTrigger"
+    ],
+    "credentialTypes": []
+  },
+  "competitor-research-agent": {
+    "sourceName": "",
+    "nodeCount": 30,
+    "nodeTypes": [
+      "agent",
+      "httpRequest",
+      "limit",
+      "lmChatOpenAi",
+      "manualTrigger",
+      "notion",
+      "outputParserStructured",
+      "removeDuplicates",
+      "set",
+      "splitInBatches",
+      "splitOut",
+      "stickyNote",
+      "toolHttpRequest",
+      "wait"
+    ],
+    "triggerTypes": [
+      "manualTrigger"
+    ],
+    "credentialTypes": [
+      "httpHeaderAuth",
+      "notionApi",
+      "openAiApi",
+      "serpApi"
+    ]
+  },
+  "customer-feedback-sentiment": {
+    "sourceName": "",
+    "nodeCount": 4,
+    "nodeTypes": [
+      "formTrigger",
+      "googleSheets",
+      "merge",
+      "openAi",
+      "stickyNote"
+    ],
+    "triggerTypes": [
+      "formTrigger"
+    ],
+    "credentialTypes": [
+      "googleSheetsOAuth2Api",
+      "openAiApi"
+    ]
+  },
+  "deep-research-agent": {
+    "sourceName": "",
+    "nodeCount": 66,
+    "nodeTypes": [
+      "aggregate",
+      "chainLlm",
+      "code",
+      "executeWorkflow",
+      "executeWorkflowTrigger",
+      "executionData",
+      "filter",
+      "form",
+      "formTrigger",
+      "httpRequest",
+      "if",
+      "lmChatGoogleGemini",
+      "lmChatOpenAi",
+      "markdown",
+      "merge",
+      "noOp",
+      "notion",
+      "outputParserStructured",
+      "set",
+      "splitInBatches",
+      "splitOut",
+      "stickyNote",
+      "switch"
+    ],
+    "triggerTypes": [
+      "executeWorkflowTrigger",
+      "formTrigger"
+    ],
+    "credentialTypes": [
+      "googlePalmApi",
+      "httpHeaderAuth",
+      "httpQueryAuth",
+      "notionApi",
+      "openAiApi"
+    ]
+  },
+  "ecommerce-email-routing": {
+    "sourceName": "Contact Form Text Classifier for eCommerce",
+    "nodeCount": 13,
+    "nodeTypes": [
+      "emailSend",
+      "formTrigger",
+      "googleSheets",
+      "lmChatOpenAi",
+      "stickyNote",
+      "textClassifier"
+    ],
+    "triggerTypes": [
+      "formTrigger"
+    ],
+    "credentialTypes": [
+      "googleSheetsOAuth2Api",
+      "openAiApi",
+      "smtp"
+    ]
+  },
+  "emails-to-notion-tasks": {
+    "sourceName": "mails2notion V2",
+    "nodeCount": 25,
+    "nodeTypes": [
+      "agent",
+      "airtable",
+      "code",
+      "filter",
+      "gmail",
+      "gmailTrigger",
+      "httpRequest",
+      "lmChatOpenAi",
+      "manualTrigger",
+      "noOp",
+      "outputParserStructured",
+      "set",
+      "stickyNote",
+      "toolCalculator"
+    ],
+    "triggerTypes": [
+      "gmailTrigger",
+      "manualTrigger"
+    ],
+    "credentialTypes": [
+      "airtableTokenApi",
+      "gmailOAuth2",
+      "openAiApi"
+    ]
+  },
+  "enrich-pipedrive-organizations": {
+    "sourceName": "piepdrive-test",
+    "nodeCount": 7,
+    "nodeTypes": [
+      "code",
+      "httpRequest",
+      "markdown",
+      "openAi",
+      "pipedrive",
+      "pipedriveTrigger",
+      "slack",
+      "stickyNote"
+    ],
+    "triggerTypes": [
+      "pipedriveTrigger"
+    ],
+    "credentialTypes": [
+      "openAiApi",
+      "pipedriveApi",
+      "slackOAuth2Api"
+    ]
+  },
+  "form-feedback-summary-report": {
+    "sourceName": "Summarize Google Sheets form feedback via OpenAI's GPT-4",
+    "nodeCount": 6,
+    "nodeTypes": [
+      "aggregate",
+      "gmail",
+      "googleSheets",
+      "manualTrigger",
+      "markdown",
+      "openAi",
+      "stickyNote"
+    ],
+    "triggerTypes": [
+      "manualTrigger"
+    ],
+    "credentialTypes": [
+      "gmailOAuth2",
+      "googleSheetsOAuth2Api",
+      "openAiApi"
+    ]
+  },
+  "gmail-auto-labelling": {
+    "sourceName": "",
+    "nodeCount": 11,
+    "nodeTypes": [
+      "aggregate",
+      "chainLlm",
+      "gmail",
+      "gmailTrigger",
+      "lmChatOpenAi",
+      "merge",
+      "outputParserStructured",
+      "set",
+      "splitOut",
+      "stickyNote"
+    ],
+    "triggerTypes": [
+      "gmailTrigger"
+    ],
+    "credentialTypes": [
+      "gmailOAuth2",
+      "openAiApi"
+    ]
+  },
+  "gmail-draft-replies": {
+    "sourceName": "Gmail AI auto-responder: create draft replies to incoming emails",
+    "nodeCount": 8,
+    "nodeTypes": [
+      "chainLlm",
+      "gmail",
+      "gmailTrigger",
+      "if",
+      "lmChatOpenAi",
+      "outputParserStructured",
+      "stickyNote"
+    ],
+    "triggerTypes": [
+      "gmailTrigger"
+    ],
+    "credentialTypes": [
+      "gmailOAuth2",
+      "openAiApi"
+    ]
+  },
+  "google-analytics-weekly-report": {
+    "sourceName": "Google Analytics: Weekly Report",
+    "nodeCount": 13,
+    "nodeTypes": [
+      "code",
+      "emailSend",
+      "googleAnalytics",
+      "openAi",
+      "scheduleTrigger",
+      "set",
+      "stickyNote",
+      "summarize",
+      "telegram",
+      "toolCalculator"
+    ],
+    "triggerTypes": [
+      "scheduleTrigger"
+    ],
+    "credentialTypes": [
+      "googleAnalyticsOAuth2",
+      "openAiApi",
+      "smtp",
+      "telegramApi"
+    ]
+  },
+  "human-in-the-loop-email-replies": {
+    "sourceName": "Very simple Human in the loop system email with AI e IMAP",
+    "nodeCount": 10,
+    "nodeTypes": [
+      "agent",
+      "chainSummarization",
+      "emailReadImap",
+      "emailSend",
+      "if",
+      "lmChatOpenAi",
+      "markdown",
+      "set",
+      "stickyNote"
+    ],
+    "triggerTypes": [],
+    "credentialTypes": [
+      "imap",
+      "openAiApi",
+      "smtp"
+    ]
+  },
+  "instagram-posts-from-trends": {
+    "sourceName": "Generate Instagram Content from Top Trends with AI Image Generation",
+    "nodeCount": 27,
+    "nodeTypes": [
+      "code",
+      "facebookGraphApi",
+      "httpRequest",
+      "if",
+      "merge",
+      "openAi",
+      "postgres",
+      "scheduleTrigger",
+      "set",
+      "splitInBatches",
+      "stickyNote",
+      "telegram"
+    ],
+    "triggerTypes": [
+      "scheduleTrigger"
+    ],
+    "credentialTypes": [
+      "facebookGraphApi",
+      "openAiApi",
+      "postgres",
+      "telegramApi"
+    ]
+  },
+  "invoice-data-extraction": {
+    "sourceName": "",
+    "nodeCount": 17,
+    "nodeTypes": [
+      "aggregate",
+      "chainLlm",
+      "gmail",
+      "gmailTrigger",
+      "googleSheets",
+      "httpRequest",
+      "if",
+      "lmOpenAi",
+      "merge",
+      "outputParserStructured",
+      "set",
+      "splitOut",
+      "stickyNote",
+      "switch",
+      "wait"
+    ],
+    "triggerTypes": [
+      "gmailTrigger"
+    ],
+    "credentialTypes": [
+      "gmailOAuth2",
+      "googleSheetsOAuth2Api",
+      "httpHeaderAuth",
+      "openAiApi"
+    ]
+  },
+  "it-help-desk-slack-bot": {
+    "sourceName": "",
+    "nodeCount": 11,
+    "nodeTypes": [
+      "agent",
+      "if",
+      "lmChatOpenAi",
+      "memoryBufferWindow",
+      "noOp",
+      "respondToWebhook",
+      "slack",
+      "stickyNote",
+      "toolWorkflow",
+      "webhook"
+    ],
+    "triggerTypes": [
+      "webhook"
+    ],
+    "credentialTypes": [
+      "openAiApi",
+      "slackApi"
+    ]
+  },
+  "jira-issue-resolution-assistant": {
+    "sourceName": "",
+    "nodeCount": 29,
+    "nodeTypes": [
+      "agent",
+      "aggregate",
+      "chainLlm",
+      "executeWorkflow",
+      "executeWorkflowTrigger",
+      "if",
+      "jira",
+      "jiraTool",
+      "lmChatOpenAi",
+      "notionTool",
+      "outputParserStructured",
+      "scheduleTrigger",
+      "sentimentAnalysis",
+      "set",
+      "slack",
+      "stickyNote",
+      "textClassifier"
+    ],
+    "triggerTypes": [
+      "executeWorkflowTrigger",
+      "scheduleTrigger"
+    ],
+    "credentialTypes": [
+      "jiraSoftwareCloudApi",
+      "notionApi",
+      "openAiApi",
+      "slackApi"
+    ]
+  },
+  "job-applicant-scoring": {
+    "sourceName": "HR Job Posting and Evaluation with AI",
+    "nodeCount": 30,
+    "nodeTypes": [
+      "agent",
+      "airtable",
+      "airtableTool",
+      "emailSend",
+      "extractFromFile",
+      "form",
+      "formTrigger",
+      "googleCalendarTool",
+      "googleDrive",
+      "if",
+      "lmChatOpenAi",
+      "openAi",
+      "outputParserStructured",
+      "set",
+      "stickyNote"
+    ],
+    "triggerTypes": [
+      "formTrigger"
+    ],
+    "credentialTypes": [
+      "airtableTokenApi",
+      "googleCalendarOAuth2Api",
+      "googleDriveOAuth2Api",
+      "openAiApi",
+      "smtp"
+    ]
+  },
+  "meeting-transcript-follow-ups": {
+    "sourceName": "",
+    "nodeCount": 19,
+    "nodeTypes": [
+      "agent",
+      "executeWorkflowTrigger",
+      "extractFromFile",
+      "googleCalendar",
+      "googleDrive",
+      "httpRequest",
+      "lmChatOpenAi",
+      "manualTrigger",
+      "outputParserStructured",
+      "set",
+      "splitOut",
+      "stickyNote",
+      "switch",
+      "toolWorkflow"
+    ],
+    "triggerTypes": [
+      "executeWorkflowTrigger",
+      "manualTrigger"
+    ],
+    "credentialTypes": [
+      "googleCalendarOAuth2Api",
+      "googleDriveOAuth2Api",
+      "googleOAuth2Api",
+      "openAiApi"
+    ]
+  },
+  "news-monitoring-slack-alerts": {
+    "sourceName": "AI-Powered Information Monitoring with OpenAI, Google Sheets, Jina AI and Slack",
+    "nodeCount": 18,
+    "nodeTypes": [
+      "chainLlm",
+      "code",
+      "googleSheets",
+      "httpRequest",
+      "if",
+      "lmChatOpenAi",
+      "noOp",
+      "rssFeedRead",
+      "scheduleTrigger",
+      "set",
+      "slack",
+      "stickyNote",
+      "textClassifier"
+    ],
+    "triggerTypes": [
+      "scheduleTrigger"
+    ],
+    "credentialTypes": [
+      "googleApi",
+      "openAiApi",
+      "slackOAuth2Api"
+    ]
+  },
+  "outlook-email-assistant": {
+    "sourceName": "Microsoft Outlook AI Email Assistant",
+    "nodeCount": 20,
+    "nodeTypes": [
+      "agent",
+      "airtable",
+      "if",
+      "lmChatOpenAi",
+      "manualTrigger",
+      "markdown",
+      "merge",
+      "microsoftOutlook",
+      "mondayCom",
+      "outputParserStructured",
+      "scheduleTrigger",
+      "set",
+      "splitInBatches",
+      "stickyNote"
+    ],
+    "triggerTypes": [
+      "manualTrigger",
+      "scheduleTrigger"
+    ],
+    "credentialTypes": [
+      "airtableTokenApi",
+      "microsoftOutlookOAuth2Api",
+      "mondayComApi",
+      "openAiApi"
+    ]
+  },
+  "pdf-data-extraction": {
+    "sourceName": "",
+    "nodeCount": 6,
+    "nodeTypes": [
+      "extractFromFile",
+      "googleDrive",
+      "httpRequest",
+      "manualTrigger",
+      "set",
+      "stickyNote"
+    ],
+    "triggerTypes": [
+      "manualTrigger"
+    ],
+    "credentialTypes": [
+      "anthropicApi",
+      "googleDriveOAuth2Api",
+      "googlePalmApi"
+    ]
+  },
+  "perplexity-research-to-html": {
+    "sourceName": "🔍🛠️Perplexity Researcher to HTML Web Page",
+    "nodeCount": 38,
+    "nodeTypes": [
+      "agent",
+      "chainLlm",
+      "executeWorkflowTrigger",
+      "httpRequest",
+      "if",
+      "lmChatOpenAi",
+      "noOp",
+      "outputParserStructured",
+      "respondToWebhook",
+      "set",
+      "stickyNote",
+      "telegram",
+      "toolWorkflow",
+      "webhook"
+    ],
+    "triggerTypes": [
+      "executeWorkflowTrigger",
+      "webhook"
+    ],
+    "credentialTypes": [
+      "httpCustomAuth",
+      "httpHeaderAuth",
+      "openAiApi",
+      "telegramApi"
+    ]
+  },
+  "qualify-appointment-requests": {
+    "sourceName": "",
+    "nodeCount": 19,
+    "nodeTypes": [
+      "chainLlm",
+      "executeWorkflow",
+      "executeWorkflowTrigger",
+      "form",
+      "formTrigger",
+      "gmail",
+      "googleCalendar",
+      "if",
+      "lmChatOpenAi",
+      "set",
+      "stickyNote",
+      "textClassifier"
+    ],
+    "triggerTypes": [
+      "executeWorkflowTrigger",
+      "formTrigger"
+    ],
+    "credentialTypes": [
+      "gmailOAuth2",
+      "googleCalendarOAuth2Api",
+      "openAiApi"
+    ]
+  },
+  "qualify-cold-email-replies": {
+    "sourceName": "",
+    "nodeCount": 10,
+    "nodeTypes": [
+      "code",
+      "gmailTrigger",
+      "if",
+      "openAi",
+      "pipedrive",
+      "set",
+      "stickyNote"
+    ],
+    "triggerTypes": [
+      "gmailTrigger"
+    ],
+    "credentialTypes": [
+      "openAiApi",
+      "pipedriveApi"
+    ]
+  },
+  "qualify-leads-google-sheets": {
+    "sourceName": "Qualify new leads in Google Sheets via OpenAI's GPT-4",
+    "nodeCount": 5,
+    "nodeTypes": [
+      "googleSheets",
+      "googleSheetsTrigger",
+      "merge",
+      "openAi",
+      "set",
+      "stickyNote"
+    ],
+    "triggerTypes": [
+      "googleSheetsTrigger"
+    ],
+    "credentialTypes": [
+      "googleSheetsOAuth2Api",
+      "googleSheetsTriggerOAuth2Api",
+      "openAiApi"
+    ]
+  },
+  "remove-pii-from-csv": {
+    "sourceName": "",
+    "nodeCount": 9,
+    "nodeTypes": [
+      "code",
+      "extractFromFile",
+      "googleDrive",
+      "googleDriveTrigger",
+      "merge",
+      "openAi",
+      "splitOut",
+      "stickyNote"
+    ],
+    "triggerTypes": [
+      "googleDriveTrigger"
+    ],
+    "credentialTypes": [
+      "googleDriveOAuth2Api",
+      "openAiApi"
+    ]
+  },
+  "resume-screening-vision-ai": {
+    "sourceName": "",
+    "nodeCount": 8,
+    "nodeTypes": [
+      "chainLlm",
+      "editImage",
+      "googleDrive",
+      "httpRequest",
+      "if",
+      "lmChatGoogleGemini",
+      "manualTrigger",
+      "outputParserStructured",
+      "stickyNote"
+    ],
+    "triggerTypes": [
+      "manualTrigger"
+    ],
+    "credentialTypes": [
+      "googleDriveOAuth2Api",
+      "googlePalmApi"
+    ]
+  },
+  "rfp-response-drafting": {
+    "sourceName": "",
+    "nodeCount": 13,
+    "nodeTypes": [
+      "chainLlm",
+      "extractFromFile",
+      "gmail",
+      "googleDocs",
+      "lmChatOpenAi",
+      "openAi",
+      "outputParserItemList",
+      "set",
+      "slack",
+      "splitInBatches",
+      "stickyNote",
+      "webhook"
+    ],
+    "triggerTypes": [
+      "webhook"
+    ],
+    "credentialTypes": [
+      "gmailOAuth2",
+      "googleDocsOAuth2Api",
+      "openAiApi",
+      "slackApi"
+    ]
+  },
+  "sales-meeting-prep-whatsapp": {
+    "sourceName": "",
+    "nodeCount": 47,
+    "nodeTypes": [
+      "aggregate",
+      "chainLlm",
+      "executeWorkflow",
+      "executeWorkflowTrigger",
+      "gmail",
+      "googleCalendar",
+      "html",
+      "httpRequest",
+      "if",
+      "informationExtractor",
+      "lmChatOpenAi",
+      "merge",
+      "scheduleTrigger",
+      "set",
+      "splitOut",
+      "stickyNote",
+      "switch",
+      "whatsApp"
+    ],
+    "triggerTypes": [
+      "executeWorkflowTrigger",
+      "scheduleTrigger"
+    ],
+    "credentialTypes": [
+      "gmailOAuth2",
+      "googleCalendarOAuth2Api",
+      "httpQueryAuth",
+      "openAiApi",
+      "whatsAppApi"
+    ]
+  },
+  "seo-seed-keywords": {
+    "sourceName": "",
+    "nodeCount": 7,
+    "nodeTypes": [
+      "agent",
+      "aggregate",
+      "lmChatAnthropic",
+      "manualTrigger",
+      "noOp",
+      "set",
+      "splitOut",
+      "stickyNote"
+    ],
+    "triggerTypes": [
+      "manualTrigger"
+    ],
+    "credentialTypes": []
+  },
+  "slack-support-to-linear-tickets": {
+    "sourceName": "",
+    "nodeCount": 12,
+    "nodeTypes": [
+      "aggregate",
+      "chainLlm",
+      "if",
+      "linear",
+      "lmChatOpenAi",
+      "merge",
+      "outputParserStructured",
+      "scheduleTrigger",
+      "set",
+      "slack",
+      "stickyNote"
+    ],
+    "triggerTypes": [
+      "scheduleTrigger"
+    ],
+    "credentialTypes": [
+      "linearApi",
+      "openAiApi",
+      "slackApi"
+    ]
+  },
+  "support-issue-sentiment-tracking": {
+    "sourceName": "",
+    "nodeCount": 14,
+    "nodeTypes": [
+      "airtable",
+      "airtableTrigger",
+      "graphql",
+      "informationExtractor",
+      "lmChatOpenAi",
+      "removeDuplicates",
+      "scheduleTrigger",
+      "set",
+      "slack",
+      "splitInBatches",
+      "splitOut",
+      "stickyNote",
+      "switch"
+    ],
+    "triggerTypes": [
+      "airtableTrigger",
+      "scheduleTrigger"
+    ],
+    "credentialTypes": [
+      "airtableTokenApi",
+      "httpHeaderAuth",
+      "openAiApi",
+      "slackApi"
+    ]
+  },
+  "telegram-ai-assistant": {
+    "sourceName": "Agentic Telegram AI bot with LangChain nodes and new tools",
+    "nodeCount": 7,
+    "nodeTypes": [
+      "agent",
+      "lmChatOpenAi",
+      "memoryBufferWindow",
+      "stickyNote",
+      "telegram",
+      "telegramTool",
+      "telegramTrigger",
+      "toolHttpRequest"
+    ],
+    "triggerTypes": [
+      "telegramTrigger"
+    ],
+    "credentialTypes": [
+      "openAiApi",
+      "telegramApi"
+    ]
+  },
+  "trustpilot-review-sentiment": {
+    "sourceName": "Scrape Trustpilot Reviews with DeepSeek, Analyze Sentiment with OpenAI",
+    "nodeCount": 16,
+    "nodeTypes": [
+      "googleSheets",
+      "html",
+      "httpRequest",
+      "if",
+      "informationExtractor",
+      "limit",
+      "lmChatOpenAi",
+      "manualTrigger",
+      "sentimentAnalysis",
+      "set",
+      "splitOut",
+      "stickyNote"
+    ],
+    "triggerTypes": [
+      "manualTrigger"
+    ],
+    "credentialTypes": [
+      "googleSheetsOAuth2Api",
+      "openAiApi"
+    ]
+  },
+  "website-faq-enrichment": {
+    "sourceName": "",
+    "nodeCount": 29,
+    "nodeTypes": [
+      "aggregate",
+      "chainLlm",
+      "executeWorkflow",
+      "executeWorkflowTrigger",
+      "googleDrive",
+      "googleSheets",
+      "httpRequest",
+      "if",
+      "lmChatOpenAi",
+      "manualTrigger",
+      "set",
+      "splitInBatches",
+      "splitOut",
+      "stickyNote",
+      "strapi",
+      "switch",
+      "webflow",
+      "wordpress"
+    ],
+    "triggerTypes": [
+      "executeWorkflowTrigger",
+      "manualTrigger"
+    ],
+    "credentialTypes": [
+      "wordpressApi"
+    ]
+  },
+  "whatsapp-business-rag-chatbot": {
+    "sourceName": "Business WhatsApp AI RAG Chatbot",
+    "nodeCount": 18,
+    "nodeTypes": [
+      "agent",
+      "documentDefaultDataLoader",
+      "embeddingsOpenAi",
+      "googleDrive",
+      "httpRequest",
+      "if",
+      "lmChatOpenAi",
+      "manualTrigger",
+      "memoryBufferWindow",
+      "respondToWebhook",
+      "stickyNote",
+      "textSplitterTokenSplitter",
+      "vectorStoreQdrant",
+      "webhook",
+      "whatsApp"
+    ],
+    "triggerTypes": [
+      "manualTrigger",
+      "webhook"
+    ],
+    "credentialTypes": [
+      "googleDriveOAuth2Api",
+      "httpHeaderAuth",
+      "openAiApi",
+      "qdrantApi",
+      "whatsAppApi"
+    ]
+  },
+  "woocommerce-support-agent": {
+    "sourceName": "",
+    "nodeCount": 31,
+    "nodeTypes": [
+      "agent",
+      "aggregate",
+      "chatTrigger",
+      "code",
+      "dhl",
+      "executeWorkflowTrigger",
+      "httpRequest",
+      "if",
+      "lmChatOpenAi",
+      "memoryBufferWindow",
+      "merge",
+      "respondToWebhook",
+      "set",
+      "splitOut",
+      "stickyNote",
+      "toolWorkflow",
+      "webhook",
+      "wooCommerce"
+    ],
+    "triggerTypes": [
+      "chatTrigger",
+      "executeWorkflowTrigger",
+      "webhook"
+    ],
+    "credentialTypes": [
+      "dhlApi",
+      "openAiApi",
+      "wooCommerceApi"
+    ]
+  },
+  "youtube-channel-strategist": {
+    "sourceName": "Youtube Strategist",
+    "nodeCount": 44,
+    "nodeTypes": [
+      "agent",
+      "aggregate",
+      "filter",
+      "formTrigger",
+      "googleSheets",
+      "httpRequest",
+      "limit",
+      "lmChatOpenRouter",
+      "merge",
+      "openAi",
+      "outputParserStructured",
+      "scheduleTrigger",
+      "set",
+      "slack",
+      "sort",
+      "splitInBatches",
+      "splitOut",
+      "stickyNote"
+    ],
+    "triggerTypes": [
+      "formTrigger",
+      "scheduleTrigger"
+    ],
+    "credentialTypes": [
+      "googleSheetsOAuth2Api",
+      "openAiApi",
+      "openRouterApi",
+      "slackApi"
+    ]
+  }
+}

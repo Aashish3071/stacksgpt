@@ -1,0 +1,69 @@
+---
+title: "How to Build an Inbox Manager Agent with Automation"
+slug: "test-inbox-manager-agent"
+summary: "Turn your inbox into a repeatable system: triage new mail, queue reply drafts for approval, track follow-ups and get one daily digest."
+outcome: "An inbox agent that sorts, drafts and tracks follow-ups while you approve what gets sent"
+goal: "manage-email-and-admin"
+roles: ["founder", "operations", "freelancer-agency"]
+tools: ["gmail", "openai"]
+difficulty: "intermediate"
+setupTime: "half-day"
+costNotes: "Uses your existing model and email accounts. No extra subscription required."
+seoTitle: "Build an Inbox Manager Agent with Automation"
+metaDescription: "Step-by-step inbox blueprint: triage email, draft replies for approval, track follow-ups and get a daily digest. Includes templates and starter prompt."
+keywords: ["inbox manager", "ai inbox manager", "email triage agent", "gmail ai agent"]
+references:
+  - title: "Hermes email inbox triage skill"
+    url: "https://github.com/NousResearch/hermes-agent/blob/main/skills/email/email-inbox-triage/SKILL.md"
+---
+
+## The Problem
+
+Your inbox mixes urgent client emails with newsletters and notifications, and sorting it by hand eats the start of every day.
+
+## What You'll Get
+
+- Incoming email sorted into clear groups.
+- Reply drafts waiting for your approval.
+- One morning summary of what needs attention.
+
+## How It Works
+
+1. The assistant reads new email.
+2. It sorts each message and drafts replies where needed.
+3. You review the drafts and the morning summary.
+
+## What You Need
+
+- An email account.
+- An AI model account.
+
+<!-- gate -->
+
+## Build It Step by Step
+
+### Step 1: Connect Your Email
+Add your email credentials as environment variables rather than typing them into files.
+
+### Step 2: Define the Rules
+List which senders need attention and which newsletters can be archived.
+
+## Copy-Paste Prompt
+
+```text
+Group my unread messages into urgent, review and archive. Draft replies for the review group. Do not send anything.
+```
+
+## Good to Know
+
+- The assistant never sends email on its own.
+
+## Technical Details
+
+```yaml
+categories:
+  urgent:
+    - client inquiries
+  digest:
+    - newsletters
+```

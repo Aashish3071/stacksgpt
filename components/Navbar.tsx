@@ -6,6 +6,7 @@ import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import Logo from "@/components/Logo";
 import SearchModal from "@/components/SearchModal";
+import SubscribeModal from "@/components/SubscribeModal";
 
 const NEWS_CATEGORIES = [
   { name: "Productivity", slug: "productivity", desc: "Workflows & tools" },
@@ -24,6 +25,7 @@ export default function Navbar({
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [subscribeOpen, setSubscribeOpen] = useState(false);
   const [newsDropdownOpen, setNewsDropdownOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const newsDropdownRef = useRef<HTMLDivElement>(null);
@@ -248,6 +250,14 @@ export default function Navbar({
               </svg>
             </button>
 
+            <button
+              type="button"
+              onClick={() => setSubscribeOpen(true)}
+              className="hidden sm:inline-flex min-h-[36px] items-center rounded-md px-3 py-2 font-sans text-[13px] font-medium text-ink transition-colors hover:text-accent"
+            >
+              Subscribe
+            </button>
+
             {/* Desktop Priority CTA: Talk to Us (Build Custom Automation or AI tools) */}
             <Link
               href="/contact"
@@ -256,7 +266,6 @@ export default function Navbar({
               title="Talk to us to build custom Automation or AI tools"
             >
               <span>Talk to Us</span>
-              <span className="text-[11px] font-normal text-surface/80">· Custom Automation &amp; AI</span>
             </Link>
 
             {/* Mobile Hamburger Toggle */}
@@ -449,6 +458,16 @@ export default function Navbar({
 
                 {/* Bottom Actions: Priority Talk to Us Button + Social */}
                 <div className="border-t border-rule pt-5 mt-6 space-y-3 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMobileOpen(false);
+                      setSubscribeOpen(true);
+                    }}
+                    className="w-full rounded-xl border border-ink py-3 text-center font-sans text-sm font-semibold text-ink transition-colors hover:bg-paper min-h-[44px] flex items-center justify-center"
+                  >
+                    Subscribe to the newsletter
+                  </button>
                   <Link
                     href="/contact"
                     prefetch={true}
@@ -487,6 +506,10 @@ export default function Navbar({
       <SearchModal
         isOpen={searchOpen}
         onClose={() => setSearchOpen(false)}
+      />
+      <SubscribeModal
+        isOpen={subscribeOpen}
+        onClose={() => setSubscribeOpen(false)}
       />
     </>
   );

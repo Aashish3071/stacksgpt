@@ -1,105 +1,130 @@
 ---
-title: "Build an Audience Growth Prediction and Trend Forecasting Engine"
+title: "Track Your Audience Growth and Get AI Content Ideas"
 slug: "audience-growth-prediction"
-summary: "Aggregate cross-platform follower analytics, run predictive growth regression models with OpenAI, and identify emerging high-retention content angles."
-outcome: "A data pipeline that tracks follower momentum across platforms, projects monthly audience growth trajectories, and recommends breakout content formats"
+summary: "Record cross-platform follower snapshots, project growth trends with a code step, and use OpenAI to suggest content angles worth testing."
+outcome: "A running record of your follower growth across channels, a simple projection of where it is heading, and AI suggestions for content experiments to try"
 goal: "make-content"
 category: "Marketing"
 roles: ["marketer", "founder", "operations"]
 tools: ["n8n", "openai", "google-sheets", "linkedin"]
 difficulty: "intermediate"
 setupTime: "half-day"
-costNotes: "Google Sheets and social API reads operate within standard free tiers. OpenAI evaluation token costs run under $0.05 per weekly forecast."
+costNotes: "Social platform APIs and data providers each have their own pricing and quotas. OpenAI bills per use for each analysis."
 heroImage: "/images/blueprints/2026-09-13-audience-growth-prediction.png"
-heroImageAlt: "Multi-channel audience growth prediction and engagement forecasting architecture"
-seoTitle: "Audience Growth Prediction and Trend Forecasting Engine"
-metaDescription: "Forecast social audience growth curves, analyze retention metrics with AI, and predict high-performing content themes using this production blueprint."
-keywords: ["audience growth prediction", "content trend forecasting", "social media analytics", "predictive audience modeling"]
+heroImageAlt: "Illustration of a marketer reviewing audience growth charts across social media channels"
+seoTitle: "Track Your Audience Growth and Get AI Content Ideas"
+metaDescription: "Track follower history, project simple growth trends from your own data, and use AI to suggest content experiments to test next."
+keywords: ["audience growth tracking", "content trend forecasting", "social media analytics", "ai content ideas"]
 references:
   - title: "LinkedIn Community Management API Documentation"
     url: "https://learn.microsoft.com/en-us/linkedin/marketing/community-management/shares/posts-api"
-  - title: "OpenAI Mathematical and Statistical Reasoning"
+  - title: "OpenAI Prompt Engineering Guide"
     url: "https://platform.openai.com/docs/guides/prompt-engineering"
   - title: "n8n Schedule and Code Node Reference"
     url: "https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.code/"
 ---
 
-## What You're Building
+## The Problem
 
-An audience growth prediction and content trend forecasting engine. Most marketing teams look backwards, reviewing follower counts and engagement rates days after campaigns have concluded.
+Most teams check follower counts after the fact. By the time you notice growth has stalled, weeks of posting have gone by, and it is hard to tell which kinds of posts actually helped. Keeping a spreadsheet up to date by hand rarely lasts.
 
-This workflow takes historical follower snapshots, post impressions, and comment velocity from LinkedIn, Twitter/X, and YouTube. A Python or JavaScript Code node calculates compounding growth rates and 30-day forward projections. A language model reasoning step identifies which hook formats, formats, and topics correlate with breakout subscriber growth, generating a forward-looking editorial forecast for your content creators.
+## What You'll Get
 
-## What Predictive Modeling and Language Models Can Handle
+- A running record of your followers across channels in a Google Sheet.
+- A simple projection of where your audience is heading if the recent trend continues.
+- AI suggestions for content experiments to try next, clearly labelled as ideas to test rather than predictions.
 
-Manual spreadsheets require hours of formula updating and lack qualitative trend synthesis. Automating this system provides:
+## How It Works
 
-1. **Automated Follower Snapshots**: Collects daily follower totals and net additions across brand and founder profiles.
-2. **Growth Trajectory Modeling**: Calculates moving averages, momentum velocity, and projected end-of-quarter subscriber counts.
-3. **Format Correlation Analysis**: Isolates which specific asset structures (carousels, long-form teardowns, video shorts) yield the highest follower conversion.
-4. **Editorial Focus Directives**: Recommends upcoming editorial themes with high predicted reach based on recent audience acceleration.
+1. Every day, the workflow records your follower numbers and recent post stats.
+2. A calculation step works out your growth rate and extends the trend forward.
+3. AI reviews the numbers and your recent top posts and suggests what to try next.
 
 ## What You Need
 
-1. Social platform APIs or scraping webhooks (LinkedIn API, Twitter API v2, or RapidAPI data endpoints).
-2. A Google Sheets workbook to record historical metrics and forward forecasts.
-3. An OpenAI API key with access to GPT-4o.
-4. An active n8n instance.
+- Access to your social platform data, through each platform's API or a data provider
+- A Google Sheet to store the history
+- An OpenAI account
+- An n8n account to run the workflow
+- Confidence building a workflow from an example, because there is no ready-made file for this one yet
+- About half a day to set it up
 
-## The Build Blueprint
+<!-- gate -->
+
+## Build It Step by Step
+
+1. **Create your sheet** with one tab for historical metrics and one for projections.
+2. **Connect your data sources.** In n8n, add steps that fetch follower counts and post stats for each channel you track.
+3. **Connect Google Sheets and OpenAI** by adding their credentials in n8n.
+4. **Add the calculation step** using the configuration in Technical Details below.
+5. **Add the AI step** and paste in the prompt below.
+6. **Save the results** to your projections tab.
+7. **Run it once** to record your starting numbers, then activate the daily schedule.
+
+## Copy-Paste Prompt
+
+Use this in the AI step:
+
+```text
+You are a senior audience growth consultant analyzing multi-channel performance data for a technology executive.
+
+Data inputs:
+Current Audience: {{ $json.followers }}
+Weekly Growth Rate: {{ $json.weeklyGrowthRate }}
+Projected Audience (short term): {{ $json.day30Projected }}
+Projected Audience (medium term): {{ $json.day90Projected }}
+Top Recent Themes: {{ $json.topThemes }}
+
+Generate a structured forecast in JSON format:
+{
+  "trajectoryAssessment": "Accelerating" | "Steady" | "Plateauing" | "Declining",
+  "milestoneEstimate": "<estimated date for the next follower milestone I set, with the assumption used>",
+  "possibleDrivers": ["<hypothesis>", "<hypothesis>"],
+  "contentExperimentRecommendations": [
+    {
+      "format": "<e.g. Technical Deep Dive / Data Teardown / Founder Essay>",
+      "hypothesis": "<why this format might increase follower growth>"
+    }
+  ]
+}
+
+Only use the data provided. Present explanations as hypotheses, not facts.
+```
+
+## Good to Know
+
+- **Projections are estimates.** They extend your recent trend and cannot account for algorithm changes, viral posts or paid campaigns.
+- **Patterns are not proof.** If a type of post coincides with faster growth, treat that as an idea to test, not a guaranteed result.
+- **Ignore one-off spikes.** Leave posts far above your normal range out of the baseline so projections stay realistic.
+- **Be gentle with APIs.** Space out requests so you stay within each platform's limits.
+- **Looking for a ready-made file?** The [YouTube Channel Strategist](/blueprints/templates/youtube-channel-strategist) template researches what performs in a YouTube niche.
+
+## Technical Details
+
+No complete, importable workflow ships with this blueprint yet. The excerpt below shows how the key steps are configured. You still need to add the steps that fetch your channel data and connect everything.
 
 ```
-[Schedule Trigger: Daily Midnight UTC]
+[Schedule Trigger: Daily]
                    │
                    ▼
 [HTTP Request: Fetch Channel Follower & Post Data]
                    │
                    ▼
-[Code Node: Compute Compounding Rates & 30D Trends]
+[Code Node: Compute Growth Rates & Projections]
                    │
                    ▼
-[OpenAI Model: Forecast Trends & Content Directives]
+[OpenAI Model: Interpret Trends & Suggest Experiments]
                    │
                    ▼
 [Google Sheets: Record Projections & Weekly Brief]
 ```
 
-<!-- gate -->
-
-## How to Set It Up
-
-1. Create a Google Sheet with tabs for Historical Metrics and Growth Forecasts.
-2. In n8n, set up authentication for your social data sources or RapidAPI connectors.
-3. Connect your Google Sheets service account and OpenAI credentials.
-4. Import the provided workflow JSON template into n8n.
-5. In the Code node, verify the projection formulas for your current target milestones.
-6. Trigger a manual execution to populate baseline metrics and generate your first forecast briefing.
-
-## The Core Workflows
-
-1. **Data Harvesting**: Fetches total followers, post impressions, profile views, and engagement percentages across tracked channels.
-2. **Velocity Calculations**: Subtracts previous period baselines to calculate 7-day rolling growth rates and retention efficiency.
-3. **Trend Extrapolation**: Runs linear and compounding regression projections to estimate 30-day and 90-day audience size.
-4. **Strategic Synthesis**: GPT-4o analyzes the quantitative growth figures alongside recent top-performing topics to explain what drove the inflection points.
-5. **Briefing Output**: Appends the projections to Google Sheets and dispatches an executive summary to marketing leadership.
-
-## What Stays Under Your Control
-
-- **Projection Models**: Switch between conservative linear models or aggressive compounding curves in the Code node.
-- **Milestone Goals**: Define target quarterly thresholds to track whether your channels are ahead of or behind schedule.
-- **Channel Weighting**: Prioritize high-converting business channels like LinkedIn over top-of-funnel viral channels.
-
-## Templates
-
-Below is the verified n8n workflow definition ready for import:
-
 ```json
 {
-  "name": "Audience Growth Prediction Engine",
+  "name": "Audience Growth Projection (excerpt)",
   "nodes": [
     {
-      "id": "ag01-1111-4444-8888-abcdef123456",
-      "name": "Daily Midnight Trigger",
+      "name": "Daily Trigger",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
       "position": [200, 300],
@@ -107,45 +132,40 @@ Below is the verified n8n workflow definition ready for import:
         "rule": {
           "interval": [
             {
-              "field": "days",
-              "triggerAtHour": 0
+              "field": "days"
             }
           ]
         }
       }
     },
     {
-      "id": "ag01-2222-4444-8888-abcdef123456",
       "name": "Calculate Growth Projections",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [440, 300],
       "parameters": {
         "language": "javaScript",
-        "jsCode": "const items = $input.all();\nconst currentFollowers = items[0].json.followers || 10000;\nconst weeklyGrowthRate = items[0].json.growthRate || 0.025;\nconst day30Projected = Math.round(currentFollowers * Math.pow(1 + weeklyGrowthRate / 7, 30));\nconst day90Projected = Math.round(currentFollowers * Math.pow(1 + weeklyGrowthRate / 7, 90));\nreturn [{ json: { currentFollowers, weeklyGrowthRate, day30Projected, day90Projected } }];"
+        "jsCode": "const { followers, weeklyGrowthRate } = $input.first().json;\nif (typeof followers !== 'number' || typeof weeklyGrowthRate !== 'number') {\n  throw new Error('followers and weeklyGrowthRate must come from your data source.');\n}\nconst dailyRate = weeklyGrowthRate / 7;\nconst project = (days) => Math.round(followers * Math.pow(1 + dailyRate, days));\nreturn [{ json: { followers, weeklyGrowthRate, day30Projected: project(30), day90Projected: project(90) } }];"
       }
     },
     {
-      "id": "ag01-3333-4444-8888-abcdef123456",
-      "name": "Generate Predictive Analysis",
+      "name": "Interpret Trends",
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [680, 300],
       "parameters": {
-        "modelId": "gpt-4o",
         "messages": {
           "values": [
             {
               "role": "system",
-              "content": "You are a growth modeling strategist. Review the current follower numbers and projected trajectory. Provide an executive summary and 3 high-impact content themes to accelerate growth."
+              "content": "You are a growth strategist. Review the follower numbers and projected trajectory. Summarize the trend and suggest content experiments to test. Label every explanation as a hypothesis."
             }
           ]
         }
       }
     },
     {
-      "id": "ag01-4444-4444-8888-abcdef123456",
-      "name": "Save Forecast to Sheets",
+      "name": "Save Projection to Sheets",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
       "position": [920, 300],
@@ -158,43 +178,3 @@ Below is the verified n8n workflow definition ready for import:
   ]
 }
 ```
-
-## Starter Prompt
-
-Use this prompt in the analysis node to calibrate your strategic content forecasts:
-
-```text
-You are a senior audience growth consultant analyzing multi-channel performance data for a technology executive.
-
-Data inputs:
-Current Audience: {{ $json.currentFollowers }}
-Weekly Growth Rate: {{ $json.weeklyGrowthRate * 100 }}%
-30-Day Projection: {{ $json.day30Projected }}
-90-Day Projection: {{ $json.day90Projected }}
-Top Recent Themes: {{ $json.topThemes }}
-
-Generate a structured strategic forecast in JSON format:
-{
-  "trajectoryAssessment": "Accelerating" | "Steady" | "Plateauing" | "Declining",
-  "milestonePrediction": "<date estimate when next 10k milestone will be reached>",
-  "growthCatalysts": ["<driver 1>", "<driver 2>"],
-  "contentExperimentRecommendations": [
-    {
-      "format": "<e.g. Technical Deep Dive / Data Teardown / Founder Essay>",
-      "hypothesis": "<why this format will increase follower conversion rate>"
-    }
-  ]
-}
-```
-
-## Customize It
-
-1. **Email Newsletter Integration**: Sync Beehiiv or Substack subscriber metrics to compare social impressions against email list conversion.
-2. **Sentiment Weighting**: Incorporate positive versus neutral comment sentiment to adjust predicted retention scores.
-3. **Multi-Creator Benchmarking**: Compare your executive team growth rates against key competitors in the same vertical.
-
-## Keep It Reliable
-
-1. **Outlier Dampening**: Exclude viral anomalies (e.g. single posts with 100x average views) from baseline calculations to prevent unrealistic forecasts.
-2. **API Rate Quotas**: Stagger social API scraping requests across 3-minute intervals to stay safely below platform rate limits.
-3. **Data Freshness Checks**: Ensure the timestamp of retrieved social metrics is within 24 hours before computing moving averages.

@@ -1,0 +1,242 @@
+[
+  {
+    "slug": "qualify-leads-google-sheets",
+    "title": "Qualify New Leads in Google Sheets with OpenAI",
+    "source": "All n8n Guides, templates & extra tools./n8n templates v2 200+/Google_Drive_and_Google_Sheets/Qualify new leads in Google Sheets via OpenAI_s GPT-4.txt"
+  },
+  {
+    "slug": "enrich-pipedrive-organizations",
+    "title": "Enrich New Pipedrive Organizations and Notify Slack",
+    "source": "All n8n Guides, templates & extra tools./n8n templates v2 200+/Slack/Enrich Pipedrive_s Organization Data with OpenAI GPT-4o & Notify it in Slack.txt"
+  },
+  {
+    "slug": "qualify-cold-email-replies",
+    "title": "Qualify Cold Email Replies and Create Pipedrive Deals",
+    "source": "All n8n Guides, templates & extra tools./n8n templates v2 200+/Other_Integrations_and_Use_Cases/Qualify replies from Pipedrive persons with AI.txt"
+  },
+  {
+    "slug": "classify-lemlist-replies",
+    "title": "Classify lemlist Replies and Route Next Steps",
+    "source": "All n8n Guides, templates & extra tools./n8n templates v2 200+/Gmail_and_Email_Automation/Classify lemlist replies using OpenAI and automate reply handling.txt"
+  },
+  {
+    "slug": "ai-web-researcher-for-sales",
+    "title": "AI Web Researcher for Sales Prospects",
+    "source": "All n8n Guides, templates & extra tools./n8n templates v2 200+/OpenAI_and_LLMs/AI web researcher for sales.txt"
+  },
+  {
+    "slug": "sales-meeting-prep-whatsapp",
+    "title": "Sales Meeting Prep Briefings Sent to WhatsApp",
+    "source": "All n8n Guides, templates & extra tools./n8n templates v2 200+/WhatsApp/Automate Sales Meeting Prep with AI & APIFY Sent To WhatsApp.txt"
+  },
+  {
+    "slug": "apollo-lead-scraper-cold-outreach",
+    "title": "Apollo Lead Scraper with Personalized Cold Outreach",
+    "source": "Agent Templates, Guides & Tools/Collection of Agents #3/LinkedIn Scraper + Cold Outreach.json"
+  },
+  {
+    "slug": "appointment-lead-follow-up",
+    "title": "Appointment Lead Follow-Up with Twilio and Cal.com",
+    "source": "All n8n Guides, templates & extra tools./n8n templates v2 200+/Other_Integrations_and_Use_Cases/Handling Appointment Leads and Follow-up With Twilio, Cal.com and AI.txt"
+  },
+  {
+    "slug": "qualify-appointment-requests",
+    "title": "Qualify Appointment Requests with AI Forms",
+    "source": "All n8n Guides, templates & extra tools./n8n templates v2 200+/Forms_and_Surveys/Qualifying Appointment Requests with AI & n8n Forms.txt"
+  },
+  {
+    "slug": "slack-support-to-linear-tickets",
+    "title": "Turn Slack Support Messages into Linear Tickets",
+    "source": "All n8n Guides, templates & extra tools./n8n templates v2 200+/Slack/Customer Support Channel and Ticketing System with Slack and Linear.txt"
+  },
+  {
+    "slug": "support-issue-sentiment-tracking",
+    "title": "Track Sentiment on Active Support Issues",
+    "source": "All n8n Guides, templates & extra tools./n8n templates v2 200+/Slack/Sentiment Analysis Tracking on Support Issues with Linear and Slack (1).txt"
+  },
+  {
+    "slug": "classify-linear-bugs",
+    "title": "Classify New Linear Bugs and Route to the Right Team",
+    "source": "All n8n Guides, templates & extra tools./n8n templates v2 200+/Other_Integrations_and_Use_Cases/Classify new bugs in Linear with OpenAI_s GPT-4 and move them to the right team.txt"
+  },
+  {
+    "slug": "jira-issue-resolution-assistant",
+    "title": "Resolve Long-Running Jira Support Issues with AI",
+    "source": "All n8n Guides, templates & extra tools./n8n templates v2 200+/OpenAI_and_LLMs/Automate Customer Support Issue Resolution using AI Text Classifier.txt"
+  },
+  {
+    "slug": "woocommerce-support-agent",
+    "title": "WooCommerce Customer Support Agent",
+    "source": "All n8n Guides, templates & extra tools./n8n templates v2 200+/OpenAI_and_LLMs/AI-powered WooCommerce Support-Agent.txt"
+  },
+  {
+    "slug": "whatsapp-business-rag-chatbot",
+    "title": "WhatsApp Business Chatbot Grounded in Your Documents",
+    "source": "All n8n Guides, templates & extra tools./n8n templates v2 200+/WhatsApp/Complete business WhatsApp AI-Powered RAG Chatbot using OpenAI.txt"
+  },
+  {
+    "slug": "ecommerce-email-routing",
+    "title": "Route eCommerce Emails with an AI Classifier",
+    "source": "All n8n Guides, templates & extra tools./n8n templates v2 200+/Gmail_and_Email_Automation/Modular & Customizable AI-Powered Email Routing_ Text Classifier for eCommerce.txt"
+  },
+  {
+    "slug": "gmail-draft-replies",
+    "title": "Draft Gmail Replies to Incoming Emails",
+    "source": "All n8n Guides, templates & extra tools./n8n templates v2 200+/Gmail_and_Email_Automation/Gmail AI Auto-Responder_ Create Draft Replies to incoming emails.txt"
+  },
+  {
+    "slug": "human-in-the-loop-email-replies",
+    "title": "Human-in-the-Loop Email Replies with AI",
+    "source": "All n8n Guides, templates & extra tools./n8n templates v2 200+/Gmail_and_Email_Automation/A Very Simple _Human in the Loop_ Email Response System Using AI and IMAP.txt"
+  },
+  {
+    "slug": "gmail-auto-labelling",
+    "title": "Auto-Label Incoming Gmail Messages",
+    "source": "All n8n Guides, templates & extra tools./n8n templates v2 200+/Gmail_and_Email_Automation/Auto-label incoming Gmail messages with AI nodes.txt"
+  },
+  {
+    "slug": "outlook-email-assistant",
+    "title": "Outlook Email Assistant with Monday and Airtable Context",
+    "source": "All n8n Guides, templates & extra tools./n8n templates v2 200+/Gmail_and_Email_Automation/Microsoft Outlook AI Email Assistant with contact support from Monday and Airtable.txt"
+  },
+  {
+    "slug": "emails-to-notion-tasks",
+    "title": "Turn Emails into Tasks in Notion",
+    "source": "All n8n Guides, templates & extra tools./n8n templates v2 200+/Notion/Turn Emails into AI-Enhanced Tasks in Notion (Multi-User Support) with Gmail, Airtable and Softr.txt"
+  },
+  {
+    "slug": "brand-voice-blog-writer",
+    "title": "Write Blog Posts in Your Brand Voice for WordPress",
+    "source": "All n8n Guides, templates & extra tools./n8n templates v2 200+/WordPress/Automate Blog Creation in Brand Voice with AI.txt"
+  },
+  {
+    "slug": "perplexity-research-to-html",
+    "title": "Turn Perplexity Research into Publish-Ready HTML",
+    "source": "All n8n Guides, templates & extra tools./n8n templates v2 200+/AI_Research_RAG_and_Data_Analysis/🔍 Perplexity Research to HTML_ AI-Powered Content Creation.txt"
+  },
+  {
+    "slug": "branded-linkedin-posts",
+    "title": "Create and Schedule Branded LinkedIn Posts",
+    "source": "All n8n Guides, templates & extra tools./Extras/Branded Linkedin Content.json"
+  },
+  {
+    "slug": "competitor-ad-creative-generator",
+    "title": "Competitor Ad Analysis and Creative Variations",
+    "source": "Agent Templates, Guides & Tools/Collection of Agents #3/Competitor Ad Intelligence & Creative Generator.json"
+  },
+  {
+    "slug": "youtube-channel-strategist",
+    "title": "YouTube Channel Strategist",
+    "source": "All n8n Guides, templates & extra tools./n8n templates v2 200+/Youtube_Strategist.json"
+  },
+  {
+    "slug": "seo-seed-keywords",
+    "title": "Generate SEO Seed Keywords",
+    "source": "All n8n Guides, templates & extra tools./n8n templates v2 200+/AI_Research_RAG_and_Data_Analysis/Generate SEO Seed Keywords Using AI.txt"
+  },
+  {
+    "slug": "website-faq-enrichment",
+    "title": "Add FAQ Sections to Website Pages at Scale",
+    "source": "All n8n Guides, templates & extra tools./n8n templates v2 200+/OpenAI_and_LLMs/Enrich FAQ sections on your website pages at scale with AI.txt"
+  },
+  {
+    "slug": "instagram-posts-from-trends",
+    "title": "Instagram Posts from Trending Topics",
+    "source": "All n8n Guides, templates & extra tools./n8n templates v2 200+/Instagram_Twitter_Social_Media/Generate Instagram Content from Top Trends with AI Image Generation.txt"
+  },
+  {
+    "slug": "competitor-research-agent",
+    "title": "Competitor Research Agent with Exa and Notion",
+    "source": "All n8n Guides, templates & extra tools./n8n templates v2 200+/Notion/Automate Competitor Research with Exa.ai, Notion and AI Agents.txt"
+  },
+  {
+    "slug": "google-analytics-weekly-report",
+    "title": "Weekly Google Analytics Report by Email and Telegram",
+    "source": "All n8n Guides, templates & extra tools./n8n templates v2 200+/AI_Research_RAG_and_Data_Analysis/Create a Google Analytics Data Report with AI and sent it to E-Mail and Telegram.txt"
+  },
+  {
+    "slug": "trustpilot-review-sentiment",
+    "title": "Trustpilot Review Scraping and Sentiment Analysis",
+    "source": "All n8n Guides, templates & extra tools./n8n templates v2 200+/AI_Research_RAG_and_Data_Analysis/Scrape Trustpilot Reviews with DeepSeek, Analyze Sentiment with OpenAI.txt"
+  },
+  {
+    "slug": "news-monitoring-slack-alerts",
+    "title": "Monitor News Feeds and Alert Slack on Relevant Stories",
+    "source": "All n8n Guides, templates & extra tools./n8n templates v2 200+/Slack/AI-Powered Information Monitoring with OpenAI, Google Sheets, Jina AI and Slack.txt"
+  },
+  {
+    "slug": "deep-research-agent",
+    "title": "Self-Hosted Deep Research Agent",
+    "source": "All n8n Guides, templates & extra tools./n8n templates v2 200+/AI_Research_RAG_and_Data_Analysis/Host Your Own AI Deep Research Agent with n8n, Apify and OpenAI o3.txt"
+  },
+  {
+    "slug": "customer-feedback-sentiment",
+    "title": "Customer Feedback Sentiment Classifier",
+    "source": "All n8n Guides, templates & extra tools./n8n templates v2 200+/OpenAI_and_LLMs/AI Customer feedback sentiment analysis.txt"
+  },
+  {
+    "slug": "form-feedback-summary-report",
+    "title": "Summarize Form Feedback into an Email Report",
+    "source": "All n8n Guides, templates & extra tools./n8n templates v2 200+/Google_Drive_and_Google_Sheets/Summarize Google Sheets form feedback via OpenAI_s GPT-4.txt"
+  },
+  {
+    "slug": "invoice-data-extraction",
+    "title": "Extract Invoice Data from Email into Google Sheets",
+    "source": "All n8n Guides, templates & extra tools./n8n templates v2 200+/PDF_and_Document_Processing/Invoice data extraction with LlamaParse and OpenAI (1).txt"
+  },
+  {
+    "slug": "pdf-data-extraction",
+    "title": "Extract Data from PDFs with Claude or Gemini",
+    "source": "All n8n Guides, templates & extra tools./n8n templates v2 200+/PDF_and_Document_Processing/Extract and process information directly from PDF using Claude and Gemini.txt"
+  },
+  {
+    "slug": "rfp-response-drafting",
+    "title": "Draft RFP Responses from Your Company Knowledge",
+    "source": "All n8n Guides, templates & extra tools./n8n templates v2 200+/OpenAI_and_LLMs/Automate Your RFP Process with OpenAI Assistants.txt"
+  },
+  {
+    "slug": "bank-statement-transcription",
+    "title": "Transcribe Bank Statements into Structured Text",
+    "source": "All n8n Guides, templates & extra tools./n8n templates v2 200+/PDF_and_Document_Processing/Transcribing Bank Statements To Markdown Using Gemini Vision AI.txt"
+  },
+  {
+    "slug": "remove-pii-from-csv",
+    "title": "Remove Personal Data from CSV Files",
+    "source": "All n8n Guides, templates & extra tools./n8n templates v2 200+/PDF_and_Document_Processing/Remove Personally Identifiable Information (PII) from CSV Files with OpenAI.txt"
+  },
+  {
+    "slug": "job-applicant-scoring",
+    "title": "Job Applicant Scoring and Interview Scheduling",
+    "source": "All n8n Guides, templates & extra tools./n8n templates v2 200+/HR_and_Recruitment/HR Job Posting and Evaluation with AI.txt"
+  },
+  {
+    "slug": "resume-screening-vision-ai",
+    "title": "Screen Resumes with Vision AI",
+    "source": "All n8n Guides, templates & extra tools./n8n templates v2 200+/PDF_and_Document_Processing/CV Resume PDF Parsing with Multimodal Vision AI.txt"
+  },
+  {
+    "slug": "company-documents-chatbot",
+    "title": "Company Documents Chatbot for Employee Questions",
+    "source": "All n8n Guides, templates & extra tools./n8n templates v2 200+/Google_Drive_and_Google_Sheets/RAG Chatbot for Company Documents using Google Drive and Gemini.txt"
+  },
+  {
+    "slug": "it-help-desk-slack-bot",
+    "title": "IT Help Desk Slack Bot on Your Knowledge Base",
+    "source": "All n8n Guides, templates & extra tools./n8n templates v2 200+/Slack/IT Ops AI SlackBot Workflow - Chat with your knowledge base.txt"
+  },
+  {
+    "slug": "telegram-ai-assistant",
+    "title": "Telegram AI Assistant with Image Generation",
+    "source": "All n8n Guides, templates & extra tools./n8n templates v2 200+/Telegram/Agentic Telegram AI bot with with LangChain nodes and new tools.txt"
+  },
+  {
+    "slug": "meeting-transcript-follow-ups",
+    "title": "Turn Meeting Transcripts into Follow-Up Actions",
+    "source": "All n8n Guides, templates & extra tools./n8n templates v2 200+/OpenAI_and_LLMs/Actioning Your Meeting Next Steps using Transcripts and AI.txt"
+  },
+  {
+    "slug": "chat-with-postgres",
+    "title": "Chat with Your Postgres Database",
+    "source": "All n8n Guides, templates & extra tools./n8n templates v2 200+/Database_and_Storage/Chat with Postgresql Database.txt"
+  }
+]

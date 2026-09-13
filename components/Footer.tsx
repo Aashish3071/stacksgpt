@@ -48,7 +48,7 @@ export default function Footer({
               <Logo size="md" />
             </Link>
             <p className="meta mt-3 max-w-md text-sm leading-relaxed text-muted">
-              Production AI workflows, automation templates, and engineering services. Plus reported artificial intelligence news and frontier model intelligence.
+              Plain-English AI blueprints and workflow templates for your business, plus the AI news worth knowing about.
             </p>
 
             <div className="mt-5 flex flex-col gap-2 font-sans text-xs">
@@ -124,38 +124,38 @@ export default function Footer({
               </li>
               <li>
                 <Link
-                  href="/blueprints?category=automation"
+                  href="/blueprints/templates"
                   prefetch={true}
                   className="flex items-center py-2 text-muted hover:text-ink transition-colors min-h-[44px]"
                 >
-                  Automations
+                  Workflow Templates
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/blueprints?category=ai-agents"
+                  href="/blueprints?goal=get-more-leads"
                   prefetch={true}
                   className="flex items-center py-2 text-muted hover:text-ink transition-colors min-h-[44px]"
                 >
-                  AI Agents
+                  Get More Leads
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/blueprints?category=marketing"
+                  href="/blueprints?goal=make-content"
                   prefetch={true}
                   className="flex items-center py-2 text-muted hover:text-ink transition-colors min-h-[44px]"
                 >
-                  Marketing Workflows
+                  Make Content
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/blueprints?category=sales"
+                  href="/blueprints?goal=automate-operations"
                   prefetch={true}
                   className="flex items-center py-2 text-muted hover:text-ink transition-colors min-h-[44px]"
                 >
-                  Sales &amp; GTM Pipelines
+                  Automate Operations
                 </Link>
               </li>
             </ul>

@@ -1,5 +1,6 @@
 import prisma from "@/lib/db";
 import { siteUrl, CATEGORIES } from "@/lib/site";
+import { listTemplates } from "@/lib/templates";
 import { xml } from "@/lib/xml";
 
 export const revalidate = 300;
@@ -30,7 +31,13 @@ export async function GET(
       "/contact",
       "/terms",
       "/partners",
+      "/blueprints",
+      "/blueprints/templates",
     ].map((url) => ({ url: siteUrl(url) }));
+
+    for (const t of listTemplates()) {
+      entries.push({ url: siteUrl(`/blueprints/templates/${t.slug}`) });
+    }
 
     for (const c of CATEGORIES) {
       entries.push({ url: siteUrl(`/category/${c.toLowerCase()}`) });

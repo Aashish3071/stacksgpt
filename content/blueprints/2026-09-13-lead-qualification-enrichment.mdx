@@ -1,107 +1,133 @@
 ---
-title: "Build an Automated Lead Qualification and Enrichment Pipeline"
+title: "Score and Route New Sales Leads Automatically"
 slug: "lead-qualification-enrichment"
-summary: "Enrich raw form submissions with verified firmographics, score buying intent using OpenAI, and route high-value prospects directly to your sales team."
-outcome: "A real-time qualification engine that transforms generic lead emails into complete company profiles, calculates fit scores, and alerts account executives"
+summary: "Score raw form submissions against your ideal customer profile with OpenAI, add a company summary from their website, and route strong prospects to sales."
+outcome: "Every new lead is scored against your ideal customer, summarized with context from their website, and the strongest ones reach your sales team in Slack right away"
 goal: "get-more-leads"
 category: "Sales"
 roles: ["sales", "founder", "operations"]
 tools: ["n8n", "openai", "google-sheets", "slack"]
 difficulty: "intermediate"
 setupTime: "half-day"
-costNotes: "OpenAI JSON structured output costs approximately $0.005 per lead evaluated. Google Sheets and Slack integration incur no extra platform fees."
+costNotes: "OpenAI bills per use for each lead scored and each website summary. Google Sheets and Slack work with standard accounts."
 heroImage: "/images/blueprints/2026-09-13-lead-qualification-enrichment.png"
-heroImageAlt: "System architecture for automated lead scoring and firmographic enrichment"
-seoTitle: "Automated Lead Qualification and Enrichment Pipeline"
-metaDescription: "Enrich inbound leads with company firmographics, score buying intent with GPT-4o, and route VIP prospects to sales using this production blueprint."
-keywords: ["lead qualification", "firmographic enrichment", "ai lead scoring", "sales automation"]
+heroImageAlt: "Illustration of a salesperson watching incoming leads get scored and routed to reps on a dashboard"
+seoTitle: "Score and Route New Sales Leads Automatically"
+metaDescription: "Score inbound leads against your ideal customer profile with OpenAI, summarize their company website, and alert sales in Slack for top prospects."
+keywords: ["lead qualification", "lead enrichment", "ai lead scoring", "sales automation"]
 references:
-  - title: "OpenAI Structured Data and Function Calling"
-    url: "https://platform.openai.com/docs/guides/function-calling"
   - title: "n8n Google Sheets Node Documentation"
     url: "https://docs.n8n.io/integrations/builtin/app-nodes/n8n-nodes-base.googlesheets/"
   - title: "Slack Block Kit Interactive Builder"
     url: "https://api.slack.com/block-kit"
 ---
 
-## What You're Building
+## The Problem
 
-An automated lead qualification and firmographic enrichment pipeline. When a prospective customer submits a contact form, demo request, or waitlist application, this workflow intercepts the webhook payload in real time.
+New leads arrive through your website form, and someone has to read each one, look up the company and decide who deserves a quick call. Good leads wait in the queue while the team works through the rest, and by the time someone replies, the prospect may have moved on.
 
-Instead of routing raw submissions to sales reps, an enrichment node parses the company domain, discovers firmographic attributes such as company size, business model, and estimated revenue, and scores the buyer intent against your Ideal Customer Profile (ICP). High-scoring enterprise leads immediately trigger an urgent Slack alert with full briefing context, while lower-scoring leads enter automated nurture sequences.
+## What You'll Get
 
-## What Language Models and Webhooks Can Handle
+- Each lead scored against your ideal customer profile, with a short reason.
+- A short summary of what the lead's company does, taken from their website.
+- An instant Slack alert for your strongest leads, with the rest logged for follow-up.
 
-Manual sales triage slows response time and burns executive hours. Combining automation with LLM data extraction enables:
+## How It Works
 
-1. **Instant Domain Dissection**: Extracts corporate email domains, weeding out free webmail addresses like Gmail or Yahoo.
-2. **Firmographic Inference**: Synthesizes company industry, business model (B2B, B2C, Marketplace), and estimated funding stage.
-3. **Objective ICP Scoring**: Evaluates job titles, team sizes, and stated challenges against predefined scoring criteria.
-4. **Conditional Channel Routing**: Automatically dispatches qualified opportunities to dedicated closing channels while logging disqualified inquiries.
+1. A prospect fills in your website form.
+2. AI summarizes their company website and scores the lead against rules you write.
+3. The score and summary are saved to Google Sheets, and strong leads trigger a Slack alert.
 
 ## What You Need
 
-1. A form provider (Typeform, Tally, Google Forms, or standard custom webhook).
-2. A Google Sheets account for centralized database tracking and CRM backup.
-3. An OpenAI API key with access to GPT-4o or GPT-4o-mini.
-4. A Slack incoming webhook or bot token.
-5. An active n8n instance.
+- A website form, such as Typeform, Tally, Google Forms or your own
+- A Google Sheet to keep track of leads
+- An OpenAI account
+- A Slack workspace
+- An n8n account to run the workflow
+- About half a day to set it up
 
-## The Build Blueprint
+<!-- gate -->
+
+## Build It Step by Step
+
+1. **Download the building blocks** from the box above:
+   - [Qualify New Leads in Google Sheets with OpenAI](/blueprints/templates/qualify-leads-google-sheets) handles the scoring.
+   - [Enrich New Pipedrive Organizations and Notify Slack](/blueprints/templates/enrich-pipedrive-organizations) handles the website summary and the Slack message.
+2. **Create your sheet** with columns for Timestamp, Name, Email, Company, Job Title, Use Case, Score and AI Summary.
+3. **Start with the scoring template.** Point it at your sheet and paste the prompt below into the AI step.
+4. **Add the website summary.** Copy the website scraping and summary steps from the second template into your workflow, before the scoring step. Use your form instead of the Pipedrive trigger.
+5. **Add the alert.** Add a step that checks whether the score is above your chosen threshold, and send those leads to your Slack sales channel.
+6. **Test it** by submitting a lead with a company email address and checking the sheet and Slack.
+
+## Copy-Paste Prompt
+
+Use this in the scoring step and replace the guidance with your own rules:
+
+```text
+You are an expert sales operations analyst scoring inbound prospects for a software service.
+
+Review the following prospect submission:
+Name: {{ $json.name }}
+Email: {{ $json.email }}
+Company: {{ $json.company }}
+Role: {{ $json.role }}
+Company website summary: {{ $json.websiteSummary }}
+Problem Statement: {{ $json.message }}
+
+Scoring guidance:
+- Senior decision-makers such as founders, VPs, directors and heads of product score highest.
+- Mid-level individual contributors score in the middle.
+- A specific, urgent problem statement raises the score.
+- Vague or student enquiries score low.
+- Free webmail addresses lower the score.
+
+Output format must be valid JSON:
+{
+  "score": <number from 0 to 100>,
+  "companyTier": "Enterprise" | "MidMarket" | "SMB",
+  "urgency": "High" | "Medium" | "Low",
+  "executiveSummary": "<two sentence overview for the sales team>"
+}
+
+Only use the information provided. If something is unknown, say so instead of guessing.
+```
+
+## Good to Know
+
+- **You own the rules.** Rewrite the scoring guidance whenever your ideal customer changes.
+- **AI only knows what it is given.** The score is based on the form and the website. If you need verified company size or revenue, add a data provider such as Clearbit or Apollo.
+- **Lead details go to OpenAI.** Only send the fields you need for scoring.
+- **Keep spam out.** Add a hidden honeypot field to your form so bots are dropped before any AI step runs.
+- **Easy extras.** Send your highest scoring leads a reply with your booking link, or create the contact straight in HubSpot or Salesforce.
+
+## Technical Details
 
 ```
 [Webhook / Form Trigger: New Inbound Lead]
                      │
                      ▼
-[Domain Filter: Strip Free Webmail Domains]
+[Domain Filter: Flag Free Webmail Domains]
                      │
                      ▼
-[OpenAI Model: Enrich Firmographics & Score 0-100]
+[Website Summary + OpenAI: Score Against ICP]
                      │
                      ▼
-[Google Sheets: Append Full Profile & Intent Score]
+[Google Sheets: Append Profile, Score & Reasoning]
                      │
                      ▼
-[IF Condition: Score >= 75 (High Priority Lead)]
+[IF Condition: Score Above Your Threshold]
          ├── Yes ──► [Slack: Alert Account Executives Channel]
-         └── No  ──► [CRM / Nurture: Log for Email Drip]
+         └── No  ──► [CRM / Nurture: Log for Email Follow-Up]
 ```
 
-<!-- gate -->
-
-## How to Set It Up
-
-1. Create a Google Sheet with columns for Timestamp, Name, Email, Company, Job Title, Use Case, Score, and AI Summary.
-2. In n8n, set up a Webhook node to listen for POST requests from your website contact form.
-3. Configure your Google Sheets and OpenAI credentials in your n8n workspace.
-4. Import the provided workflow JSON template into n8n.
-5. Set the target Google Sheet document ID and Slack sales channel.
-6. Submit a test form entry with a corporate domain to confirm proper qualification and routing.
-
-## The Core Workflows
-
-1. **Submission Ingestion**: Receives form submissions containing prospect name, email address, company URL, and initial request text.
-2. **Domain Parsing**: Extracts the domain from the email, runs validation, and queries public company information.
-3. **Structured Scoring**: GPT-4o evaluates the lead based on job authority, budget indicators, and urgency, returning structured JSON with an integer score from 0 to 100.
-4. **Data Syncing**: Appends the parsed firmographic attributes and calculated score into Google Sheets.
-5. **VIP Notification**: For leads scoring 75 or higher, posts an interactive Block Kit card into Slack with direct LinkedIn links and contact buttons.
-
-## What Stays Under Your Control
-
-- **Scoring Rubric**: Modify scoring criteria in the system prompt to reflect changing business priorities or ICP updates.
-- **Alert Thresholds**: Adjust the score boundary that separates automated email replies from live sales rep outreach.
-- **Data Protection**: Store all prospective customer data in your private sheet or CRM without sending sensitive details to external third parties.
-
-## Templates
-
-Below is the verified n8n workflow definition ready for import:
+The excerpt below shows the scoring and routing steps. It is not a complete workflow. Use a structured output parser so the score is always a number the IF step can compare.
 
 ```json
 {
-  "name": "Lead Qualification and Enrichment Engine",
+  "name": "Lead Qualification and Enrichment (excerpt)",
   "nodes": [
     {
-      "id": "lq01-1111-4444-8888-abcdef123456",
       "name": "Inbound Lead Webhook",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
@@ -113,25 +139,22 @@ Below is the verified n8n workflow definition ready for import:
       }
     },
     {
-      "id": "lq01-2222-4444-8888-abcdef123456",
-      "name": "Score and Enrich Lead with OpenAI",
+      "name": "Score Lead with OpenAI",
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [440, 300],
       "parameters": {
-        "modelId": "gpt-4o",
         "messages": {
           "values": [
             {
               "role": "system",
-              "content": "You are a B2B sales development representative. Evaluate the inbound prospect against our ICP. Return a valid JSON object containing: score (0-100), reasoning (string), companyTier (Enterprise, MidMarket, SMB), and recommendedAction."
+              "content": "You are a B2B sales development representative. Evaluate the inbound prospect against our ICP. Return a valid JSON object containing: score, companyTier, urgency and executiveSummary."
             }
           ]
         }
       }
     },
     {
-      "id": "lq01-3333-4444-8888-abcdef123456",
       "name": "Log to Google Sheets",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
@@ -143,7 +166,6 @@ Below is the verified n8n workflow definition ready for import:
       }
     },
     {
-      "id": "lq01-4444-4444-8888-abcdef123456",
       "name": "Check Priority Threshold",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
@@ -154,7 +176,7 @@ Below is the verified n8n workflow definition ready for import:
             {
               "value1": "={{ $json.score }}",
               "operation": "largerEqual",
-              "value2": 75
+              "value2": "={{ $vars.LEAD_SCORE_THRESHOLD }}"
             }
           ]
         }
@@ -163,45 +185,3 @@ Below is the verified n8n workflow definition ready for import:
   ]
 }
 ```
-
-## Starter Prompt
-
-Use this prompt in the evaluation node to enforce strict qualification standards:
-
-```text
-You are an expert sales operations analyst scoring inbound prospective clients for a high-ticket software service.
-
-Review the following prospect submission:
-Name: {{ $json.name }}
-Email: {{ $json.email }}
-Company: {{ $json.company }}
-Role: {{ $json.role }}
-Problem Statement: {{ $json.message }}
-
-Scoring Rules:
-- Senior decision-makers (Founder, VP, Director, Head of Product): +30 points.
-- Mid-level individual contributors: +15 points.
-- High-intent technical problem statement: +40 points.
-- Vague or student inquiry: 0 to 20 points total.
-- Free webmail (gmail, hotmail, yahoo): -20 points penalty.
-
-Output format must be valid JSON:
-{
-  "score": <number 0-100>,
-  "companyTier": "Enterprise" | "MidMarket" | "SMB",
-  "urgency": "High" | "Medium" | "Low",
-  "executiveSummary": "<2 sentence overview for the sales team>"
-}
-```
-
-## Customize It
-
-1. **Clearbit or Apollo API Fallback**: Add an HTTP Request node to query Clearbit or Apollo for revenue and employee headcount if domain data is ambiguous.
-2. **Calendar Booking Direct Link**: For leads with a score above 85, auto-generate a personalized email reply containing your senior partner calendar scheduling link.
-3. **HubSpot or Salesforce Sync**: Replace the Google Sheets node with HubSpot CRM to create deals and assign contact owners automatically.
-
-## Keep It Reliable
-
-1. **JSON Output Verification**: Use n8n JSON schema validation or Structured Output parser to guarantee your LLM returns parseable numerical scores.
-2. **Rate Limiting**: Buffer high-volume webhook bursts using an n8n queue mode execution setup during active marketing campaigns.
-3. **Bot Spam Filtering**: Include a hidden honeypot field in your web form to drop automated submission spam before triggering API nodes.

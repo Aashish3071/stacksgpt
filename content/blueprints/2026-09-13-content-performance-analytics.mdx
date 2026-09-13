@@ -1,194 +1,107 @@
 ---
-title: "Build an Automated Content Performance Analytics Engine"
+title: "Get a Weekly Website Traffic Report Written by AI"
 slug: "content-performance-analytics"
-summary: "Ingest web traffic data, isolate top-performing editorial assets, run statistical anomaly detection with OpenAI, and broadcast automated executive digests."
-outcome: "A production analytics pipeline that extracts Google Analytics events, identifies outlier engagement trends, and pushes concise executive summaries to Slack"
+summary: "Pull weekly Google Analytics data, compare it with the same week last year, have OpenAI explain what changed, and deliver the report by email and Telegram."
+outcome: "A traffic report lands in your inbox every week, comparing this week with the same week last year and explaining the biggest changes in plain words"
 goal: "research-and-analysis"
 category: "Automation"
-roles: ["marketer", "operations", "developer"]
-tools: ["n8n", "google-analytics", "openai", "slack"]
+roles: ["marketer", "operations", "founder"]
+tools: ["n8n", "google-analytics", "openai", "telegram"]
 difficulty: "intermediate"
 setupTime: "half-day"
-costNotes: "Google Analytics 4 API is free within standard quotas. OpenAI tokens cost approximately $0.15 per weekly execution."
+costNotes: "The Google Analytics Data API is free within Google's quotas. OpenAI bills per use for the weekly analysis."
 heroImage: "/images/blueprints/2026-09-13-content-performance-analytics.png"
-heroImageAlt: "Workflow architecture diagram for content performance analytics and anomaly detection"
-seoTitle: "Build Content Performance Analytics with Automation"
-metaDescription: "Automate Google Analytics data extraction, detect traffic spikes with OpenAI, and receive executive summaries in Slack with this production blueprint."
-keywords: ["content performance analytics", "google analytics automation", "ai traffic analysis", "n8n analytics agent"]
+heroImageAlt: "Illustration of a woman reading a weekly website traffic report on her computer, with a summary on her phone"
+seoTitle: "Get a Weekly Website Traffic Report Written by AI"
+metaDescription: "Automate a weekly Google Analytics report: compare traffic with last year, analyze changes with OpenAI, and send it by email and Telegram."
+keywords: ["content performance analytics", "google analytics automation", "ai traffic analysis", "weekly analytics report"]
 references:
   - title: "Google Analytics Data API (GA4) Documentation"
     url: "https://developers.google.com/analytics/devguides/reporting/data/v1"
   - title: "n8n Google Analytics Node Reference"
     url: "https://docs.n8n.io/integrations/builtin/app-nodes/n8n-nodes-base.googleanalytics/"
-  - title: "OpenAI Structured Outputs Guide"
-    url: "https://platform.openai.com/docs/guides/structured-outputs"
 ---
 
-## What You're Building
+## The Problem
 
-A scheduled content analytics intelligence engine. Rather than requiring marketing leaders to sift through complex Google Analytics reporting dashboards, this automated pipeline runs on a scheduled cadence. It queries 30 days of pageviews, bounce rates, session duration, and organic search conversions across every published article or landing page.
+Knowing how your website is doing means logging into Google Analytics, finding the right report and working out what actually changed. Most weeks it gets skipped, so a drop in traffic is noticed late, and nobody can say whether a busy week was unusual or just normal for the time of year.
 
-An evaluation node compares current weekly velocity against a 90-day moving baseline. An OpenAI reasoning node interprets the metrics: identifying content decay, highlighting surging traffic clusters, and producing an actionable Slack briefing for the content and growth teams.
+## What You'll Get
 
-## What Google Analytics and OpenAI Can Handle
+- A weekly report in your inbox comparing the last seven days with the same week last year.
+- A short explanation of the biggest changes, written in plain words by AI.
+- A shorter version sent to Telegram for anyone who only wants the headline.
 
-Standard BI dashboards show numbers without context. Combining programmatic extraction with LLM reasoning delivers:
+## How It Works
 
-1. **Automated Data Extraction**: Pulls clean tabular reports from GA4 without manual CSV exports or UI latency.
-2. **Anomaly Detection**: Calculates percentage shifts in organic search sessions and flags statistical anomalies.
-3. **Decay Warning Alerts**: Pinpoints older cornerstone articles losing ranking positions before organic revenue drops.
-4. **Actionable Recommendations**: Recommends internal linking and refresh priorities based on real user engagement data.
+1. Every week, the workflow pulls your website traffic numbers from Google Analytics.
+2. It pulls the same week from last year so the comparison is fair.
+3. AI writes a short report with the changes and sends it by email and Telegram.
 
 ## What You Need
 
-1. A Google Analytics 4 property with an active Google Cloud Service Account possessing Viewer access.
-2. An OpenAI API key with access to GPT-4o or GPT-4o-mini.
-3. A Slack incoming webhook URL or bot token for channel dispatch.
-4. An n8n instance (self-hosted Docker or cloud-managed).
-
-## The Build Blueprint
-
-```
-[Schedule Trigger: Every Monday 08:00 UTC]
-                    │
-                    ▼
-[GA4 Node: Fetch 30-Day Content Metrics]
-                    │
-                    ▼
-[Code Node: Calculate Moving Average & Delta %]
-                    │
-                    ▼
-[OpenAI Model: Identify Spikes, Decay & Actions]
-                    │
-                    ▼
-[Slack Node: Format Block Kit Executive Digest]
-```
+- A Google Analytics property for your website
+- An OpenAI account
+- An email account that can send mail through SMTP
+- A Telegram bot, if you want the short version
+- An n8n account to run the workflow
+- About half a day to set it up
 
 <!-- gate -->
 
-## How to Set It Up
+## Build It Step by Step
 
-1. Open Google Cloud Console, enable the Google Analytics Data API v1, and create a Service Account key in JSON format.
-2. In Google Analytics Admin, grant your service account email the Viewer role on your production property.
-3. In n8n, create Google Analytics 4 OAuth or Service Account credentials using your client JSON.
-4. Add your OpenAI API credential and configure your target Slack webhook URL.
-5. Import the blueprint workflow JSON provided below into your n8n workspace.
-6. Set your Property ID in the GA4 node and execute a test run to inspect the generated payload.
+1. **Download the workflow file** from the box above and import it into n8n.
+2. **Connect Google Analytics.** Create a Google credential in n8n that can read your property.
+3. **Connect OpenAI, email and Telegram** by adding their credentials in n8n.
+4. **Choose your property** in both Google Analytics steps.
+5. **Set who receives it.** Enter the email recipients and your Telegram chat ID.
+6. **Pick the day.** The template runs on Monday morning. Change the schedule if another day suits you.
+7. **Test it.** Run the workflow once by hand and check the report before activating it.
 
-## The Core Workflows
+## Copy-Paste Prompt
 
-1. **Metric Extraction**: Queries page path, active users, average engagement duration, and event conversions over the last 7 days compared to the previous 7 days.
-2. **Delta Computation**: Normalizes URL paths, filters out administrative backend routes, and computes percentage variance across high-traffic URLs.
-3. **Synthesis & Reasoning**: Passes the top 10 gainers and top 10 decliners to GPT-4o to isolate actionable operational takeaways.
-4. **Slack Channel Delivery**: Dispatches a cleanly structured Block Kit message with bullet points, green/red status indicators, and refresh recommendations.
-
-## What Stays Under Your Control
-
-- **Threshold Sensitivity**: Set the minimum session threshold (e.g. 500 visits) so low-volume URLs do not trigger false alerts.
-- **Reporting Cadence**: Adjust from weekly to daily or monthly schedules depending on your content release volume.
-- **Exclusion Filters**: Exclude staging subdomains, preview routes, and tracking parameters from analysis.
-
-## Templates
-
-Below is the verified n8n workflow definition ready for import:
-
-```json
-{
-  "name": "Content Performance Analytics Engine",
-  "nodes": [
-    {
-      "id": "c1a01123-1111-4444-8888-abcdef123456",
-      "name": "Weekly Monday Trigger",
-      "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.2,
-      "position": [220, 300],
-      "parameters": {
-        "rule": {
-          "interval": [
-            {
-              "field": "weeks",
-              "triggerAtDay": [1],
-              "triggerAtHour": 8,
-              "triggerAtMinute": 0
-            }
-          ]
-        }
-      }
-    },
-    {
-      "id": "c1a01123-2222-4444-8888-abcdef123456",
-      "name": "Fetch GA4 Performance Data",
-      "type": "n8n-nodes-base.googleAnalytics",
-      "typeVersion": 2,
-      "position": [440, 300],
-      "parameters": {
-        "resource": "report",
-        "operation": "get",
-        "propertyId": "={{ $vars.GA4_PROPERTY_ID }}",
-        "metrics": ["sessions", "averageSessionDuration", "conversions"],
-        "dimensions": ["pagePath"]
-      }
-    },
-    {
-      "id": "c1a01123-3333-4444-8888-abcdef123456",
-      "name": "Analyze Performance with AI",
-      "type": "@n8n/n8n-nodes-langchain.openAi",
-      "typeVersion": 1.8,
-      "position": [660, 300],
-      "parameters": {
-        "modelId": "gpt-4o",
-        "messages": {
-          "values": [
-            {
-              "role": "system",
-              "content": "You are a senior growth analyst. Review the provided web analytics report. Highlight key performance drivers, decaying content needing updates, and 3 high-priority actions."
-            }
-          ]
-        }
-      }
-    },
-    {
-      "id": "c1a01123-4444-4444-8888-abcdef123456",
-      "name": "Broadcast Slack Digest",
-      "type": "n8n-nodes-base.slack",
-      "typeVersion": 2.2,
-      "position": [880, 300],
-      "parameters": {
-        "resource": "chat",
-        "operation": "postMessage",
-        "channel": "={{ $vars.SLACK_GROWTH_CHANNEL }}",
-        "text": "={{ $json.response }}"
-      }
-    }
-  ]
-}
-```
-
-## Starter Prompt
-
-Use this system prompt in the analysis node to calibrate your growth insights:
+Use this in the analysis step:
 
 ```text
-You are an expert content analytics and conversion optimization consultant.
-Analyze the following tabular Google Analytics data comparing the current period with the previous period.
+You are an expert content analytics consultant.
+You will receive Google Analytics metrics for the last seven days and for the same seven days last year.
 
-Structure your response into 4 distinct sections:
-1. Executive Summary: 2 sentences on overall traffic trajectory.
-2. Top Growth Outliers: 3 pages with significant positive spikes and probable causes.
-3. Content Decay Alerts: 3 cornerstone URLs showing declining traffic or high bounce velocity.
-4. Tactical Recommendations: 3 specific editorial actions to take this week.
+Structure your response into these sections:
+1. Summary: two sentences on the overall change.
+2. Comparison table: each metric with both periods and the percentage change.
+3. What changed: the biggest gains and drops, with possible explanations clearly marked as hypotheses.
+4. Suggested checks: specific things the team should look into this week.
 
-Maintain an objective tone. Avoid generic advice and cite specific URL paths and percentage changes.
+Only use the figures provided. Do not invent numbers.
 ```
 
-## Customize It
+## Good to Know
 
-1. **Search Console Integration**: Connect the Google Search Console API to pair pageview drops with keyword impression trends.
-2. **Automated Jira or Linear Tasks**: Add a branch that automatically opens a content refresh ticket in Linear when an article loses more than 25% traffic.
-3. **Multi-Brand Workspace**: Pass dynamic property IDs to loop through client domains for agencies managing multiple client properties.
+- **The report explains, your team decides.** It highlights what changed; people choose what to do about it.
+- **Year on year needs history.** The comparison only works if your property has data for the same week last year.
+- **Rename the steps.** Some steps in the template have German names. Rename them so your team can maintain the workflow.
+- **Get told when it breaks.** Add an error alert so you know if Google access expires.
+- **Prefer Slack?** Add a Slack step to post the report to your team channel.
 
-## Keep It Reliable
+## Technical Details
 
-1. **Sampling Limits**: For sites with over 10 million visits per month, ensure your GA4 API calls use standard date windows to avoid data sampling.
-2. **Dimension Constraints**: Keep dimension combinations under 5 per query to prevent GA4 API quota exhaustion errors.
-3. **Webhook Fallback**: Configure Slack error notifications on the workflow failure trigger to catch credential or API quota issues immediately.
+```
+[Schedule Trigger: Weekly]
+                    │
+                    ▼
+[Google Analytics: Last Seven Days] ──► [Summarize]
+                    │
+                    ▼
+[Google Analytics: Same Days Last Year] ──► [Summarize]
+                    │
+                    ▼
+[OpenAI: Comparison Table and Analysis]
+          ├── Branch 1 ──► [Email: Full Report]
+          └── Branch 2 ──► [OpenAI: Short Version] ──► [Telegram]
+```
+
+- **Data pulls:** two Google Analytics report steps, one for the last seven days and one for the same dates in the previous year, each followed by a summarize step.
+- **Analysis:** an OpenAI step builds the comparison table and commentary as HTML for email.
+- **Short version:** a second OpenAI step converts the HTML into plain text for Telegram.
+- **Source template:** [Weekly Google Analytics Report by Email and Telegram](/blueprints/templates/google-analytics-weekly-report).

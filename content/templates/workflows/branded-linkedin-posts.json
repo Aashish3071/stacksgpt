@@ -1,0 +1,741 @@
+{
+  "name": "Create and Schedule Branded LinkedIn Posts",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Generate a New Post Idea and All Materials",
+        "height": 480,
+        "width": 980,
+        "color": 6
+      },
+      "id": "f8eca68b-916d-432d-bacc-1298540dc127",
+      "name": "Sticky Note7",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1472,
+        -656
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Generate an Image and Save",
+        "height": 480,
+        "width": 1140,
+        "color": 6
+      },
+      "id": "264855e3-5ebc-4818-bbe9-363ea71b2fbf",
+      "name": "Sticky Note8",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -464,
+        -656
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"about\": \"One-sentence summary of what the post is about\",\n  \"copy\": \"Full LinkedIn post in story format. Strong hook, clear pacing, valuable insight. Use spacing for readability.\",\n  \"image\": \"Renaissance-style visual metaphor of the idea. Simple, clear, symbolic.\"\n}"
+      },
+      "id": "72d62705-bce7-46c9-bc4c-41816fdbd71a",
+      "name": "Structured Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "position": [
+        -640,
+        -368
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "claude-3-7-sonnet-20250219"
+        },
+        "options": {}
+      },
+      "id": "9b9df1da-b899-40cb-bd49-38629769ecec",
+      "name": "Anthropic Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "position": [
+        -992,
+        -368
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "name": "web_search",
+        "description": "Call this tool to make a web search query using Perplexity AI. It will automatically look at multiple relevant websites and combine all the valuable information in one clean response.",
+        "workflowId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "workflowInputs": {
+          "value": {},
+          "schema": [
+            {
+              "id": "query",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "query",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            }
+          ],
+          "mappingMode": "defineBelow",
+          "matchingColumns": [
+            "query"
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "id": "6e11963c-4128-4068-a9dc-5003485023ce",
+      "name": "Perplexity Research",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "position": [
+        -832,
+        -336
+      ],
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "data[0].b64_json",
+        "binaryPropertyName": "=data",
+        "options": {}
+      },
+      "id": "3c84c9e7-0321-4cf2-ba67-96763003c327",
+      "name": "Convert to File",
+      "type": "n8n-nodes-base.convertToFile",
+      "position": [
+        16,
+        -480
+      ],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 5
+            }
+          ]
+        }
+      },
+      "id": "1aec8567-418e-4637-b43c-9970c0b450ac",
+      "name": "Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [
+        -1264,
+        -400
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get all incoming items\nconst items = $input.all();\n\n// Extract the text field from each item\nconst texts = items.map(item => item.json.idea);\n\n// Concatenate them (adjust the separator as needed)\nconst concatenated = texts.join(\", \");\n\n// Return a single item with the concatenated text\nreturn [{ json: { mergedText: concatenated } }];"
+      },
+      "id": "04d75406-0d7d-4df2-b412-2e97daf03024",
+      "name": "Join Ideas",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        -1120,
+        -560
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {},
+      "id": "236fdc8c-92f0-4dab-b69a-3f5b79736b31",
+      "name": "Pick One",
+      "type": "n8n-nodes-base.limit",
+      "position": [
+        -1024,
+        -64
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Auto Posting",
+        "height": 300,
+        "width": 1340,
+        "color": 4
+      },
+      "id": "e056a8a1-8b92-4c9f-bb98-f29f49ca5a87",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1472,
+        -160
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "mode": "url",
+          "value": ""
+        },
+        "options": {}
+      },
+      "id": "197b0702-c3e4-4c0c-ae9e-22be02dd2e7d",
+      "name": "Image Style",
+      "type": "n8n-nodes-base.googleDrive",
+      "position": [
+        -400,
+        -480
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "options": {}
+      },
+      "id": "1942a94d-c1a8-4f1f-9522-6e94c2564db0",
+      "name": "Get Past Ideas",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        -1312,
+        -560
+      ],
+      "typeVersion": 4.5,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "inputDataFieldName": "=data",
+        "name": "={{ $('LinkedIn Creator Agent').item.json.output.name }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "options": {}
+      },
+      "id": "45d383f8-ff4c-47ab-b17b-a192a38a67ca",
+      "name": "Save Image",
+      "type": "n8n-nodes-base.googleDrive",
+      "position": [
+        240,
+        -480
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "columns": {
+          "value": {
+            "text": "={{ $('LinkedIn Creator Agent').item.json.output.copy }}",
+            "about": "={{ $('LinkedIn Creator Agent').item.json.output.about }}",
+            "image": "={{ $json.webViewLink.replace(/usp=[^&]+/, 'usp=sharing') }}",
+            "status": "review"
+          },
+          "schema": [
+            {
+              "id": "about",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "about",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "text",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "text",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "image",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "image",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "status",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            }
+          ],
+          "mappingMode": "defineBelow",
+          "matchingColumns": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "49c38adc-71ee-41f4-af37-3e2298404dab",
+      "name": "Save Post",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        448,
+        -480
+      ],
+      "typeVersion": 4.5
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "daysInterval": 3,
+              "triggerAtHour": 14
+            }
+          ]
+        }
+      },
+      "id": "feff8817-d5f9-4358-a37b-8507a18b07fa",
+      "name": "Schedule 2",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [
+        -1392,
+        -64
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "status",
+              "lookupValue": "ready"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "937581d7-9433-4fbe-95b8-a99fec35212d",
+      "name": "Get Ready Posts",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        -1200,
+        -64
+      ],
+      "typeVersion": 4.5
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "mode": "url",
+          "value": ""
+        },
+        "options": {}
+      },
+      "id": "c2dccad7-c3a5-4fb3-a2b9-ff6ae1f397fb",
+      "name": "Download Image",
+      "type": "n8n-nodes-base.googleDrive",
+      "position": [
+        -832,
+        -64
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "person": "rBxbEv1ziJ",
+        "text": "={{ $json.text }}",
+        "shareMediaCategory": "IMAGE",
+        "additionalFields": {
+          "visibility": "PUBLIC"
+        }
+      },
+      "id": "67dd0956-3e3c-49be-864a-85eb541fa0de",
+      "name": "Publish Post",
+      "type": "n8n-nodes-base.linkedIn",
+      "position": [
+        -624,
+        -64
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "columns": {
+          "value": {
+            "about": "={{ $('Pick One').item.json.about }}",
+            "status": "posted"
+          },
+          "schema": [
+            {
+              "id": "about",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "about",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "text",
+              "type": "string",
+              "display": true,
+              "removed": true,
+              "required": false,
+              "displayName": "text",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "image",
+              "type": "string",
+              "display": true,
+              "removed": true,
+              "required": false,
+              "displayName": "image",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "status",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "type": "string",
+              "display": true,
+              "removed": true,
+              "readOnly": true,
+              "required": false,
+              "displayName": "row_number",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            }
+          ],
+          "mappingMode": "defineBelow",
+          "matchingColumns": [
+            "about"
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "e34ccdaf-03d2-4101-9711-512591bac416",
+      "name": "Update Status",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        -432,
+        -64
+      ],
+      "typeVersion": 4.5
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "model",
+              "value": "gpt-image-1"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "image",
+              "inputDataFieldName": "data"
+            },
+            {
+              "name": "prompt",
+              "value": "=You're a professional artist/designer.\n\nMake a new image in the style very very similar to the reference.\n\nCopy the art style, theme, painting look, etc.\n\nMake it vertical 3x4.\n\nIt will be an image for a LinkedIn post.\n\nHere is the description of the new image:\n{{ $('LinkedIn Creator Agent').item.json.output.image }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "efa1290d-5ee1-4d13-ae44-b0154174b101",
+      "name": "OpenAI Image1",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -192,
+        -480
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Generate my next LinkedIn post.\n\nReturn only:\n\nabout (1-sentence summary)\n\ncopy (LinkedIn post content)\n\nimage (simple description for AI image generation)\n\nBegin:\n",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=ROLE:\nYou are a world-class content strategist for a business professional who helps companies scale through innovative solutions and strategic expertise.\nOBJECTIVE:\nYour mission is to write high-performing LinkedIn posts that:\n\nBuild the user's authority and personal brand\nSpark interest in their services/expertise\nDeliver real value to their target audience\nSubtly showcase their unique value proposition and industry knowledge\nPosition them as a thought leader in their field\n\nABOUT THE BUSINESS:\n[Replace with your business description]\nThe user is a [YOUR TITLE/ROLE] focused on helping [TARGET MARKET] achieve [PRIMARY OUTCOME].\nThey specialize in:\n\n[SERVICE/SKILL 1]\n[SERVICE/SKILL 2]\n[SERVICE/SKILL 3]\n[SERVICE/SKILL 4]\n[OTHER EXPERTISE AREAS]\n\nYour content should feel valuable and entertaining—but also act as a demonstration of expertise. Make readers think: \"This person really knows what they're talking about.\"\nAUDIENCE:\n[Define your target audience - examples:]\n\nIndustry executives and decision-makers\nBusiness owners and entrepreneurs\n[SPECIFIC ROLE 1], [SPECIFIC ROLE 2], and [SPECIFIC ROLE 3]\nProfessionals looking to [ACHIEVE SPECIFIC GOAL]\n\nTONE:\n[Customize your brand voice - examples:]\n\nProfessional yet approachable\nSharp, clear, and valuable\nAuthoritative but not arrogant\n[REFERENCE STYLE]: Feels like [INFLUENCER 1] meets [INFLUENCER 2]—[DESCRIBE VOICE QUALITIES]\n\nCONTENT BUCKETS:\n1. Timeless Principles (Story Format)\nShare story-driven posts based on timeless business principles from thought leaders like:\n\nBusiness legends (Buffett, Munger, Jobs, Bezos)\nMarketing masters (Ogilvy, Hopkins, Cialdini)\nModern thought leaders (Naval, Paul Graham, Seth Godin)\n\nFormat Guidelines:\n\nUse real examples, mini-narratives, or metaphors to make lessons memorable\nConnect insights to [YOUR INDUSTRY/EXPERTISE AREA]\nFocus on business growth, strategy, leadership, or [YOUR SPECIALTY]\nShow, don't tell your expertise through storytelling\n\n2. Industry-Specific Use Cases\nTeach how smart businesses are achieving results in [YOUR FIELD]:\nExamples for different industries:\n\nTech/SaaS: Product development, user acquisition, scaling strategies\nMarketing: Campaign optimization, conversion improvement, brand building\nConsulting: Client transformation stories, methodology insights\nFinance: Investment strategies, risk management, market analysis\nOperations: Process improvement, efficiency gains, cost reduction\n\nFocus on:\n\nSpecific results and metrics\nTime saved, revenue gained, or problems solved\nPractical applications your audience can implement\nReal-world case studies and examples\n\nPOST REQUIREMENTS:\nMake every post:\n\nScroll-stopping from the first line\nEasy to consume with proper line spacing and formatting\nTied to growth and relevant business outcomes\nValue-packed with actionable insights\nSubtly demonstrate your expertise through examples and storytelling\n\nCUSTOMIZATION VARIABLES:\nReplace these placeholders with your specific details:\nBusiness Information:\n\n[YOUR NAME/COMPANY]\n[YOUR TITLE/ROLE]\n[TARGET MARKET]\n[PRIMARY OUTCOME]\n[SERVICE/SKILL 1-4]\n[YOUR INDUSTRY/EXPERTISE AREA]\n\nAudience Details:\n\n[SPECIFIC ROLE 1-3]\n[ACHIEVE SPECIFIC GOAL]\n\nBrand Voice:\n\n[INFLUENCER 1] meets [INFLUENCER 2]\n[DESCRIBE VOICE QUALITIES]\n[REFERENCE STYLE]\n\nContent Focus:\n\n[YOUR SPECIALTY]\n[YOUR FIELD]\nIndustry-specific examples relevant to your expertise"
+        }
+      },
+      "id": "6deecbf6-f5f1-4e4d-b67c-4ad41449e5cb",
+      "name": "LinkedIn Creator Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -848,
+        -560
+      ],
+      "retryOnFail": true,
+      "typeVersion": 1.7
+    },
+    {
+      "parameters": {
+        "content": "# Create and auto-post branded LinkedIn content with AI and Perplexity\n\n## Overview \nAutomate your entire LinkedIn content machine — from research and image generation to scheduling and posting — with this AI-powered workflow.\n\nThis workflow pulls in past content ideas, researches new ones using Perplexity, generates a new post (with image) using your brand's voice and style, saves the output to Google Sheets, and auto-posts twice a week to LinkedIn. It’s perfect for founders, creators, and marketers who want to stay consistent on LinkedIn without manually writing or designing every post.\n\n### Who’s it for\n- Solo founders or marketers building a LinkedIn presence  \n- Content creators growing their audience  \n- Agencies managing client content calendars  \n- Anyone who wants to post consistently without spending hours on content  \n\n### How it works\n- Pulls old ideas from a Google Sheet  \n- Schedules content creation using n8n’s cron node  \n- Uses Perplexity to research current topics and trends  \n- Feeds the data into an AI agent (like Claude or GPT) to generate post copy  \n- Creates a branded image using a reference style and OpenAI’s image model  \n- Saves post content + image URL into Google Sheets  \n- Twice a week, selects one ready post, downloads the image, and publishes it to LinkedIn\n\n### How to set up\n1. Add your Google Sheet ID and column names for posts  \n2. Connect your OpenAI (or Claude) and Perplexity API keys  \n3. Upload a brand-style reference image to Google Drive  \n4. Configure your LinkedIn account and connect the node  \n5. Adjust the cron schedule for both post creation and auto-posting  \n6. (Optional) Edit the AI prompt to match your personal voice or niche  \n\n### Requirements\n- Google Drive & Sheets access  \n- OpenAI or Claude API key  \n- Perplexity API key  \n- LinkedIn credentials (via n8n’s LinkedIn integration)\n\n### How to customize\n- Change the prompt for the AI to fit your voice or audience  \n- Swap out Perplexity for another research method  \n- Adjust how often you want posts scheduled or published  \n- Swap LinkedIn for Twitter, Slack, or another platform  \n- Add Notion or Airtable as your CMS backend\n",
+        "height": 1180,
+        "width": 660
+      },
+      "id": "582cb293-be7f-4aea-8616-b27776725579",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -2144,
+        -656
+      ],
+      "typeVersion": 1
+    }
+  ],
+  "connections": {
+    "Pick One": {
+      "main": [
+        [
+          {
+            "node": "Download Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule": {
+      "main": [
+        [
+          {
+            "node": "LinkedIn Creator Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Image": {
+      "main": [
+        [
+          {
+            "node": "Save Post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule 2": {
+      "main": [
+        [
+          {
+            "node": "Get Ready Posts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Image Style": {
+      "main": [
+        [
+          {
+            "node": "OpenAI Image1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Publish Post": {
+      "main": [
+        [
+          {
+            "node": "Update Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Image1": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Image": {
+      "main": [
+        [
+          {
+            "node": "Publish Post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Past Ideas": {
+      "main": [
+        [
+          {
+            "node": "Join Ideas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "Save Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Ready Posts": {
+      "main": [
+        [
+          {
+            "node": "Pick One",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Perplexity Research": {
+      "ai_tool": [
+        [
+          {
+            "node": "LinkedIn Creator Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "LinkedIn Creator Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkedIn Creator Agent": {
+      "main": [
+        [
+          {
+            "node": "Image Style",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "LinkedIn Creator Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

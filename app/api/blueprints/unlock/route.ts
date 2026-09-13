@@ -7,6 +7,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
     const slug = typeof body.slug === "string" ? body.slug.trim() : "";
+    const kind = body.kind === "template" ? "template" : "blueprint";
 
     if (!email || !email.includes("@")) {
       return NextResponse.json(
@@ -22,7 +23,7 @@ export async function POST(req: NextRequest) {
         where: { email },
         create: {
           email,
-          source: slug ? `blueprint:${slug}` : "blueprint_unlock",
+          source: slug ? `${kind}:${slug}` : `${kind}_unlock`,
         },
         update: {},
       });
@@ -31,8 +32,7 @@ export async function POST(req: NextRequest) {
       console.warn("Subscriber table upsert skipped in local test mode:", e);
     }
 
-    // Increment unlock count if slug is provided
-    if (slug) {
+    if (slug && kind === "blueprint") {
       try {
         await prisma.blueprint.update({
           where: { slug },

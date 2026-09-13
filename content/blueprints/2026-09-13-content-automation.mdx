@@ -1,18 +1,18 @@
 ---
-title: "Build an End-to-End Multichannel Content Automation Pipeline"
+title: "Turn One Topic into a Blog Post and Social Posts with AI"
 slug: "content-automation"
-summary: "Turn raw topic ideas into deep research dossiers, generate verified blog posts, spin multi-platform social assets, and queue drafts for human review."
-outcome: "A full content engine that takes a single seed topic, extracts factual research with Perplexity, drafts long-form and social variants, and stages them for review"
+summary: "Turn raw topic ideas into research-backed drafts, adapt them into social posts, and queue everything for human review before publishing."
+outcome: "Submit a topic and get a researched blog draft plus LinkedIn and X posts based on it, all saved as drafts for your editor to review"
 goal: "make-content"
 category: "Automation"
 roles: ["marketer", "founder", "freelancer-agency"]
 tools: ["n8n", "openai", "perplexity", "wordpress", "linkedin"]
 difficulty: "advanced"
 setupTime: "weekend"
-costNotes: "Perplexity research calls cost approximately $0.005 each. OpenAI generation tokens total about $0.12 per complete multi-asset bundle."
+costNotes: "Perplexity and OpenAI both bill by usage, so cost grows with the number and length of the pieces you produce."
 heroImage: "/images/blueprints/2026-09-13-content-automation.png"
-heroImageAlt: "Multichannel content automation pipeline with research, synthesis, and staging verification"
-seoTitle: "Multichannel Content Automation Pipeline with AI"
+heroImageAlt: "Illustration of a content strategist turning one idea into articles and social posts that pass human review before publishing"
+seoTitle: "Turn One Topic into Blog and Social Posts with AI"
 metaDescription: "Automate technical research, draft long-form essays and social spins, and queue posts for human review across channels with this production blueprint."
 keywords: ["content automation", "multichannel publishing", "ai content workflow", "automated content pipeline"]
 references:
@@ -20,42 +20,85 @@ references:
     url: "https://docs.perplexity.ai/reference/post_chat_completions"
   - title: "WordPress REST API Handbook"
     url: "https://developer.wordpress.org/rest-api/"
-  - title: "n8n AI Transform and Multi-Output Nodes"
-    url: "https://docs.n8n.io/advanced-ai/"
 ---
 
-## What You're Building
+## The Problem
 
-An end-to-end multichannel content production and automation engine. Producing authoritative technical content requires hours of background research, drafting, formatting, and adapting long-form pieces into platform-specific social posts.
+Writing a well-researched article takes hours, and turning it into LinkedIn and X posts takes more. Most teams publish less often than they want to, or fall back on AI content that reads as generic and unsourced.
 
-This workflow takes a single seed concept or URL. A Perplexity research node gathers verified citations, technical specs, and recent real-world examples. An OpenAI node structures the research into an authoritative long-form markdown article with code snippets and tables. Downstream nodes automatically spin the article into a LinkedIn carousel outline, an X thread, and a draft newsletter, queuing all assets into staging tables for human editorial sign-off.
+## What You'll Get
 
-## What Research APIs and Content Generators Can Handle
+- Research on your topic from the live web, with sources you can check.
+- A long-form article saved as a draft in WordPress, written in your house style.
+- A LinkedIn post and an X thread based on the article, waiting for review.
 
-Pure chatbot prompting creates generic, unverified articles. Combining structured pipelines with research APIs enables:
+## How It Works
 
-1. **Grounded Fact Checking**: Queries the live web through Perplexity to incorporate verifiable benchmarks and current statistics.
-2. **Structural House Consistency**: Enforces strict brand tone, heading hierarchies, and forbidden phrasing across every draft.
-3. **Automated Cross-Channel Adaptation**: Generates tailored social spins without copying and pasting between multiple windows.
-4. **Staging Review Isolation**: Keeps generated drafts in draft or pending status so no unvetted content publishes automatically.
+1. You submit a topic or a link.
+2. Perplexity researches it and AI writes an article in your house style.
+3. AI turns the article into social posts, everything is saved as drafts and your editor is notified.
 
 ## What You Need
 
-1. A Perplexity API key for live search research capabilities.
-2. An OpenAI API key with access to GPT-4o.
-3. A CMS destination (WordPress REST API, Ghost, Notion, or GitHub markdown repo).
-4. An active n8n instance.
+- A Perplexity account for research
+- An OpenAI account
+- A WordPress site, or another place you publish articles
+- A Slack workspace, if you want editor notifications
+- An n8n account to run the workflow
+- A weekend to set it up
 
-## The Build Blueprint
+<!-- gate -->
+
+## Build It Step by Step
+
+1. **Download the building blocks** from the box above:
+   - [Turn Perplexity Research into Publish-Ready HTML](/blueprints/templates/perplexity-research-to-html) covers research and article writing.
+   - [Write Blog Posts in Your Brand Voice for WordPress](/blueprints/templates/brand-voice-blog-writer) covers on-brand drafts saved to WordPress.
+   - [Create and Schedule Branded LinkedIn Posts](/blueprints/templates/branded-linkedin-posts) covers researched LinkedIn posts.
+2. **Create a WordPress application password** with editor permissions.
+3. **Connect your accounts.** Add Perplexity, OpenAI and WordPress credentials in n8n.
+4. **Build the flow:** a form for the topic, then research, then article writing, then a WordPress draft, then social posts, then a Slack message to your editor.
+5. **Add your style rules** to the article prompt below: tone, words to avoid and how headings should look.
+6. **Test with one topic** and read every draft before running more.
+
+## Copy-Paste Prompt
+
+Use this in the article writing step:
+
+```text
+You are a senior technology editor writing for technical leaders, engineers and product operators.
+
+Topic Brief:
+Title: {{ $json.title }}
+Primary Keyword: {{ $json.keyword }}
+Research Context: {{ $json.researchSummary }}
+
+Draft an authoritative long-form technical article in Markdown.
+Follow these editorial requirements strictly:
+1. Do not use em dashes anywhere. Use commas, colons or full stops.
+2. Structure the piece with an executive summary, how it works, step-by-step implementation and trade-offs.
+3. Every claim must trace to a source in the research context. Leave out anything you cannot source.
+4. Avoid empty filler phrases such as 'in today's fast-paced world'.
+5. Include a comparison table or code block that illustrates the concept.
+```
+
+## Good to Know
+
+- **Nothing publishes on its own.** Keep the WordPress status set to draft so an editor approves every post.
+- **Check the sources.** Research tools can still return outdated or wrong facts, so read the citations before accepting a draft.
+- **Keep a style sheet.** Put your brand terms and banned phrases in the prompt so every draft follows them.
+- **Easy extras.** Add suggested SEO titles and descriptions, or translated versions of each article.
+
+## Technical Details
 
 ```
 [Form Trigger: Seed Topic or URL Brief]
                   │
                   ▼
-[Perplexity API: Live Deep Research & Citations]
+[Perplexity API: Live Research & Citations]
                   │
                   ▼
-[OpenAI Node: Draft Authoritative Long-Form Post]
+[OpenAI Node: Draft Long-Form Post]
                   │
                   ├── Branch 1 ──► [WordPress Node: Stage Draft Post]
                   ├── Branch 2 ──► [Prompt Node: Generate LinkedIn Post]
@@ -65,41 +108,13 @@ Pure chatbot prompting creates generic, unverified articles. Combining structure
 [Slack Node: Alert Editor with Staging Preview Links]
 ```
 
-<!-- gate -->
-
-## How to Set It Up
-
-1. In WordPress or your CMS, generate an application password or API token with editor privileges.
-2. In n8n, configure credentials for Perplexity (HTTP Bearer auth), OpenAI, and WordPress.
-3. Import the workflow definition JSON provided below into your n8n workspace.
-4. Customize your editorial guidelines and brand voice rules inside the master drafting prompt.
-5. In the Slack node, specify your target editorial team notification channel.
-6. Submit a test brief to run the complete research, drafting, and staging sequence.
-
-## The Core Workflows
-
-1. **Brief Ingestion**: Captures seed title, target audience persona, primary keyword, and required takeaways from an n8n form or webhook.
-2. **Live Neural Research**: Calls Perplexity sonar-pro model to retrieve factual background data, competitor approaches, and cited references.
-3. **Article Construction**: Formats the long-form piece into clean markdown complete with subheadings, actionable steps, and zero forbidden jargon.
-4. **Social Derivatives**: Takes the finalized draft and produces platform-native social content with tailored hooks and character counts.
-5. **Staging & Alerting**: Posts the article into WordPress as a Draft and notifies editors in Slack with links to review and publish.
-
-## What Stays Under Your Control
-
-- **Final Editorial Approval**: Articles remain in draft state until a human editor reviews and clicks Publish.
-- **Fact Verification**: Review source citations provided by the Perplexity research output before accepting drafts.
-- **Brand Voice Standards**: Maintain a dedicated style sheet node that injects company terminology and prohibited clichés into every prompt.
-
-## Templates
-
-Below is the verified n8n workflow definition ready for import:
+The excerpt below shows how the research and drafting steps connect. It is not a complete workflow. When passing research into the social post steps, send only the key takeaways so prompts stay within the model's context window.
 
 ```json
 {
-  "name": "Multichannel Content Automation Pipeline",
+  "name": "Multichannel Content Automation Pipeline (excerpt)",
   "nodes": [
     {
-      "id": "ca01-1111-4444-8888-abcdef123456",
       "name": "Topic Brief Trigger",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
@@ -111,8 +126,7 @@ Below is the verified n8n workflow definition ready for import:
       }
     },
     {
-      "id": "ca01-2222-4444-8888-abcdef123456",
-      "name": "Perplexity Deep Research",
+      "name": "Perplexity Research",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [440, 300],
@@ -130,29 +144,26 @@ Below is the verified n8n workflow definition ready for import:
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"model\": \"sonar-pro\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"Conduct comprehensive technical research on the topic. Return facts, benchmarks, and cited sources.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"{{ $json.topic }}\"\n    }\n  ]\n}"
+        "jsonBody": "={\n  \"model\": \"{{ $vars.PERPLEXITY_MODEL }}\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"Research the topic. Return key facts with cited sources.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"{{ $json.topic }}\"\n    }\n  ]\n}"
       }
     },
     {
-      "id": "ca01-3333-4444-8888-abcdef123456",
       "name": "Generate Long-Form Article",
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [680, 300],
       "parameters": {
-        "modelId": "gpt-4o",
         "messages": {
           "values": [
             {
               "role": "system",
-              "content": "You are an authoritative technology journalist and systems architect. Write a 1,200-word deep-dive article based on the research. Use clear H2 and H3 headings, concrete examples, and zero buzzwords."
+              "content": "You are an authoritative technology journalist. Write a deep-dive article based only on the research provided. Use clear H2 and H3 headings, concrete examples and no buzzwords."
             }
           ]
         }
       }
     },
     {
-      "id": "ca01-4444-4444-8888-abcdef123456",
       "name": "Stage Draft in WordPress",
       "type": "n8n-nodes-base.wordpress",
       "typeVersion": 1,
@@ -167,36 +178,3 @@ Below is the verified n8n workflow definition ready for import:
   ]
 }
 ```
-
-## Starter Prompt
-
-Use this master system prompt in the article drafting node:
-
-```text
-You are a senior technology editor writing for technical leaders, engineers, and product operators.
-
-Topic Brief:
-Title: {{ $json.title }}
-Primary Keyword: {{ $json.keyword }}
-Research Context: {{ $json.researchSummary }}
-
-Draft an authoritative 1,200 to 1,500 word technical article in Markdown.
-Follow these editorial requirements strictly:
-1. Do not use em dashes anywhere. Use commas, colons, or full stops.
-2. Structure with an executive summary, technical architecture, step-by-step implementation, and production trade-offs.
-3. Every claim must trace to verifiable evidence from the research context.
-4. Avoid empty filler phrases such as 'in today's fast-paced world' or 'it is important to remember'.
-5. Include a concrete comparison table or code block illustrating the concept.
-```
-
-## Customize It
-
-1. **LinkedIn Carousel Generator**: Add an image generation node to automatically create branded 1080x1350 slide images for each major subheading.
-2. **SEO Metadata Extraction**: Include a secondary prompt node that generates optimized meta titles, meta descriptions, and slug suggestions.
-3. **Multi-Language Localization**: Add translation nodes using DeepL or GPT-4o to generate localized versions for Spanish and German blogs.
-
-## Keep It Reliable
-
-1. **Strict Draft Enforcement**: Hardcode the CMS publication status parameter to `draft` so an unapproved post can never accidentally go live.
-2. **Citation Validation**: Implement a regex check verifying that all external links returned by Perplexity use valid secure HTTPS protocols.
-3. **Payload Truncation**: When passing research into social spin nodes, extract only the core bullet takeaways to prevent context token overflow.

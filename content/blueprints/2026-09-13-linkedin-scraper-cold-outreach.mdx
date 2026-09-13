@@ -1,150 +1,108 @@
 ---
-title: "How to Build an Automated LinkedIn Prospecting and Outreach Pipeline"
+title: "Find B2B Leads and Send Personalized Cold Emails on Autopilot"
 slug: "linkedin-scraper-cold-outreach"
-summary: "Extract targeted B2B prospect profiles, enrich verified contact emails, and orchestrate hyper-personalized outreach campaigns on autopilot."
-outcome: "A full B2B outbound pipeline that scrapes decision-makers from target industries, enriches business contact details, and synchronizes verified leads to your CRM"
+summary: "Describe your ideal leads in a form, scrape matching contacts, research each company and push personalized leads into your cold email campaign."
+outcome: "Describe who you want to reach and get a researched lead list with a personalized opening message for each person, ready to review in your email tool"
 goal: "get-more-leads"
 category: "B2B"
 roles: ["sales", "founder", "marketer"]
-tools: ["n8n", "apify", "apollo", "google-sheets"]
+tools: ["n8n", "apify", "apollo", "openai", "tavily", "instantly", "google-sheets"]
 difficulty: "advanced"
 setupTime: "weekend"
-costNotes: "Apify actor compute credits and Apollo email verification credits scale with monthly lead volume."
+costNotes: "Apify, Tavily and Instantly are paid services, and OpenAI bills per use. Check each vendor's current pricing before running at volume."
 heroImage: "/images/blueprints/2026-09-13-linkedin-scraper-cold-outreach.png"
-heroImageAlt: "Diagram of an autonomous LinkedIn scraping and cold email enrichment workflow with automation"
-seoTitle: "Automate LinkedIn Prospecting and Cold Outreach"
-metaDescription: "Step-by-step B2B blueprint: scrape LinkedIn decision-makers, enrich verified emails with Apollo, and synchronize leads to Google Sheets."
-keywords: ["linkedin b2b prospecting", "cold outreach automation", "apify linkedin scraper", "apollo lead enrichment"]
+heroImageAlt: "Illustration of a salesperson reviewing prospect profiles, company research and outreach emails"
+seoTitle: "Find B2B Leads and Send Personalized Cold Emails"
+metaDescription: "Step-by-step B2B blueprint: scrape Apollo leads with Apify, research companies with Tavily, and push personalized leads to Instantly."
+keywords: ["b2b prospecting automation", "cold outreach automation", "apify apollo scraper", "instantly lead automation"]
 references:
-  - title: "Apify LinkedIn Profile Scraper Actor Documentation"
+  - title: "Apify Store"
     url: "https://apify.com/store"
-  - title: "Apollo API Search and Enrichment Reference"
-    url: "https://apolloio.github.io/apollo-api-docs/"
 ---
 
-## What You're Building
+## The Problem
 
-An end-to-end B2B outbound prospecting pipeline. You input an Ideal Customer Profile (ICP) query or Sales Navigator URL. The workflow runs an actor on Apify to scrape active decision-makers, queries Apollo or hunter APIs to retrieve verified business emails, filters out unqualified prospects, and appends fully-enriched lead profiles directly to Google Sheets or your CRM.
+Building a list of prospects means searching a lead database, copying names and job titles into a spreadsheet, looking up each company and writing an opening line for every person. It takes hours before a single email goes out, so outreach happens in bursts instead of steadily.
 
-## What Scraping and Apollo Can Handle
+## What You'll Get
 
-Manual prospecting takes hours of copy-pasting names, headlines, and company domains. Automating this pipeline via n8n delivers:
+- A list of people who match the job titles, company size and location you describe.
+- A short research summary of each person's company.
+- A personalized opening message for each lead, added to your cold email campaign and ready for review.
 
-1. High-throughput lead extraction without risking your personal browser account.
-2. Two-step email verification to maintain mailbox deliverability above 98 percent.
-3. Clean column mapping into Google Sheets with duplicate detection on personal LinkedIn URLs.
+## How It Works
+
+1. You fill in a short form describing the people you want to reach.
+2. The workflow finds matching leads, tidies up their details and saves them to a Google Sheet.
+3. AI researches each company, writes a personalized message and adds the lead to your Instantly campaign.
 
 ## What You Need
 
-1. An Apify account with API token for executing the profile scraper actor.
-2. An Apollo API key for real-time B2B contact and email enrichment.
-3. An n8n instance to schedule and coordinate the pipeline.
-4. A Google Sheets database configured with standardized CRM columns.
-
-## The Build Blueprint
-
-```
-[Target ICP Parameters / Search Query]
-                   │
-                   ▼
-[Apify Actor: Profile & Company Scraper]
-                   │
-                   ▼
-[Apollo Enrichment Node: Match Verified Email]
-                   │
-                   ▼
-[Filter Node: Discard Unverified or Inactive]
-                   │
-                   ▼
-[Google Sheets Upsert: Append or Update by LinkedIn URL]
-```
+- An Apify account, which runs the lead scraper
+- An OpenAI account
+- A Tavily account for company research
+- An Instantly account with a campaign set up
+- A Google Sheet for your leads
+- An n8n account to run the workflow
+- A weekend to set it up and test it
 
 <!-- gate -->
 
-## How to Set It Up
+## Build It Step by Step
 
-1. Open Apify, navigate to the LinkedIn scraper actor, and test a sample run with your search criteria. Copy your Apify API Token.
-2. Open Apollo, go to Settings > Integrations > API Keys, and generate a new secret key.
-3. In Google Drive, create a new spreadsheet named `B2B Pipeline Leads` with columns: `Full Name`, `Email`, `Title`, `Personal LinkedIn`, `Company Name`, `Company Website`, `Company LinkedIn`.
-4. In n8n, create credentials for Google Sheets, Apify, and Apollo.
-5. Import the blueprint JSON into n8n and select your Google Sheet ID in the append node.
-6. Trigger the workflow manually to verify the first batch of scraped rows.
+1. **Download the workflow file** from the box above and import it into n8n.
+2. **Create your accounts** for Apify, OpenAI, Tavily and Instantly, and copy each API key.
+3. **Prepare your sheet.** Create a Google Sheet with columns such as `Full Name`, `Email`, `Title`, `LinkedIn`, `Company Name` and `Company Website`.
+4. **Add your keys.** Connect OpenAI and Google Sheets in n8n, then paste your Apify and Instantly keys into the steps that call those services.
+5. **Pick your sheet and campaign** in the matching steps.
+6. **Run a small test.** Submit the form with a narrow search, then check the leads in your sheet and the messages in Instantly.
+7. **Review before sending.** Read the generated messages in Instantly and adjust the prompt until the tone sounds like you.
 
-## The Core Workflows
+## Copy-Paste Prompt
 
-1. **Lead Extraction**: Submits targeted search criteria to Apify actor and polls for finished run items.
-2. **Contact Enrichment**: Sends full name and company domain to Apollo matching endpoints to retrieve direct corporate emails.
-3. **Data Hygiene**: Normalizes company names (removes legal suffixes like LLC and Inc) and formats job titles.
-4. **CRM Sync**: Runs `appendOrUpdate` against Google Sheets, using the unique LinkedIn profile URL as the match key.
-
-## What Stays Under Your Control
-
-- **Lead Quality Criteria**: Add conditional filter rules for minimum employee headcount, seniority level, or target geography.
-- **Daily Volume Caps**: Set batch limits to avoid spam flags and keep within vendor API credit quotas.
-- **Outreach Timing**: Hold verified leads in staging before feeding them to cold email sequencing tools like Instantly or Smartlead.
-
-## Templates
-
-Below is the verified n8n workflow definition ready for import:
-
-```json
-{
-  "name": "LinkedIn Scraper and Cold Outreach",
-  "nodes": [
-    {
-      "parameters": {
-        "operation": "appendOrUpdate",
-        "documentId": {
-          "__rl": true,
-          "value": "YOUR_GOOGLE_SHEET_ID",
-          "mode": "id"
-        },
-        "sheetName": {
-          "__rl": true,
-          "value": "Sheet1",
-          "mode": "name"
-        },
-        "columns": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "Full Name": "={{ $json.output.fullName }}",
-            "Email": "={{ $json.output.email }}",
-            "Title": "={{ $json.output.title }}",
-            "Personal LinkedIn": "={{ $json.output.LinkedIn }}",
-            "Company Name": "={{ $json.output.companyName }}",
-            "Company Website": "={{ $json.output.companyWebsite }}"
-          },
-          "matchingColumns": ["Personal LinkedIn"]
-        }
-      },
-      "name": "Google Sheets",
-      "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.6,
-      "position": [600, 300]
-    }
-  ]
-}
-```
-
-## Starter Prompt
-
-Use this prompt in your LLM personalization node to craft icebreakers:
+Use this in the message writing step to shape your opening lines:
 
 ```text
-Review the prospect's LinkedIn summary: {{ $json.summary }}
-Company domain: {{ $json.companyWebsite }}
-Write a 1-sentence personalized observation about their recent company focus.
-Keep it conversational, natural, and avoid generic praise or buzzwords.
+Review the prospect's background: {{ $json.summary }}
+Company website: {{ $json.companyWebsite }}
+Write one sentence with a personalized observation about their company's recent focus.
+Keep it conversational and natural, and avoid generic praise or buzzwords.
 ```
 
-## Customize It
+## Good to Know
 
-1. **Cold Email Sequence Hand-Off**: Add an HTTP node pushing verified contacts directly into an Instantly or Smartlead campaign.
-2. **AI Icebreaker Generation**: Insert an LLM node that reads the prospect's latest posts and generates custom first lines.
-3. **Slack Lead Alerts**: Send real-time Slack notifications when high-value VP or C-level prospects are identified.
+- **Nothing sends until you say so.** Leads land in your Instantly campaign, where you review the messages and settings before launching.
+- **Check the terms first.** Collecting Apollo data through a third party scraper may conflict with Apollo's terms of service.
+- **Protect your sender reputation.** Verify email addresses before sending, and warm up new sending domains.
+- **Avoid duplicates.** Use the email address or LinkedIn URL as a unique key so the same person is not added twice.
+- **Check current prices.** Apify, Tavily and Instantly are paid services, and OpenAI bills per use.
 
-## Keep It Reliable
+## Technical Details
 
-1. **Email Deliverability**: Never send emails to unverified addresses. Enforce catch-all filters to protect sender reputation.
-2. **Duplicate Checks**: Always use unique profile URLs as primary keys when syncing with Google Sheets or your CRM.
-3. **API Credit Budgets**: Monitor Apify compute unit consumption by scheduling runs once daily rather than continuous polling.
+```
+[Form: Job Title, Company Size, Keywords, Location]
+                   │
+                   ▼
+[AI: Build Apollo Search URL]
+                   │
+                   ▼
+[Apify Actor: Scrape Apollo Results]
+                   │
+                   ▼
+[OpenAI: Parse Lead Data] ──► [Google Sheets: Save Lead]
+                   │
+                   ▼
+[AI Agent with Tavily: Research Company]
+                   │
+                   ▼
+[OpenAI: Write Outreach Message]
+                   │
+                   ▼
+[Instantly: Add Lead to Campaign]
+```
+
+- **Lead search:** an AI step turns the form answers into an Apollo search URL, which an Apify actor scrapes through an HTTP request.
+- **Lead parsing:** OpenAI converts each raw result into consistent fields before the lead is appended to Google Sheets.
+- **Company research:** an AI agent uses the Tavily search tool to summarize the company.
+- **Campaign hand-off:** the lead and message are sent to Instantly's API through an HTTP request.
+- **Source template:** [Apollo Lead Scraper with Personalized Cold Outreach](/blueprints/templates/apollo-lead-scraper-cold-outreach).

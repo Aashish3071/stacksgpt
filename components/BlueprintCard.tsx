@@ -126,13 +126,6 @@ export default function BlueprintCard({
                 <BarChart className="h-3.5 w-3.5" />
                 {difficulty}
               </span>
-              {blueprint.tools && blueprint.tools.length > 0 && (
-                <span className="font-mono text-ink/60">
-                  {blueprint.tools
-                    .map((t) => (t.toLowerCase() === "n8n" ? "Automation" : t))
-                    .join(" · ")}
-                </span>
-              )}
             </div>
           </div>
         </div>
@@ -197,13 +190,7 @@ export default function BlueprintCard({
               <BarChart className="h-3 w-3" />
               {difficulty}
             </span>
-            {blueprint.tools && blueprint.tools[0] && (
-              <span className="font-mono uppercase text-ink/50">
-                {blueprint.tools[0].toLowerCase() === "n8n"
-                  ? "Automation"
-                  : blueprint.tools[0]}
-              </span>
-            )}
+            <span className="font-semibold text-accent">Read guide →</span>
           </div>
         </div>
       </div>

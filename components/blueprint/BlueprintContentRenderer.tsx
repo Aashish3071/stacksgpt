@@ -25,11 +25,11 @@ export default function BlueprintContentRenderer({ html, className = "" }: Props
       // Determine label (e.g. JSON, Workflow Template, Prompt, or Diagram)
       let label = "Code";
       if (rawCode.trim().startsWith("{") || rawCode.trim().startsWith("[")) {
-        label = "JSON Workflow Template";
+        label = "Configuration";
       } else if (rawCode.includes("-->") || rawCode.includes("──►") || rawCode.includes("│") || rawCode.includes("▼")) {
-        label = "Architecture Flow";
+        label = "Workflow diagram";
       } else if (rawCode.toLowerCase().includes("you are") || rawCode.toLowerCase().includes("prompt")) {
-        label = "Starter Prompt";
+        label = "Prompt";
       }
 
       // Create wrapper

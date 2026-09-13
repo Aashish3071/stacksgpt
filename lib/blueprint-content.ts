@@ -82,19 +82,18 @@ export function parseBlueprintFile(
   return parseBlueprintText(raw, fileName, options);
 }
 
+// Plain-English sections come first and are free; everything from "Build It Step by Step" on sits behind the gate.
 const REQUIRED_H2_PATTERNS = [
-  { name: "What You're Building", regex: /^##\s+What\s+You['’]re\s+Building/i },
-  { name: "What <Tool> Can Handle", regex: /^##\s+What\s+.+\s+Can\s+Handle/i },
-  { name: "What You Need", regex: /^##\s+What\s+You\s+Need/i },
-  { name: "The Build Blueprint", regex: /^##\s+The\s+Build\s+Blueprint/i },
-  { name: "How to Set It Up", regex: /^##\s+How\s+to\s+Set\s+It\s+Up/i },
-  { name: "The Core Workflows", regex: /^##\s+The\s+Core\s+Workflows/i },
-  { name: "What Stays Under Your Control", regex: /^##\s+What\s+Stays\s+Under\s+Your\s+Control/i },
-  { name: "Templates", regex: /^##\s+Templates/i },
-  { name: "Starter Prompt", regex: /^##\s+(?:Copy-Paste\s+)?(?:Starter\s+)?Prompt/i },
-  { name: "Customize It", regex: /^##\s+Customize\s+It/i },
-  { name: "Keep It Reliable", regex: /^##\s+Keep\s+It\s+Reliable/i },
+  { name: "The Problem", regex: /^##\s+The\s+Problem\s*$/i },
+  { name: "What You'll Get", regex: /^##\s+What\s+You['’]ll\s+Get\s*$/i },
+  { name: "How It Works", regex: /^##\s+How\s+It\s+Works\s*$/i },
+  { name: "What You Need", regex: /^##\s+What\s+You\s+Need\s*$/i },
+  { name: "Build It Step by Step", regex: /^##\s+Build\s+It\s+Step\s+by\s+Step\s*$/i },
+  { name: "Copy-Paste Prompt", regex: /^##\s+Copy-Paste\s+Prompt\s*$/i },
+  { name: "Good to Know", regex: /^##\s+Good\s+to\s+Know\s*$/i },
+  { name: "Technical Details", regex: /^##\s+Technical\s+Details\s*$/i },
 ];
+const FREE_SECTION_COUNT = 4;
 
 export function parseBlueprintText(
   raw: string,
@@ -248,6 +247,19 @@ export function parseBlueprintText(
     } else {
       patternIndex = matchIndex + 1;
     }
+  }
+
+  if (gateMatches?.length === 1) {
+    const freeH2s = (freeBody.match(/^##\s+.+$/gm) || []).map((h) => h.trim());
+    REQUIRED_H2_PATTERNS.forEach((required, idx) => {
+      const shouldBeFree = idx < FREE_SECTION_COUNT;
+      const isFree = freeH2s.some((h2) => required.regex.test(h2));
+      if (shouldBeFree !== isFree && foundH2s.some((h2) => required.regex.test(h2))) {
+        errors.push(
+          `"## ${required.name}" must be ${shouldBeFree ? "before" : "after"} the <!-- gate --> separator.`,
+        );
+      }
+    });
   }
 
   if (errors.length > 0) {

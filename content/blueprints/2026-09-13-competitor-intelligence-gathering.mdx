@@ -1,19 +1,19 @@
 ---
-title: "Build an Autonomous Competitor Intelligence Gathering Agent"
+title: "Research Your Competitors Automatically with AI"
 slug: "competitor-intelligence-gathering"
-summary: "Deploy an autonomous research agent network to monitor rival companies, parse product releases, compare pricing models, and sync dossiers into Notion."
-outcome: "A multi-agent competitive research system that automatically surfaces emerging market rivals, extracts product features, and populates a Notion database"
+summary: "Find competitors with Exa, send three AI agents to research each company's overview, product offering and customer reviews, and compile a report in Notion."
+outcome: "A Notion database of your competitors, each with a company overview, product and pricing notes, and customer review highlights gathered by AI"
 goal: "research-and-analysis"
 category: "AI Agents"
 roles: ["founder", "marketer", "operations"]
-tools: ["n8n", "exa-ai", "openai", "notion"]
+tools: ["n8n", "exa-ai", "serpapi", "openai", "notion"]
 difficulty: "advanced"
 setupTime: "weekend"
-costNotes: "Exa AI search credits cost roughly $0.005 per query. OpenAI token costs average $0.08 per competitive dossier generated."
+costNotes: "Exa, SerpApi and OpenAI all bill by usage. Researching more competitors means more searches and AI calls, so check each provider's current pricing."
 heroImage: "/images/blueprints/2026-09-13-competitor-intelligence-gathering.png"
-heroImageAlt: "Autonomous competitor intelligence gathering and competitive dossier synthesis diagram"
-seoTitle: "Autonomous Competitor Intelligence Gathering Agent"
-metaDescription: "Deploy autonomous AI agents to discover competitor launches, extract pricing models with Exa, and sync comparative dossiers into Notion automatically."
+heroImageAlt: "Illustration of a woman reviewing a competitor overview that compares company, product and customer review details"
+seoTitle: "Research Your Competitors Automatically with AI"
+metaDescription: "Use Exa to find similar companies, research each competitor's overview, products and reviews with AI agents, and save the report to Notion."
 keywords: ["competitor intelligence", "ai market research", "exa search agent", "competitive analysis automation"]
 references:
   - title: "Exa AI Neural Search API Documentation"
@@ -24,188 +24,100 @@ references:
     url: "https://developers.notion.com/reference/intro"
 ---
 
-## What You're Building
+## The Problem
 
-An autonomous competitive intelligence gathering agent system. Market landscapes move quickly, and founders frequently miss stealth product announcements, pricing restructuring, and new feature launches by competitors.
+Keeping track of competitors means repeating the same searches for every rival: who they are, what they sell, what they charge and what customers say about them. It rarely gets done properly, so pricing and positioning decisions end up relying on old information.
 
-This system combines semantic neural search (Exa.ai) with multi-agent orchestration in n8n. The primary controller agent periodically searches for similar companies in your sector, spawns sub-agents to retrieve recent news, pricing tables, and user reviews, and synthesizes the findings into a structured comparative matrix inside Notion.
+## What You'll Get
 
-## What Neural Search and Autonomous Agents Can Handle
+- A list of companies similar to yours, found automatically.
+- For each competitor: a company and funding overview, product and pricing notes, and customer review highlights.
+- Everything saved in one Notion database your team can read and compare.
 
-Standard keyword scraping returns noisy results from irrelevant blogs. Neural search paired with autonomous agents provides:
+## How It Works
 
-1. **Semantic Similarity Discovery**: Finds actual direct and indirect market competitors using neural embeddings rather than literal keyword matches.
-2. **Targeted Deep Scraping**: Pulls live webpage contents from product pages, changelogs, and pricing tiers without dealing with browser anti-bot blocks.
-3. **Structured Feature Extraction**: Maps competitors across standardized dimensions like pricing tier thresholds, core features, and target user personas.
-4. **Continuous Notion Dossier Sync**: Updates existing company records when new developments appear and creates new database rows for emerging contenders.
+1. You tell the workflow which company is yours.
+2. Exa, a search engine built for finding similar websites, returns a list of competitors.
+3. Three AI researchers look into each competitor, and the combined report is saved to Notion.
 
 ## What You Need
 
-1. An Exa.ai API key with credits for semantic neural search and similarity endpoints.
-2. An OpenAI API key with access to GPT-4o.
-3. A Notion workspace with an integration token and a dedicated Competitor Intelligence database.
-4. An n8n instance with support for advanced AI nodes.
-
-## The Build Blueprint
-
-```
-[Schedule Trigger: Weekly Bi-Weekly Cadence]
-                     │
-                     ▼
-[Exa.ai API: Search Similar Companies & News]
-                     │
-                     ▼
-[Sub-Agent 1: Extract Features & Core Capabilities]
-[Sub-Agent 2: Extract Pricing Tiers & Limitations]
-[Sub-Agent 3: Gather Public User Sentiment]
-                     │
-                     ▼
-[Synthesis Node: Compile Comparative Scorecard]
-                     │
-                     ▼
-[Notion Node: Upsert Record in Competitor Table]
-```
+- An Exa account
+- A SerpApi account, which the AI researchers use to search the web
+- An OpenAI account
+- A Notion workspace
+- An n8n account to run the workflow
+- A weekend to set it up and review the first results
 
 <!-- gate -->
 
-## How to Set It Up
+## Build It Step by Step
 
-1. Create a Notion database with properties for Company Name, Domain, Value Proposition, Pricing Model, Key Differentiators, and Threat Level (High, Medium, Low).
-2. Generate an internal integration secret in the Notion developer portal and share your database with the integration.
-3. In Exa.ai, generate an API key and test a basic `findSimilar` query against your website URL.
-4. In n8n, create credentials for Notion, Exa HTTP header authentication, and OpenAI.
-5. Import the blueprint workflow definition JSON into n8n.
-6. Configure your seed domain and execute an on-demand test run to populate your first competitor cards.
+1. **Download the workflow file** from the box above and import it into n8n.
+2. **Prepare Notion.** Create a database for competitors, add an integration in the Notion developer portal and share the database with it.
+3. **Get your keys** for Exa, SerpApi and OpenAI.
+4. **Connect everything** by adding the credentials in n8n and selecting your Notion database.
+5. **Enter your company** in the step the template marks as required.
+6. **Run it once** by hand and review the first entries in Notion before relying on them.
 
-## The Core Workflows
+## Copy-Paste Prompt
 
-1. **Landscape Discovery**: Calls the Exa API `findSimilar` endpoint using your product URL as the baseline, returning top relevant URLs and company domains.
-2. **Deep Content Retrieval**: Fetches clean markdown contents of the target company homepage, pricing page, and recent press announcements.
-3. **Feature and Pricing Parsing**: Sub-agent prompts parse the retrieved text into strict JSON schema variables representing tiers, feature limits, and integrations.
-4. **Competitive Matrix Synthesis**: Reconciles the findings against your company strengths and weaknesses, assigning a tactical threat rating.
-5. **Notion Database Synchronizer**: Checks whether the company already exists in your database; updates existing properties or creates a clean new entry with full body notes.
-
-## What Stays Under Your Control
-
-- **Seed Parameters**: Specify exact domains to track alongside automated discovery to ensure key industry incumbents are always included.
-- **Threat Scoring Criteria**: Define the criteria for what constitutes a High versus Medium threat based on your specific go-to-market motion.
-- **Publication Gate**: Keep newly identified competitors in a Needs Review status until an operator verifies the profile.
-
-## Templates
-
-Below is the verified n8n workflow definition ready for import:
-
-```json
-{
-  "name": "Autonomous Competitor Intelligence Agent",
-  "nodes": [
-    {
-      "id": "ci01-1111-4444-8888-abcdef123456",
-      "name": "Weekly Schedule",
-      "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.2,
-      "position": [200, 300],
-      "parameters": {
-        "rule": {
-          "interval": [
-            {
-              "field": "weeks",
-              "triggerAtDay": [3],
-              "triggerAtHour": 9
-            }
-          ]
-        }
-      }
-    },
-    {
-      "id": "ci01-2222-4444-8888-abcdef123456",
-      "name": "Search Competitors with Exa",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [420, 300],
-      "parameters": {
-        "url": "https://api.exa.ai/findSimilar",
-        "method": "POST",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "x-api-key",
-              "value": "={{ $vars.EXA_API_KEY }}"
-            }
-          ]
-        },
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={\n  \"url\": \"{{ $vars.MY_COMPANY_URL }}\",\n  \"numResults\": 5,\n  \"excludeSourceDomain\": true\n}"
-      }
-    },
-    {
-      "id": "ci01-3333-4444-8888-abcdef123456",
-      "name": "Synthesize Competitor Dossier",
-      "type": "@n8n/n8n-nodes-langchain.openAi",
-      "typeVersion": 1.8,
-      "position": [660, 300],
-      "parameters": {
-        "modelId": "gpt-4o",
-        "messages": {
-          "values": [
-            {
-              "role": "system",
-              "content": "You are a competitive strategy director. Analyze the competitor website data. Return structured JSON with: companyName, valueProp, pricingOverview, keyFeatures, and threatLevel."
-            }
-          ]
-        }
-      }
-    },
-    {
-      "id": "ci01-4444-4444-8888-abcdef123456",
-      "name": "Upsert Competitor in Notion",
-      "type": "n8n-nodes-base.notion",
-      "typeVersion": 2.2,
-      "position": [900, 300],
-      "parameters": {
-        "resource": "databasePage",
-        "operation": "create",
-        "databaseId": "={{ $vars.NOTION_COMPETITOR_DB_ID }}"
-      }
-    }
-  ]
-}
-```
-
-## Starter Prompt
-
-Use this prompt in the analysis node to enforce structured competitive breakdown:
+The AI researchers in the template already have instructions. Use this prompt if you add a final step that turns their findings into a short briefing:
 
 ```text
 You are an expert market intelligence and product marketing specialist.
-Review the extracted webpage text from the target competitor company.
+Review the research collected about the target competitor company.
 
-Produce a detailed intelligence briefing in JSON format containing:
+Produce an intelligence briefing in JSON format containing:
 {
   "companyName": "<official brand name>",
   "website": "<canonical URL>",
   "oneLineSummary": "<concise description of their core offering>",
-  "targetAudience": "<primary buyer persona e.g. Enterprise DevOps, SMB Marketers>",
-  "pricingStructure": "<freemium, free trial, custom quote, entry price per seat>",
-  "coreStrengths": ["<strength 1>", "<strength 2>", "<strength 3>"],
-  "vulnerabilities": ["<gap 1>", "<gap 2>", "<gap 3>"],
+  "targetAudience": "<primary buyer persona>",
+  "pricingStructure": "<freemium, free trial, custom quote or published plans>",
+  "coreStrengths": ["<strength>", "<strength>"],
+  "vulnerabilities": ["<gap>", "<gap>"],
   "threatLevel": "High" | "Medium" | "Low",
-  "threatRationale": "<2 sentence explanation of why they compete with our roadmap>"
+  "threatRationale": "<short explanation of why they compete with our roadmap>"
 }
 
-Ensure all claims are grounded strictly in the provided text. Do not hallucinate capabilities or funding rounds.
+Ensure all claims are grounded strictly in the provided research. Do not invent capabilities or funding rounds.
 ```
 
-## Customize It
+## Good to Know
 
-1. **Changelog and GitHub Release Watcher**: Point an additional scraper node at the competitor public changelog or GitHub releases to catch developer API updates.
-2. **Job Board Hiring Signals**: Add a scrape of the competitor careers page to detect aggressive hiring in enterprise sales, security, or machine learning.
-3. **Slack Executive Alert**: Send a direct Slack message to the executive team when a new competitor is evaluated as a High threat level.
+- **Treat results as research notes.** Funding, pricing and review figures found online can be outdated or wrong, so check sources before sharing them.
+- **It runs when you start it.** Add a schedule if you want the research refreshed regularly.
+- **Skip known competitors.** Check Notion for an existing entry before researching the same company again.
+- **Costs grow with your list.** Every competitor means more searches and AI calls.
+- **Easy extras.** Add a step that alerts leadership in Slack when a competitor looks like a serious threat.
 
-## Keep It Reliable
+## Technical Details
 
-1. **Exa Domain Deduplication**: Store known domains in a cache or database filter so the agent does not re-analyze the same competitor on every run.
-2. **Markdown Size Truncation**: Truncate raw HTML scrapes to the first 40,000 tokens before sending to the model to avoid context window blowups.
-3. **HTTP Timeout Resilience**: Set request timeouts to 30 seconds on the Exa API node to prevent hanging executions during deep web crawl periods.
+```
+[Manual Trigger: Your Company]
+                     │
+                     ▼
+[Exa API: Find Similar Companies]
+                     │
+                     ▼
+[Loop: One Competitor at a Time]
+                     │
+                     ▼
+[Agent 1: Company and Funding Overview]
+[Agent 2: Product Offering and Pricing]
+[Agent 3: Customer Reviews]
+                     │
+                     ▼
+[Combine Findings into a Report]
+                     │
+                     ▼
+[Notion Node: Add Competitor Entry]
+```
+
+- **Discovery:** an HTTP request calls Exa's find similar endpoint with your company as the source.
+- **Loop:** competitors are processed one at a time so a single failure does not stop the whole run.
+- **Company overview agent:** searches sources such as Crunchbase, Wellfound and LinkedIn for founding details, key people, funding and news.
+- **Product and review agents:** use SerpApi to find pages and a web scraping tool to read them.
+- **Page size:** trim scraped pages before sending them to the model so long pages do not exceed its context window.
+- **Source template:** [Competitor Research Agent with Exa and Notion](/blueprints/templates/competitor-research-agent).

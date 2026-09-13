@@ -1,5 +1,6 @@
 import prisma from "@/lib/db";
 import { siteUrl, CATEGORIES } from "@/lib/site";
+import { listTemplates } from "@/lib/templates";
 import { xml } from "@/lib/xml";
 
 export const revalidate = 300;
@@ -31,6 +32,8 @@ export async function GET() {
     { path: "", priority: "1.0", changefreq: "daily" },
     { path: "/latest", priority: "0.8", changefreq: "daily" },
     { path: "/archive", priority: "0.7", changefreq: "daily" },
+    { path: "/blueprints", priority: "0.8", changefreq: "weekly" },
+    { path: "/blueprints/templates", priority: "0.8", changefreq: "weekly" },
     { path: "/tools", priority: "0.7", changefreq: "weekly" },
     { path: "/about", priority: "0.5", changefreq: "monthly" },
     { path: "/editorial-standards", priority: "0.5", changefreq: "monthly" },
@@ -125,10 +128,21 @@ export async function GET() {
     )
     .join("\n");
 
+  const templateEntries = listTemplates()
+    .map(
+      (t) => `  <url>
+    <loc>${xml(siteUrl(`/blueprints/templates/${t.slug}`))}</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>`,
+    )
+    .join("\n");
+
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
 ${staticEntries}
+${templateEntries}
 ${categoryEntries}
 ${articleEntries}
 ${tagEntries}

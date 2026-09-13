@@ -1,170 +1,69 @@
 ---
-title: "Build an Automated Customer Support Triage and Ticket Routing Agent"
+title: "Sort Customer Support Tickets Automatically with AI"
 slug: "customer-support-triage"
 summary: "Classify incoming support tickets by topic and urgency, analyze customer sentiment, generate draft answers from docs, and escalate critical bugs."
-outcome: "A real-time support triage system that tags incoming customer inquiries, produces suggested responses for support reps, and syncs engineering issues to Linear"
+outcome: "Every new support ticket is labelled by topic, urgency and mood, routine questions get a suggested reply, and bugs and upset customers reach the right people fast"
 goal: "automate-operations"
 category: "Automation"
-roles: ["operations", "developer", "founder"]
+roles: ["operations", "founder", "developer"]
 tools: ["n8n", "openai", "slack", "linear"]
 difficulty: "intermediate"
 setupTime: "half-day"
-costNotes: "OpenAI GPT-4o-mini classification tokens average $0.001 per ticket. Slack and Linear integrations run on standard free API tiers."
+costNotes: "OpenAI bills per use for each ticket it reads. Check your Slack and Linear plans for API access."
 heroImage: "/images/blueprints/2026-09-13-customer-support-triage.png"
-heroImageAlt: "Customer support ticket triage, sentiment classification, and engineering routing diagram"
-seoTitle: "Build Customer Support Triage and Ticket Routing with AI"
+heroImageAlt: "Illustration of a support lead reviewing incoming tickets labelled by topic, priority and customer mood"
+seoTitle: "Sort Customer Support Tickets Automatically with AI"
 metaDescription: "Classify incoming support tickets by urgency and sentiment, draft knowledge base answers, and escalate bugs to Linear with this production blueprint."
 keywords: ["customer support triage", "ai ticket classification", "support ticket automation", "sentiment routing"]
 references:
-  - title: "OpenAI Text Classification and Embeddings Guide"
-    url: "https://platform.openai.com/docs/guides/embeddings"
   - title: "Linear API Issue Creation Documentation"
     url: "https://developers.linear.app/docs/graphql/working-with-the-graphql-api"
   - title: "n8n Slack Node Reference"
     url: "https://docs.n8n.io/integrations/builtin/app-nodes/n8n-nodes-base.slack/"
 ---
 
-## What You're Building
+## The Problem
 
-An automated customer support triage and ticket routing system. As customer volume scales, support inboxes frequently get overwhelmed with a mixture of routine billing questions, password resets, product feature requests, and critical production outages.
+Support inboxes mix password resets, billing questions, feature ideas and serious bugs. Someone has to read every message to decide what is urgent, so urgent problems wait behind routine ones and upset customers are spotted too late.
 
-This workflow intercepts tickets the instant they arrive via webhook. A lightweight language model classifies the request into category, urgency, and sentiment. Routine questions trigger auto-drafted responses against your public documentation. Confirmed technical bugs automatically create a prioritized issue in Linear with repro steps, while hostile or high-churn-risk interactions alert senior support managers in Slack.
+## What You'll Get
 
-## What Classifier Models and Webhooks Can Handle
+- Every new ticket labelled by topic, urgency and the customer's mood.
+- A suggested reply for routine questions, waiting for an agent to approve.
+- Bugs sent to your engineering tracker and upset customers flagged to your team lead in Slack.
 
-Manual sorting causes delayed first-response times and missed SLA targets. Implementing an AI classifier in n8n provides:
+## How It Works
 
-1. **Deterministic Topic Tagging**: Categorizes tickets into Billing, Account Access, Technical Bug, Feature Request, or General Inquiry.
-2. **Sentiment & Urgency Scoring**: Detects frustrated or at-risk customers and flags urgent escalations before churn happens.
-3. **Draft Answer Synthesis**: Generates suggested response copy citing your internal knowledge base so human agents can approve with one click.
-4. **Engineering Sync**: Translates customer bug reports into structured Linear issues with environment metadata and stack traces.
+1. A new ticket reaches the workflow from your help desk.
+2. AI reads it and labels the topic, urgency and mood.
+3. The workflow routes it: a draft reply, an engineering ticket or a Slack alert.
 
 ## What You Need
 
-1. A helpdesk system (Zendesk, Help Scout, Intercom, Freshdesk, or custom webhook).
-2. An OpenAI API key with access to GPT-4o-mini or GPT-4o.
-3. A Linear API key or OAuth credential for engineering escalation.
-4. A Slack workspace for urgent notification dispatch.
-5. An active n8n instance.
-
-## The Build Blueprint
-
-```
-[Webhook: New Customer Support Ticket]
-                  │
-                  ▼
-[OpenAI Classifier: Topic, Urgency & Sentiment]
-                  │
-                  ▼
-[Switch Node: Route Based on Classification]
-   ├── Bug / Outage     ──► [Linear: Create Bug Ticket with Repro]
-   ├── Urgent Sentiment ──► [Slack: Alert Support Lead Immediately]
-   └── General / How-To ──► [Helpdesk: Draft Knowledge Base Reply]
-```
+- A help desk that can send new tickets to a web address, such as Zendesk, Help Scout, Intercom or Freshdesk
+- An OpenAI account
+- A Linear workspace for engineering tickets
+- A Slack workspace for alerts
+- An n8n account to run the workflow
+- About half a day, plus time to combine the building blocks
 
 <!-- gate -->
 
-## How to Set It Up
+## Build It Step by Step
 
-1. In your support helpdesk, create an outbound webhook that fires whenever a new ticket is opened.
-2. In Linear, create an API personal access token and note your Engineering team ID and triage backlog state ID.
-3. In n8n, create credentials for OpenAI, Slack, and Linear.
-4. Import the workflow definition JSON provided below into n8n.
-5. Configure your triage rules in the classification prompt to match your company support SLAs.
-6. Send a simulated test ticket payload to verify proper routing across branches.
+1. **Download the building blocks** from the box above. No single file does everything, so each one covers part of the job:
+   - [Classify New Linear Bugs and Route to the Right Team](/blueprints/templates/classify-linear-bugs) shows AI routing of bugs.
+   - [Track Sentiment on Active Support Issues](/blueprints/templates/support-issue-sentiment-tracking) shows mood tracking with Slack alerts.
+   - [Resolve Long-Running Jira Support Issues with AI](/blueprints/templates/jira-issue-resolution-assistant) shows ticket classification and answers from a knowledge base.
+2. **Start a new workflow** in n8n with a Webhook step, and paste its address into your help desk's outgoing webhook settings.
+3. **Add the AI step** and paste in the prompt below.
+4. **Add a routing step** with three paths: bugs, upset customers and everything else.
+5. **Connect each path.** Create a Linear issue for bugs, send a Slack message for upset customers and save a draft reply in your help desk for the rest.
+6. **Test each path** by sending a sample ticket that should go down it.
 
-## The Core Workflows
+## Copy-Paste Prompt
 
-1. **Ticket Ingestion**: Receives ticket subject, body, sender email, customer account tier, and historical ticket count.
-2. **AI Classification**: Evaluates the text with GPT-4o-mini, outputting a structured JSON schema with category, sentiment score (-1 to 1), and urgency level (P1 to P4).
-3. **Knowledge Base Matching**: Queries existing docs for how-to inquiries and pre-drafts an empathetic resolution response for agent review.
-4. **Engineering Escalation**: If category is Technical Bug and urgency is P1 or P2, formats the ticket as a Markdown issue in Linear.
-5. **Manager Intervention**: Posts a high-priority alert into `#support-urgent` if sentiment indicates a high risk of customer cancellation.
-
-## What Stays Under Your Control
-
-- **Response Delivery Mode**: Keep auto-drafted responses in draft state so support agents must click Send, ensuring no unvetted AI hallucinations reach customers.
-- **Urgency Thresholds**: Decide which customer account tiers bypass automated routing and route straight to dedicated account managers.
-- **Bug Creation Filters**: Require minimum error details before automated issue creation in Linear to keep developer backlogs clean.
-
-## Templates
-
-Below is the verified n8n workflow definition ready for import:
-
-```json
-{
-  "name": "Customer Support Triage and Ticket Routing",
-  "nodes": [
-    {
-      "id": "st01-1111-4444-8888-abcdef123456",
-      "name": "Inbound Ticket Webhook",
-      "type": "n8n-nodes-base.webhook",
-      "typeVersion": 2,
-      "position": [200, 300],
-      "parameters": {
-        "httpMethod": "POST",
-        "path": "support-ticket",
-        "responseMode": "onReceived"
-      }
-    },
-    {
-      "id": "st01-2222-4444-8888-abcdef123456",
-      "name": "Classify Ticket & Sentiment",
-      "type": "@n8n/n8n-nodes-langchain.openAi",
-      "typeVersion": 1.8,
-      "position": [440, 300],
-      "parameters": {
-        "modelId": "gpt-4o-mini",
-        "messages": {
-          "values": [
-            {
-              "role": "system",
-              "content": "You are a customer support triage agent. Classify the customer ticket into topic, urgency (P1, P2, P3, P4), sentiment (Positive, Neutral, Frustrated, Hostile), and suggestedDraftReply."
-            }
-          ]
-        }
-      }
-    },
-    {
-      "id": "st01-3333-4444-8888-abcdef123456",
-      "name": "Route by Category",
-      "type": "n8n-nodes-base.switch",
-      "typeVersion": 3.2,
-      "position": [680, 300],
-      "parameters": {
-        "rules": {
-          "rules": [
-            {
-              "value2": "Bug",
-              "output": 0
-            },
-            {
-              "value2": "Urgent",
-              "output": 1
-            }
-          ]
-        }
-      }
-    },
-    {
-      "id": "st01-4444-4444-8888-abcdef123456",
-      "name": "Create Linear Issue",
-      "type": "n8n-nodes-base.linear",
-      "typeVersion": 1.1,
-      "position": [920, 200],
-      "parameters": {
-        "teamId": "={{ $vars.LINEAR_TEAM_ID }}",
-        "title": "={{ $json.issueTitle }}",
-        "description": "={{ $json.issueDescription }}"
-      }
-    }
-  ]
-}
-```
-
-## Starter Prompt
-
-Use this prompt in the classifier node to enforce uniform triage decisions:
+Use this in the AI step so every ticket is labelled the same way:
 
 ```text
 You are an expert customer success operations specialist.
@@ -191,14 +90,72 @@ Definitions:
 - P4: Cosmetic bug, question, or feature idea.
 ```
 
-## Customize It
+## Good to Know
 
-1. **Vector Store Knowledge Base**: Connect a Pinecone or Supabase vector store node to inject real answers from your documentation into the suggested draft.
-2. **VIP Escalation Route**: Add an evaluation rule that automatically routes Enterprise tier accounts to a dedicated senior engineer Slack channel.
-3. **CSAT Prediction**: Log predicted sentiment against final customer satisfaction scores to continually calibrate classifier accuracy.
+- **Replies stay as drafts.** Never let the workflow email customers directly. An agent reviews and sends every reply.
+- **Nothing gets dropped.** If the AI step fails, send the ticket to a normal human queue instead.
+- **One incident, one bug.** Check for an existing Linear issue before creating a new one, so many reports of the same problem stay together.
+- **You choose who skips automation.** Route your most important customers straight to a person if you prefer.
 
-## Keep It Reliable
+## Technical Details
 
-1. **Draft Approval Gate**: Never configure the workflow to send emails directly to users without human agent sign-off.
-2. **Linear Duplicate Prevention**: Query open Linear issues before creating a new bug ticket to prevent duplicate issues when multiple users report the same incident.
-3. **Fallback Queue**: Catch classification timeouts by sending unclassified tickets into a default human review queue within 5 seconds.
+```
+[Webhook: New Customer Support Ticket]
+                  │
+                  ▼
+[OpenAI Classifier: Topic, Urgency & Sentiment]
+                  │
+                  ▼
+[Switch Node: Route Based on Classification]
+   ├── Bug / Outage     ──► [Linear: Create Bug Ticket]
+   ├── Urgent Sentiment ──► [Slack: Alert Support Lead]
+   └── General / How-To ──► [Helpdesk: Draft Knowledge Base Reply]
+```
+
+The excerpt below shows the classifier and Linear steps to adapt. It is not a complete workflow.
+
+```json
+{
+  "name": "Customer Support Triage and Ticket Routing (excerpt)",
+  "nodes": [
+    {
+      "name": "Inbound Ticket Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [200, 300],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "support-ticket",
+        "responseMode": "onReceived"
+      }
+    },
+    {
+      "name": "Classify Ticket & Sentiment",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [440, 300],
+      "parameters": {
+        "messages": {
+          "values": [
+            {
+              "role": "system",
+              "content": "You are a customer support triage agent. Classify the customer ticket into category, urgency (P1, P2, P3, P4), sentiment (Positive, Neutral, Frustrated, Hostile), isChurnRisk and suggestedDraftReply."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Create Linear Issue",
+      "type": "n8n-nodes-base.linear",
+      "typeVersion": 1.1,
+      "position": [920, 200],
+      "parameters": {
+        "teamId": "={{ $vars.LINEAR_TEAM_ID }}",
+        "title": "={{ $json.summary }}",
+        "description": "={{ $json.issueDescription }}"
+      }
+    }
+  ]
+}
+```
