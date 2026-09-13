@@ -1,0 +1,170 @@
+---
+title: "How to Build a WhatsApp eCommerce AI Agent with Automation and Meta API"
+slug: "whatsapp-ecommerce-ai-agent"
+summary: "Turn WhatsApp into an autonomous 24/7 sales executive: qualify buyer inquiries, check live inventory, take orders and sync directly to Google Sheets."
+outcome: "A complete WhatsApp sales agent that answers catalog questions, checks stock, collects delivery details, and logs orders into Google Sheets"
+goal: "automate-operations"
+category: "Automation"
+roles: ["founder", "operations", "sales"]
+tools: ["n8n", "whatsapp", "google-sheets"]
+difficulty: "intermediate"
+setupTime: "half-day"
+costNotes: "Uses official Meta WhatsApp Cloud API with free tier conversation credits and self-hosted or cloud n8n."
+heroImage: "/images/blueprints/2026-09-13-whatsapp-ecommerce-ai-agent.png"
+heroImageAlt: "Architecture diagram and terminal showing an automated WhatsApp eCommerce sales agent with Google Sheets"
+seoTitle: "Build a WhatsApp eCommerce AI Agent with Automation"
+metaDescription: "Connect Meta Cloud API, automation workflows, and Google Sheets to run an autonomous WhatsApp eCommerce sales agent with live inventory checks."
+keywords: ["whatsapp ai agent", "ecommerce automation agent", "whatsapp automation", "meta cloud api agent"]
+references:
+  - title: "WhatsApp Cloud API Webhook Reference"
+    url: "https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks"
+  - title: "n8n AI Agent and Tool Nodes Documentation"
+    url: "https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-langchain.agent/"
+  - title: "WhatsApp eCommerce AI Agent GitHub Repository"
+    url: "https://github.com/TeamRSBDigital/whatsapp-ecommerce-ai-agent"
+---
+
+## What You're Building
+
+An autonomous WhatsApp sales executive that operates 24/7 on your verified WhatsApp Business number. When prospective buyers message your business, the agent answers specific catalog questions, checks live stock levels, recommends matching variants, collects shipping details, and records confirmed customer orders directly into Google Sheets.
+
+Unlike standard rule-based chatbots that fail whenever a user deviates from rigid button menus, this agent understands natural conversation, remembers context across multi-turn interactions, and behaves like a trained retail sales associate.
+
+## What n8n and WhatsApp Can Handle
+
+Using the official Meta WhatsApp Cloud API coupled with n8n, this system can handle:
+
+* Inbound webhook validation with SHA-256 HMAC signature verification.
+* Message deduplication to ensure network retries never trigger duplicate responses or duplicate orders.
+* Real-time querying against Google Sheets for Products, Inventory, and Store FAQs.
+* Customer state tracking and conversational memory powered by LangChain memory nodes.
+* Structured data extraction for customer names, delivery addresses, phone numbers, and payment preferences.
+
+## What You Need
+
+1. **Meta Developer Account:** A registered Meta App with WhatsApp Cloud API configured.
+2. **n8n Instance:** Self-hosted n8n (via Docker/Railway) or an n8n Cloud workspace.
+3. **Google Workspace Account:** A Google Sheets workbook containing four sheets (`Products`, `Inventory`, `FAQ`, `Orders`).
+4. **LLM Inference Provider:** OpenAI API key (GPT-4o or GPT-4o-mini) or Anthropic Claude 3.5 Sonnet API key.
+5. **Webhook Gateway:** A public HTTPS domain or tunneling endpoint (such as Cloudflare Tunnel or ngrok for local testing).
+
+## The Build Blueprint
+
+The system architecture combines an edge webhook verification server with an n8n orchestration graph:
+
+```text
+whatsapp-ecommerce-agent/
+├── server/
+│   ├── index.js          # Webhook signature verification and deduplication
+│   ├── meta-verify.js    # Hub mode challenge responder
+│   └── package.json      # Dependencies (Express, crypto)
+├── n8n-workflows/
+│   ├── whatsapp-sales-agent.json # Complete n8n workflow canvas
+│   └── sheets-sync.json          # Google Sheets order dispatcher
+└── sheets/
+    ├── Products.csv      # SKU, Title, Price, Description, Variant
+    ├── Inventory.csv     # SKU, AvailableQuantity, LowStockThreshold
+    ├── FAQ.csv           # Question, ApprovedAnswer
+    └── Orders.csv        # OrderID, CustomerPhone, Total, Status, Address
+```
+
+<!-- gate -->
+
+## How to Set It Up
+
+### Step 1: Configure Meta WhatsApp Cloud API
+1. Navigate to the Meta App Dashboard and add the WhatsApp product.
+2. Generate your permanent System User Access Token and note your Phone Number ID.
+3. Configure your Webhook URL pointing to your n8n or backend endpoint: `https://your-domain.com/webhook/whatsapp`.
+4. Enter your custom `VERIFY_TOKEN` string and select the `messages` subscription field.
+
+### Step 2: Set Up the Google Sheets Database
+Create a new Google Sheet named `Store Operations` with four dedicated tabs:
+* **Products:** Columns: `SKU`, `Name`, `Price`, `Category`, `Description`.
+* **Inventory:** Columns: `SKU`, `InStock`, `Reserved`.
+* **FAQ:** Columns: `Topic`, `Question`, `Answer`.
+* **Orders:** Columns: `OrderID`, `CreatedAt`, `Phone`, `CustomerName`, `Items`, `TotalAmount`, `PaymentMethod`, `ShippingAddress`, `Status`.
+
+### Step 3: Import the n8n Workflow
+1. Open your n8n workspace, click **Add Workflow** -> **Import from JSON**.
+2. Paste the `whatsapp-sales-agent.json` workflow template provided below.
+3. Connect your OpenAI/Anthropic credentials and your Google Sheets OAuth2 credential.
+
+### Step 4: Test Inbound Messaging and Verification
+Send a test message from a personal phone number to your test WhatsApp number:
+`"Hi, what products do you have for winter running?"`
+Inspect the n8n execution log to confirm the agent queries the `Products` sheet and formulates a helpful recommendation.
+
+## The Core Workflows
+
+### Workflow 1: Catalog Exploration and FAQ Assistance
+The customer asks about pricing, return policies, or product dimensions. The agent queries the FAQ and Products tabs, formats prices with currency symbols, and responds directly in the WhatsApp chat.
+
+### Workflow 2: Real-Time Stock Check
+Before recommending any item, the agent invokes the stock tool. If `InStock` is 0, it informs the buyer politely and suggests an available alternative variant instead of taking an unfulfillable order.
+
+### Workflow 3: Order Capture and Confirmation
+Once the customer confirms they want to order, the agent requests their full name and shipping address. It validates the details, creates a unique `ORD-XXXX` identifier, appends the row to `Orders`, and sends a receipt summary via WhatsApp.
+
+## What Stays Under Your Control
+
+* **Zero Automated Fund Deductions:** The agent provides bank transfer instructions, payment links, or registers Cash on Delivery. It never captures credit card details or processes raw banking information.
+* **Price Tampering Protection:** Product prices are retrieved directly from the read-only Google Sheets database. The agent cannot modify or discount prices dynamically unless an explicit discount code matches the approved promotions list.
+* **Escalation Trigger:** If a customer sends messages expressing frustration or explicitly asks for a human representative, the agent marks the thread `HUMAN_TAKEOVER_NEEDED` and alerts your team via Slack or Telegram.
+
+## Templates
+
+### Google Sheets Sample Row (Products)
+```csv
+SKU,Name,Price,Category,Description
+RUN-001,Thermal Running Jacket,89.00,Apparel,Windproof and fleece-lined winter running jacket with reflective strips
+RUN-002,Trail Running Shoes,120.00,Footwear,Waterproof trail shoes with aggressive grip for mud and snow
+```
+
+### Inbound Message Normalization (n8n Code Node)
+```javascript
+const body = $input.first().json.body;
+const entry = body.entry?.[0];
+const changes = entry?.changes?.[0];
+const value = changes?.value;
+const message = value?.messages?.[0];
+
+if (!message) {
+  return [];
+}
+
+return [{
+  json: {
+    messageId: message.id,
+    from: message.from,
+    timestamp: message.timestamp,
+    text: message.text?.body || "",
+    contactName: value?.contacts?.[0]?.profile?.name || "Customer"
+  }
+}];
+```
+
+## Copy-Paste Starter Prompt
+
+```text
+You are the lead sales executive for our online store on WhatsApp.
+Your job is to assist customers politely, provide accurate pricing and product descriptions, check stock availability, and collect shipping information for confirmed orders.
+
+Operating Rules:
+1. Always look up prices and descriptions using your Product Search tool. Never guess prices.
+2. Verify stock with the Inventory tool before confirming any order.
+3. When the customer confirms an order, ask for their Full Name and Delivery Address.
+4. Once you receive the shipping address, summarize the order and invoke the CreateOrder tool.
+5. If the customer asks about returns, shipping times, or payment methods, consult your FAQ tool.
+6. Keep replies concise and friendly, suitable for WhatsApp messaging. Use short paragraphs.
+```
+
+## Customize It
+
+* **Payment Gateway Integration:** Connect Stripe or Razorpay payment link generation nodes to send a direct one-click checkout link before logging the order.
+* **CRM Sync:** Pipe incoming customer inquiries and phone numbers directly into HubSpot, Brevo, or Klaviyo for post-purchase marketing follow-ups.
+
+## Keep It Reliable
+
+* Ensure your Google Sheets authentication uses a Google Cloud Service Account so that OAuth tokens do not expire unexpectedly.
+* Set up an automated n8n error trigger workflow that sends an alert to your engineering team if an LLM API timeout occurs.

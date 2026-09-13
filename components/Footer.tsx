@@ -7,7 +7,7 @@ import Logo from "@/components/Logo";
 import { usePrivacy } from "@/components/PrivacyControls";
 
 export default function Footer({
-  tagline,
+  tagline: _tagline,
   socialLinks = [],
 }: {
   tagline?: string;
@@ -38,8 +38,8 @@ export default function Footer({
     )?.url || "https://www.linkedin.com/company/stacksgpt/";
 
   return (
-    <footer className="mt-20 border-t border-rule bg-surface">
-      <div className="mx-auto max-w-shell px-4 py-12 sm:px-6">
+    <footer className="border-t border-rule bg-surface m-0 p-0">
+      <div className="mx-auto max-w-shell px-4 pt-12 pb-6 sm:px-6">
         {/* Main 4-column layout */}
         <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-5">
           {/* Column 1: Brand, Tagline, Twitter (spans 2 cols on lg) */}
@@ -48,12 +48,12 @@ export default function Footer({
               <Logo size="md" />
             </Link>
             <p className="meta mt-3 max-w-md text-sm leading-relaxed text-muted">
-              We track the latest AI and tech developments so you do not have to, delivering what is new and why it matters.
+              Production AI workflows, automation templates, and engineering services. Plus reported artificial intelligence news and frontier model intelligence.
             </p>
 
             <div className="mt-5 flex flex-col gap-2 font-sans text-xs">
               <span className="text-muted">
-                Editorial &amp; support:{" "}
+                Engineering &amp; inquiries:{" "}
                 <a
                   href="mailto:support@stacksgpt.com"
                   className="text-ink hover:underline font-medium py-1 inline-block"
@@ -107,55 +107,64 @@ export default function Footer({
             </div>
           </div>
 
-          {/* Column 2: News & Briefings (matching Navbar) */}
+          {/* Column 2: Blueprints & Automations */}
           <div>
             <h3 className="font-sans text-xs font-semibold uppercase tracking-wider text-ink">
-              News &amp; Briefings
+              Workflows &amp; Services
             </h3>
             <ul className="mt-3 space-y-1 font-sans text-sm">
               <li>
                 <Link
-                  href="/latest"
+                  href="/blueprints"
                   prefetch={true}
                   className="flex items-center py-2 text-muted hover:text-ink transition-colors min-h-[44px]"
                 >
-                  Latest Stories
+                  All Blueprints
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/category/research"
+                  href="/blueprints?category=automation"
                   prefetch={true}
                   className="flex items-center py-2 text-muted hover:text-ink transition-colors min-h-[44px]"
                 >
-                  Research &amp; Models
+                  Automations
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/tools"
+                  href="/blueprints?category=ai-agents"
                   prefetch={true}
                   className="flex items-center py-2 text-muted hover:text-ink transition-colors min-h-[44px]"
                 >
-                  AI Tools Directory
+                  AI Agents
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/search"
+                  href="/blueprints?category=marketing"
                   prefetch={true}
                   className="flex items-center py-2 text-muted hover:text-ink transition-colors min-h-[44px]"
                 >
-                  Search Stories
+                  Marketing Workflows
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/blueprints?category=sales"
+                  prefetch={true}
+                  className="flex items-center py-2 text-muted hover:text-ink transition-colors min-h-[44px]"
+                >
+                  Sales &amp; GTM Pipelines
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Column 3: Categories (matching Navbar Category dropdown) */}
+          {/* Column 3: AI News Categories */}
           <div>
             <h3 className="font-sans text-xs font-semibold uppercase tracking-wider text-ink">
-              Categories
+              AI News Categories
             </h3>
             <ul className="mt-3 space-y-1 font-sans text-sm">
               <li>
@@ -169,11 +178,29 @@ export default function Footer({
               </li>
               <li>
                 <Link
+                  href="/category/writing"
+                  prefetch={true}
+                  className="flex items-center py-2 text-muted hover:text-ink transition-colors min-h-[44px]"
+                >
+                  Writing
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/category/coding"
                   prefetch={true}
                   className="flex items-center py-2 text-muted hover:text-ink transition-colors min-h-[44px]"
                 >
                   Coding
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/category/research"
+                  prefetch={true}
+                  className="flex items-center py-2 text-muted hover:text-ink transition-colors min-h-[44px]"
+                >
+                  Research
                 </Link>
               </li>
               <li>
@@ -245,7 +272,7 @@ export default function Footer({
                   prefetch={true}
                   className="flex items-center py-2 text-muted hover:text-ink transition-colors min-h-[44px]"
                 >
-                  Contact Us
+                  Contact Engineering
                 </Link>
               </li>
             </ul>
@@ -253,25 +280,25 @@ export default function Footer({
         </div>
 
         {/* Sub-footer: Copyright & Legal */}
-        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-rule pt-6 font-sans text-xs text-muted sm:flex-row">
+        <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-rule pt-5 pb-2 font-sans text-xs text-muted sm:flex-row">
           <p suppressHydrationWarning>
             © {new Date().getFullYear()} {SITE_NAME}. All rights reserved.
           </p>
 
           <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
-            <Link href="/privacy" className="py-2.5 inline-flex items-center min-h-[44px] hover:text-ink transition-colors">
+            <Link href="/privacy" className="py-2 inline-flex items-center hover:text-ink transition-colors">
               Privacy Policy
             </Link>
-            <Link href="/terms" className="py-2.5 inline-flex items-center min-h-[44px] hover:text-ink transition-colors">
+            <Link href="/terms" className="py-2 inline-flex items-center hover:text-ink transition-colors">
               Terms of Service
             </Link>
-            <Link href="/partners" className="py-2.5 inline-flex items-center min-h-[44px] hover:text-ink transition-colors">
+            <Link href="/partners" className="py-2 inline-flex items-center hover:text-ink transition-colors">
               Partner Disclosures
             </Link>
             <button
               type="button"
               onClick={openPrivacyChoices}
-              className="py-2.5 inline-flex items-center min-h-[44px] text-muted hover:text-ink transition-colors"
+              className="py-2 inline-flex items-center text-muted hover:text-ink transition-colors"
             >
               Privacy choices
             </button>

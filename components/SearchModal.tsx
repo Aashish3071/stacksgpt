@@ -51,7 +51,7 @@ export default function SearchModal({ isOpen, onClose }: Props) {
     { label: "OpenAI", href: "/search?q=openai" },
     { label: "DeepSeek", href: "/search?q=deepseek" },
     { label: "Coding agents", href: "/search?q=coding+agents" },
-    { label: "Automation", href: "/category/automation" },
+    { label: "Automation", href: "/blueprints?category=automation" },
     { label: "Research", href: "/category/research" },
   ];
 

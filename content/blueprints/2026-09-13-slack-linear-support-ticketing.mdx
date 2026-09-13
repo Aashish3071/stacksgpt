@@ -1,0 +1,151 @@
+---
+title: "Build an Automated Support Channel and Ticketing System with Slack and Linear"
+slug: "slack-linear-support-ticketing"
+summary: "Convert customer and team Slack inquiries into structured Linear tickets automatically with OpenAI triage and sentiment priority tags."
+outcome: "A dual-direction Slack and Linear integration that summarizes support issues, extracts reproduction steps, and assigns Linear priorities without human triage"
+goal: "automate-operations"
+category: "Slack"
+roles: ["operations", "founder"]
+tools: ["n8n", "slack", "linear", "openai"]
+difficulty: "intermediate"
+setupTime: "half-day"
+costNotes: "Slack bot tokens and Linear API tokens are free; OpenAI triage runs on cents per hundred tickets."
+heroImage: "/images/blueprints/2026-09-13-slack-linear-support-ticketing.png"
+heroImageAlt: "Architecture diagram showing automated triage of Slack support messages into Linear engineering tickets"
+seoTitle: "Slack to Linear Automated Support Ticketing with Automation"
+metaDescription: "Triage customer Slack questions into structured Linear tickets automatically using automation and OpenAI structured outputs."
+keywords: ["slack linear integration", "customer support ticketing", "slack ai triage", "linear automation agent"]
+references:
+  - title: "Linear API Developers Documentation"
+    url: "https://developers.linear.app/docs/graphql/working-with-the-graphql-api"
+  - title: "Slack Web API Overview"
+    url: "https://api.slack.com/web"
+---
+
+## What You're Building
+
+An automated triage and issue management workflow that monitors a dedicated customer support or bug report channel in Slack. When a team member or client posts an issue, an AI parsing node extracts the underlying problem, assigns an objective severity score, drafts reproduction steps, creates a Linear ticket with labels, and replies in the Slack thread with the tracking link.
+
+## What Slack and Linear Can Handle
+
+Handling customer issues directly in ad-hoc Slack threads creates missed bugs and duplicate tickets. Integrating Slack with Linear through an n8n triage workflow gives you:
+
+1. Thread-safe monitoring that only acts when specific channels or ticket emoji reactions are triggered.
+2. Structured JSON extraction using OpenAI function calling to enforce clean Linear issue formats.
+3. Two-way status linking so engineering updates in Linear post back to the original Slack requester.
+
+## What You Need
+
+1. An active Slack workspace with permissions to install or create a Slack Bot App.
+2. A Linear workspace with an API personal access token or OAuth app.
+3. An n8n instance with outbound internet access.
+4. An OpenAI API key for structured output parsing.
+
+## The Build Blueprint
+
+```
+[Slack Channel Message / Ticket Trigger]
+                  │
+                  ▼
+[OpenAI Structured Output Parser]
+  (Extracts title, summary, priority, reproduction steps)
+                  │
+                  ▼
+[Linear Issue Creation Node]
+                  │
+                  ▼
+[Post Confirmation Thread in Slack]
+```
+
+<!-- gate -->
+
+## How to Set It Up
+
+1. Create a Slack App in your workspace with `channels:history`, `channels:read`, and `chat:write` scopes. Install it and copy the Bot User OAuth Token.
+2. Generate an API Key in Linear under Settings > Account > API.
+3. In n8n, create Slack API and Linear API credentials with these tokens.
+4. Import the workflow JSON into your n8n canvas.
+5. In the Slack node, select your target support channel (e.g. `#customer-tickets`).
+6. In the Linear node, select your target team and default project.
+7. Save and activate the workflow.
+
+## The Core Workflows
+
+1. **Slack Listening**: Monitors messages in `#customer-tickets` or detects when the `:ticket:` reaction is added to any message.
+2. **Structured Extraction**: Passes message text to OpenAI with a strict JSON schema requiring `title`, `summary`, `priority`, and `ideas`.
+3. **Ticket Dispatch**: Posts GraphQL mutation to Linear API creating the issue under the designated backlog.
+4. **Thread Confirmation**: Posts a threaded reply in Slack with the Linear ticket identifier and assignee.
+
+## What Stays Under Your Control
+
+- **Triage Thresholds**: Define which priority levels trigger urgent team notifications versus standard backlog placement.
+- **Reaction Triggers**: Require human team approval (emoji reaction) before ticket creation if you prefer manual qualification.
+- **Data Redaction**: Strip sensitive customer API keys or personal identifiers before payload delivery to Linear.
+
+## Templates
+
+Below is the verified n8n workflow definition ready for import:
+
+```json
+{
+  "name": "Customer Support Slack and Linear Ticketing",
+  "nodes": [
+    {
+      "id": "2b3112a9-046e-4aae-8fcc-95bddf3bb02e",
+      "name": "Slack Search Inbound",
+      "type": "n8n-nodes-base.slack",
+      "position": [828, 327],
+      "parameters": {
+        "operation": "search",
+        "query": "in:#customer-tickets has::ticket:",
+        "limit": 10
+      },
+      "typeVersion": 2.2
+    },
+    {
+      "id": "65fd6821-4d19-436c-81d9-9bdb0f5efddd",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [1920, 480],
+      "parameters": {
+        "model": "gpt-4o"
+      },
+      "typeVersion": 1
+    },
+    {
+      "id": "85125704-7363-40de-af84-f267f8c7e919",
+      "name": "Structured Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "position": [2100, 480],
+      "parameters": {
+        "jsonSchema": "{\n \"type\": \"object\",\n \"properties\": {\n \"title\": { \"type\": \"string\" },\n \"summary\": { \"type\": \"string\" },\n \"priority\": { \"type\": \"string\" }\n }\n}"
+      },
+      "typeVersion": 1.1
+    }
+  ]
+}
+```
+
+## Starter Prompt
+
+Use this system prompt in the OpenAI triage node:
+
+```text
+Analyze the incoming Slack support message.
+Extract a clear, action-oriented bug or feature title.
+Summarize the user problem in 2 sentences.
+Determine severity priority: Urgent, High, Medium, or Low.
+Output valid JSON adhering strictly to the provided schema.
+```
+
+## Customize It
+
+1. **Jira or GitHub Issues Alternative**: Replace the Linear node with Jira Cloud or GitHub Issues node with zero changes to the OpenAI parser.
+2. **Sentiment Alerts**: Trigger immediate SMS or PagerDuty alerts if sentiment analysis indicates an enterprise customer escalation.
+3. **Automated Status Sync**: Add a webhook trigger listening to Linear issue resolution that automatically sends a completion message back to Slack.
+
+## Keep It Reliable
+
+1. **Duplicate Prevention**: Store processed Slack message timestamps in n8n workflow static data to prevent re-creating tickets on re-runs.
+2. **Rate Limits**: Linear allows 1,500 GraphQL requests per minute, which is plenty for support channels; ensure error triggers capture token expirations.
+3. **Private Channels**: Remember to invite the Slack bot to private support channels via `/invite @botname`, or the API will return `channel_not_found`.

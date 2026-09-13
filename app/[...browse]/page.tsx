@@ -4,7 +4,7 @@ import Link from "next/link";
 import { discover } from "@/lib/discovery";
 import ArticleCard from "@/components/ArticleCard";
 import CollectionSchema from "@/components/CollectionSchema";
-import { siteUrl, SITE_NAME } from "@/lib/site";
+import { siteUrl, SITE_NAME, CATEGORIES } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
@@ -203,6 +203,26 @@ export default async function Browse({ params, searchParams }: Props) {
             {pageDescription} {total > 0 ? `(${total} ${total === 1 ? "story" : "stories"})` : ""}
           </p>
         </div>
+
+        {kind === "latest" && (
+          <div className="mt-6 flex flex-wrap items-center gap-2 border-b border-rule/70 pb-5">
+            <Link
+              href="/latest"
+              className="rounded-[2px] bg-ink px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-paper shadow-sm"
+            >
+              All News
+            </Link>
+            {CATEGORIES.map((cat) => (
+              <Link
+                key={cat}
+                href={`/category/${cat.toLowerCase()}`}
+                className="rounded-[2px] border border-rule bg-surface px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-ink/70 transition hover:border-ink/30 hover:text-ink"
+              >
+                {cat}
+              </Link>
+            ))}
+          </div>
+        )}
 
         {kind === "search" && (
           <form className="my-8 flex gap-3 max-w-xl">

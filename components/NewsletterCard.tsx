@@ -36,9 +36,8 @@ export default function NewsletterCard() {
   };
 
   return (
-    <section id="newsletter" className="border-t border-rule py-10 sm:py-12">
-      <div className="max-w-measure-wide">
-        <h2 className="kicker">The StacksGPT Briefing</h2>
+    <div id="newsletter" className="py-4 text-center mx-auto max-w-xl">
+      <h2 className="kicker">The StacksGPT Briefing</h2>
         <p className="mt-2 font-serif text-head-md text-ink">
           Stay ahead of the AI curve with essential intelligence.
         </p>
@@ -54,7 +53,7 @@ export default function NewsletterCard() {
         ) : (
           <form
             onSubmit={handleSubmit}
-            className="mt-5 flex max-w-md flex-col gap-2 sm:flex-row"
+            className="mt-5 flex max-w-md flex-col gap-2 sm:flex-row mx-auto"
           >
             <label htmlFor="newsletter-email" className="sr-only">
               Email address
@@ -87,6 +86,5 @@ export default function NewsletterCard() {
           anytime. See our privacy policy.
         </p>
       </div>
-    </section>
   );
 }

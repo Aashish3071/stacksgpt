@@ -1,0 +1,147 @@
+---
+title: "Build a Competitor Ad Intelligence and Creative Generator with Automation"
+slug: "competitor-ad-creative-intelligence"
+summary: "Scrape Facebook Ad Library for active competitor creatives, deconstruct their visual hooks with OpenAI Vision, and spin high-converting ad variations."
+outcome: "An automated creative engine that tracks competitor ad campaigns, analyzes copy and visual hierarchy, and generates derivative production assets into Google Drive"
+goal: "make-content"
+category: "Marketing"
+roles: ["marketer", "founder"]
+tools: ["n8n", "openai", "apify", "google-drive", "google-sheets"]
+difficulty: "advanced"
+setupTime: "weekend"
+costNotes: "Apify ad scraper credits and OpenAI Vision API tokens scale with the volume of ads analyzed."
+heroImage: "/images/blueprints/2026-09-13-competitor-ad-creative-intelligence.png"
+heroImageAlt: "Workflow diagram of an AI competitor ad intelligence and creative generator in automation"
+seoTitle: "Competitor Ad Intelligence and Creative Automation"
+metaDescription: "Deconstruct competitor Meta ads with Apify and OpenAI Vision, then generate spun variations automatically using automation."
+keywords: ["competitor ad intelligence", "ad creative generator", "facebook ad scraper", "ai ad variations"]
+references:
+  - title: "Meta Ad Library API and Scraping Reference"
+    url: "https://www.facebook.com/ads/library/api/"
+  - title: "OpenAI Vision API Guides"
+    url: "https://platform.openai.com/docs/guides/vision"
+---
+
+## What You're Building
+
+An automated ad intelligence and creative production engine. The workflow automatically scrapes active Facebook Ad Library campaigns run by direct competitors in your niche. An OpenAI Vision node analyzes the visual structure, color schemes, headlines, and call-to-action hooks of winning ads. It then rewrites and spins three distinct brand-aligned creative variations and saves the assets into Google Drive and Google Sheets for review.
+
+## What Ad Scraping and Vision Models Can Handle
+
+Manual competitor research is sporadic and rarely turns into ready-to-test ad variants. Automating this system through n8n delivers:
+
+1. Real-time extraction of active, proven competitor creatives without manual screenshotting.
+2. Structured visual deconstruction covering typography, layout hierarchy, and copy hooks.
+3. Automated folder organization in Google Drive matching source ads with generated variations.
+
+## What You Need
+
+1. An Apify account with access to the Facebook Ad Library Scraper actor.
+2. An OpenAI API key with access to GPT-4o vision models.
+3. A Google Cloud service account or OAuth credentials for Google Drive and Google Sheets.
+4. An n8n instance running on self-hosted Docker or cloud.
+
+## The Build Blueprint
+
+```
+[Apify Actor: Scrape Meta Ad Library]
+                  │
+                  ▼
+[Google Drive: Create Asset Scaffolding Folders]
+                  │
+                  ▼
+[OpenAI Vision: Deconstruct Layout & Hook]
+                  │
+                  ▼
+[Prompt Spinning Node: Generate 3 Brand Variants]
+                  │
+                  ▼
+[Image Generation & Asset Sync to Drive + Sheets]
+```
+
+<!-- gate -->
+
+## How to Set It Up
+
+1. Open Meta Ad Library in your browser, search for a competitor brand or keyword, and copy the search URL.
+2. In Apify, test the Ad Library scraper with that URL and note your target batch size (e.g. 20 ads).
+3. In n8n, set up credentials for Apify, OpenAI, Google Drive, and Google Sheets.
+4. Import the provided workflow JSON template into n8n.
+5. In the Set Variables node, enter your target Google Drive folder ID and brand style guidelines.
+6. Run a manual execution to generate your first round of competitor variations.
+
+## The Core Workflows
+
+1. **Ad Harvesting**: Scrapes active ad archive items, filters out text-only listings, and grabs high-resolution image URLs.
+2. **Drive Scaffolding**: Automatically creates a dedicated subfolder for each ad archive ID containing `Source Assets` and `Spun Assets`.
+3. **Vision Analysis**: Passes image URLs to OpenAI Vision, generating comprehensive descriptions of the design, imagery, and typography.
+4. **Creative Variation**: Rewrites ad copy and visual layout directives into distinct creative angles while maintaining winning structures.
+5. **Database Logging**: Appends all ad copy, archive IDs, timestamps, and Google Drive asset links to a master Google Sheet.
+
+## What Stays Under Your Control
+
+- **Brand Guardrails**: Define custom style tokens (colors, tone, prohibited terms) so variations respect your brand identity.
+- **Competitor Target Lists**: Update search keywords and competitor page IDs dynamically without altering workflow logic.
+- **Budget Control**: Restrict the number of variants generated per week to manage image generation costs.
+
+## Templates
+
+Below is the verified n8n workflow definition ready for import:
+
+```json
+{
+  "name": "Competitor Ad Intelligence and Creative Generator",
+  "nodes": [
+    {
+      "id": "409aaa70-34ae-45d8-8d62-5065a8a389e6",
+      "name": "Run Ad Library Scraper",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [-160, 464],
+      "parameters": {
+        "url": "https://api.apify.com/v2/acts/XtaWFhbtfxyzqrFmd/run-sync-get-dataset-items",
+        "method": "POST",
+        "sendBody": true,
+        "specifyBody": "json"
+      },
+      "typeVersion": 4.2
+    },
+    {
+      "id": "e6725a15-9250-4262-8bc2-303ab6e1ca05",
+      "name": "OpenAI Vision Analysis",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "position": [-400, 656],
+      "parameters": {
+        "modelId": "gpt-4o",
+        "resource": "image",
+        "operation": "analyze",
+        "text": "What is in this ad image? Describe layout, typography, colors, and the core psychological hook."
+      },
+      "typeVersion": 1.8
+    }
+  ]
+}
+```
+
+## Starter Prompt
+
+Use this prompt in the creative variation node:
+
+```text
+You are an elite direct-response creative strategist.
+Review the competitor ad description provided.
+Identify the primary emotional hook and value proposition.
+Produce 3 distinct variant concepts tailored for our brand.
+Keep element placement identical but change color palette, typography style, and primary headline.
+```
+
+## Customize It
+
+1. **Direct Ad Account Upload**: Connect the Meta Marketing API node to automatically upload spun assets into your ad account as draft ads.
+2. **Video Frame Extraction**: Add an FFmpeg processor node to extract key hooks from video ads and analyze thumbnail performance.
+3. **Weekly Slack Summary**: Schedule a weekly roundup message in Slack with the top 5 most durable competitor ads.
+
+## Keep It Reliable
+
+1. **Storage Limits**: Regularly archive older competitor asset folders in Google Drive to manage cloud storage quotas.
+2. **Apify Actor Status**: Catch webhook errors when Meta changes DOM structures by enabling error alerts in n8n.
+3. **Image Resolution**: Ensure downloaded ad images meet minimum resolution requirements before running vision analysis.

@@ -6,6 +6,8 @@ const publicApi = [
   "/api/cron/",
   "/api/subscribe",
   "/api/newsletter/",
+  "/api/blueprints/",
+  "/api/contact",
   "/api/events",
   "/api/views",
   "/api/affiliate/",

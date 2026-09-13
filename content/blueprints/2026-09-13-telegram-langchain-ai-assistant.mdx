@@ -1,0 +1,151 @@
+---
+title: "Build an Agentic Telegram AI Assistant with LangChain Nodes and Memory"
+slug: "telegram-langchain-ai-assistant"
+summary: "Deploy a conversational Telegram assistant with automation powered by LangChain memory buffers and OpenAI GPT-4 to manage requests autonomously."
+outcome: "A production-grade Telegram bot that remembers context across chats, routes complex user questions, and executes tools without timeouts"
+goal: "automate-operations"
+category: "Telegram"
+roles: ["founder", "operations"]
+tools: ["n8n", "telegram", "openai"]
+difficulty: "intermediate"
+setupTime: "half-day"
+costNotes: "Uses official Telegram BotFather token (free) and OpenAI API pay-as-you-go tokens."
+heroImage: "/images/blueprints/2026-09-13-telegram-langchain-ai-assistant.png"
+heroImageAlt: "Architecture of a Telegram conversational AI bot built with LangChain memory and automation nodes"
+seoTitle: "Build a Telegram AI Assistant with Automation and LangChain"
+metaDescription: "Deploy a Telegram AI assistant with window buffer memory and LangChain nodes using automation to answer client chat queries reliably."
+keywords: ["telegram ai bot", "telegram assistant", "langchain telegram", "telegram workflow automation"]
+references:
+  - title: "Telegram Bot API Documentation"
+    url: "https://core.telegram.org/bots/api"
+  - title: "n8n LangChain Memory Buffer Documentation"
+    url: "https://docs.n8n.io/integrations/builtin/cluster-nodes/sub-nodes/n8n-nodes-langchain.memorybufferwindow/"
+---
+
+## What You're Building
+
+A dedicated Telegram AI Assistant operating on your official Telegram bot handle. The agent leverages LangChain conversational memory nodes inside n8n to track conversational thread history across multiple interactions. When users message the bot with multi-turn requirements, technical queries, or operational requests, the bot answers with precise context instead of treating every prompt in isolation.
+
+## What Telegram and LangChain Can Handle
+
+Telegram provides instant mobile and desktop access with zero client installation friction. Combining Telegram Trigger nodes with n8n LangChain chat agents solves common conversational drift:
+
+1. Thread-isolated window buffer memory keeps up to 10 context turns per chat ID.
+2. Formatted Markdown and HTML message responses preserve readability for complex answers.
+3. Automated error handling prevents silent webhook drops when external LLM rate limits spike.
+
+## What You Need
+
+1. An n8n instance (self-hosted Docker, cloud, or desktop).
+2. A Telegram Bot token obtained from BotFather on Telegram.
+3. An OpenAI API key with access to GPT-4o or GPT-4-turbo models.
+4. An SSL-secured HTTPS endpoint for your n8n webhook listener.
+
+## The Build Blueprint
+
+```
+[Telegram Trigger Webhook]
+           │
+           ▼
+[LangChain AI Agent Node]
+   ├── [OpenAI Chat Model (GPT-4o)]
+   └── [Window Buffer Memory (Session: chat.id)]
+           │
+           ▼
+[Send Telegram Message Response]
+```
+
+<!-- gate -->
+
+## How to Set It Up
+
+1. Open Telegram and search for `@BotFather`. Send `/newbot`, provide a display name, and select a bot handle ending in `bot`. Copy the HTTP API access token.
+2. In n8n, create a new Telegram API Credential and paste the bot token.
+3. Create an OpenAI API Credential in n8n with your secret key.
+4. Import the provided workflow JSON template into your n8n workspace.
+5. Set your session key parameter in the Window Buffer Memory node to `=chat_with_{{ $('Listen for incoming events').first().json.message.chat.id }}`.
+6. Activate the workflow and send a test message to your Telegram bot.
+
+## The Core Workflows
+
+1. **Inbound Webhook Handling**: Listens for `message` events from Telegram and verifies user authorization if restricting to internal team IDs.
+2. **Contextual Retrieval**: Passes the inbound prompt and chat ID to the LangChain Agent, which loads recent conversation history from memory.
+3. **Structured Response Dispatch**: Encodes LLM markdown into supported Telegram HTML entities and dispatches the payload via Telegram API.
+
+## What Stays Under Your Control
+
+- **Conversation Retention**: You choose the buffer size (e.g. 10 turns) to balance token costs against contextual continuity.
+- **Allowed Users**: Filter incoming chat IDs in a conditional node to prevent unauthorized public usage.
+- **LLM Selection**: Switch between OpenAI, Anthropic, or local Ollama models with a single drag-and-drop replacement node.
+
+## Templates
+
+Below is the verified n8n workflow definition ready for import:
+
+```json
+{
+  "name": "Telegram AI Langchain bot",
+  "nodes": [
+    {
+      "id": "e275f31f-6a5f-4444-8bf7-6c003a8e53df",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [1100, 600],
+      "parameters": {
+        "model": "gpt-4o",
+        "options": {
+          "temperature": 0.7
+        }
+      },
+      "typeVersion": 1
+    },
+    {
+      "id": "f25a6666-ff23-4372-afd0-4920a99aab6a",
+      "name": "Window Buffer Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "position": [1220, 600],
+      "parameters": {
+        "sessionKey": "=chat_with_{{ $('Telegram Trigger').first().json.message.chat.id }}",
+        "contextWindowLength": 10
+      },
+      "typeVersion": 1
+    },
+    {
+      "id": "96faef5d-0349-47fe-a7cf-150953490e90",
+      "name": "Telegram Send",
+      "type": "n8n-nodes-base.telegram",
+      "position": [1500, 380],
+      "parameters": {
+        "text": "={{ $json.output }}",
+        "chatId": "={{ $('Telegram Trigger').first().json.message.from.id }}",
+        "additionalFields": {
+          "parse_mode": "HTML"
+        }
+      },
+      "typeVersion": 1.2
+    }
+  ]
+}
+```
+
+## Starter Prompt
+
+Use this system prompt in the LangChain Agent configuration:
+
+```text
+You are an executive operational assistant accessible via Telegram.
+Communicate clearly, concisely, and use bullet points when presenting multi-step answers.
+Do not hallucinate facts. If you lack information, ask the user a clarifying question.
+```
+
+## Customize It
+
+1. **Add Calculator or Search Tools**: Attach n8n tool sub-nodes (Tavily search or Calculator) to let your bot fetch live web information.
+2. **Audio Voice Transcriptions**: Add an OpenAI Whisper node before the agent to transcribe voice notes sent in Telegram automatically.
+3. **CRM Sync**: Append a HubSpot or Notion node to log action items mentioned in messages.
+
+## Keep It Reliable
+
+1. **Rate Limits**: Telegram enforces a limit of 30 messages per second across all chats. For high-volume channels, insert a Queue or SplitInBatches node.
+2. **Markdown Parsing Failures**: Always set fallback parsing to plain text or sanitize unclosed HTML tags to prevent Telegram HTTP 400 bad request errors.
+3. **Long Prompts**: Telegram message payloads cannot exceed 4,096 characters. Add a code split node if LLM outputs exceed 4,000 characters.

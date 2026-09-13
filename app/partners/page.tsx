@@ -29,7 +29,7 @@ export default async function Page() {
                   >
                     {l.label}
                   </a>{" "}
-                  — partner link
+                  : partner link
                 </li>
               ))}
             </ul>

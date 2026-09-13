@@ -106,7 +106,7 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
-      className={`${serif.variable} ${sans.variable}`}
+      className={`${serif.variable} ${sans.variable} m-0 p-0`}
       suppressHydrationWarning
     >
       <head>
@@ -121,7 +121,7 @@ export default async function RootLayout({
           data-admpid="463498"
         />
       </head>
-      <body className="flex min-h-screen flex-col" suppressHydrationWarning>
+      <body className="flex min-h-screen flex-col m-0 p-0 bg-paper" suppressHydrationWarning>
         <GoogleTagManager gtmId={GTM_ID} />
         <PrivacyControls settings={publicSettings}>
           <SiteChrome

@@ -158,8 +158,33 @@ export default async function Page({ params, searchParams }: Props) {
             {category.description ||
               (total > 0
                 ? `${total} published ${total === 1 ? "story" : "stories"}`
-                : `Latest reporting and updates in ${categoryName.toLowerCase()}.`)}
+                : "Curated updates and reporting.")}
           </p>
+        </div>
+
+        <div className="mt-6 flex flex-wrap items-center gap-2 border-b border-rule/70 pb-5">
+          <Link
+            href="/latest"
+            className="rounded-[2px] border border-rule bg-surface px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-ink/70 transition hover:border-ink/30 hover:text-ink"
+          >
+            All News
+          </Link>
+          {CATEGORIES.map((cat) => {
+            const isActive = cat.toLowerCase() === categorySlug.toLowerCase();
+            return (
+              <Link
+                key={cat}
+                href={`/category/${cat.toLowerCase()}`}
+                className={`rounded-[2px] px-3 py-1.5 text-xs font-semibold uppercase tracking-wider transition ${
+                  isActive
+                    ? "bg-ink text-paper shadow-sm"
+                    : "border border-rule bg-surface text-ink/70 hover:border-ink/30 hover:text-ink"
+                }`}
+              >
+                {cat}
+              </Link>
+            );
+          })}
         </div>
 
         {items.length ? (

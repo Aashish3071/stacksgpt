@@ -43,3 +43,9 @@ next-env.d.ts
 .claude/
 .agents/
 skills-lock.json
+
+# Reference materials (not site code)
+Agent Templates, Guides & Tools/
+All n8n Guides, templates & extra tools./
+ANTIGRAVITY_BUILD_BLUEPRINTS.md
+docs/blueprint-drafts/

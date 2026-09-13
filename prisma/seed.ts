@@ -18,7 +18,15 @@ async function main() {
   for (const tool of SEED_TOOLS) {
     await prisma.toolAffiliate.upsert({
       where: { slug: tool.slug },
-      update: {},
+      update: {
+        name: tool.name,
+        tagline: tool.tagline,
+        description: tool.description,
+        category: tool.category,
+        pricingModel: tool.pricingModel,
+        websiteUrl: tool.websiteUrl,
+        aliases: tool.aliases,
+      },
       create: tool,
     });
   }
