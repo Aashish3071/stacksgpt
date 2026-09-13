@@ -203,7 +203,7 @@
       "parameters": {
         "textBody": "={{ $json.text }}",
         "operation": "send",
-        "phoneNumberId": "477115632141067",
+        "phoneNumberId": "",
         "requestOptions": {},
         "additionalFields": {},
         "recipientPhoneNumber": "44123456789"

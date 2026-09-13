@@ -34,7 +34,6 @@ export default function EmailUnlockForm({
 }: Props) {
   const router = useRouter();
   const [email, setEmail] = useState("");
-  const [newsletter, setNewsletter] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -54,14 +53,6 @@ export default function EmailUnlockForm({
       });
       const data = await res.json();
       if (!res.ok || !data.ok) throw new Error(data.error || "Something went wrong. Please try again.");
-
-      if (newsletter) {
-        await fetch("/api/subscribe", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, source: `${kind}:${slug}` }),
-        }).catch(() => undefined);
-      }
 
       // The unlock response sets the member cookie, so the download request is authorized.
       if (downloadSlug) startDownload(`/api/templates/${downloadSlug}/download`);
@@ -105,20 +96,11 @@ export default function EmailUnlockForm({
         </button>
       </div>
 
-      <label className="flex cursor-pointer items-start gap-2 text-xs leading-relaxed text-ink/70">
-        <input
-          type="checkbox"
-          checked={newsletter}
-          onChange={(e) => setNewsletter(e.target.checked)}
-          className="mt-0.5 h-4 w-4 shrink-0 accent-accent"
-        />
-        <span>Also send me new blueprints and AI news by email. Unsubscribe anytime.</span>
-      </label>
-
       {error && <p className="text-xs font-medium text-red-600">{error}</p>}
 
-      <p className="text-[11px] text-ink/50">
-        Free, no payment needed. See our{" "}
+      <p className="text-[11px] leading-relaxed text-ink/60">
+        Free. By unlocking, you join the StacksGPT newsletter with new blueprints and AI news.
+        Unsubscribe anytime. See our{" "}
         <Link href="/privacy" className="underline hover:text-ink">
           privacy policy
         </Link>

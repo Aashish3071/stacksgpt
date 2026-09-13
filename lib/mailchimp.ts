@@ -1,3 +1,5 @@
+import crypto from "node:crypto";
+
 /**
  * Mailchimp Marketing API integration for newsletter subscriptions.
  *
@@ -7,6 +9,8 @@
  * - MAILCHIMP_SERVER_PREFIX (Optional, auto-derived from the API key suffix)
  */
 
+type MailchimpResult = { ok: boolean; status?: string; error?: string };
+
 export function mailchimpConfigured(): boolean {
   return !!(
     process.env.MAILCHIMP_API_KEY &&
@@ -14,61 +18,82 @@ export function mailchimpConfigured(): boolean {
   );
 }
 
-function getServerPrefix(apiKey: string): string {
-  if (process.env.MAILCHIMP_SERVER_PREFIX) {
-    return process.env.MAILCHIMP_SERVER_PREFIX;
-  }
-  const parts = apiKey.split("-");
-  return parts.length === 2 ? parts[1] : "us1";
+function getConfig() {
+  const apiKey = process.env.MAILCHIMP_API_KEY;
+  const listId = process.env.MAILCHIMP_LIST_ID || process.env.MAILCHIMP_AUDIENCE_ID;
+  if (!apiKey || !listId) return null;
+
+  const serverPrefix = process.env.MAILCHIMP_SERVER_PREFIX || apiKey.split("-")[1] || "us1";
+  return {
+    membersUrl: `https://${serverPrefix}.api.mailchimp.com/3.0/lists/${listId}/members`,
+    authorization: `Basic ${Buffer.from(`stacksgpt:${apiKey}`).toString("base64")}`,
+  };
 }
 
-export async function syncToMailchimp(email: string): Promise<{
-  ok: boolean;
-  status?: string;
-  error?: string;
-}> {
-  const apiKey = process.env.MAILCHIMP_API_KEY;
-  const listId =
-    process.env.MAILCHIMP_LIST_ID || process.env.MAILCHIMP_AUDIENCE_ID;
+function memberUrl(membersUrl: string, email: string): string {
+  const hash = crypto.createHash("md5").update(email.toLowerCase().trim()).digest("hex");
+  return `${membersUrl}/${hash}`;
+}
 
-  if (!apiKey || !listId) {
-    return { ok: false, error: "Mailchimp is not configured." };
+async function mailchimpRequest(
+  url: string,
+  authorization: string,
+  method: "PUT" | "POST" | "PATCH",
+  body: unknown,
+): Promise<{ ok: true; data: Record<string, unknown> } | { ok: false; error: string }> {
+  const res = await fetch(url, {
+    method,
+    headers: { "Content-Type": "application/json", Authorization: authorization },
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(8000),
+  });
+  // Some endpoints (such as tags) reply with no body.
+  const data = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+  if (res.ok) return { ok: true, data };
+  return { ok: false, error: String(data.detail || data.title || `Mailchimp returned ${res.status}`) };
+}
+
+export async function syncToMailchimp(
+  email: string,
+  { tags = [] }: { tags?: string[] } = {},
+): Promise<MailchimpResult> {
+  const config = getConfig();
+  if (!config) return { ok: false, error: "Mailchimp is not configured." };
+
+  const url = memberUrl(config.membersUrl, email);
+  try {
+    // status_if_new only applies to new contacts, so anyone who unsubscribed stays unsubscribed.
+    const upsert = await mailchimpRequest(url, config.authorization, "PUT", {
+      email_address: email.toLowerCase().trim(),
+      status_if_new: "subscribed",
+    });
+    if (!upsert.ok) return { ok: false, error: upsert.error };
+
+    const status = typeof upsert.data.status === "string" ? upsert.data.status : undefined;
+    const activeTags = tags.filter(Boolean);
+    if (activeTags.length > 0) {
+      const tagged = await mailchimpRequest(`${url}/tags`, config.authorization, "POST", {
+        tags: activeTags.map((name) => ({ name, status: "active" })),
+      });
+      if (!tagged.ok) return { ok: false, status, error: `Tagging failed: ${tagged.error}` };
+    }
+
+    return { ok: true, status };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : "Mailchimp sync failed" };
   }
+}
 
-  const serverPrefix = getServerPrefix(apiKey);
-  const url = `https://${serverPrefix}.api.mailchimp.com/3.0/lists/${listId}/members`;
+export async function unsubscribeFromMailchimp(email: string): Promise<MailchimpResult> {
+  const config = getConfig();
+  if (!config) return { ok: false, error: "Mailchimp is not configured." };
 
   try {
-    const res = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `apikey ${apiKey}`,
-      },
-      body: JSON.stringify({
-        email_address: email.toLowerCase().trim(),
-        status: "subscribed",
-      }),
+    const result = await mailchimpRequest(memberUrl(config.membersUrl, email), config.authorization, "PATCH", {
+      status: "unsubscribed",
     });
-
-    const data = await res.json();
-
-    if (res.ok) {
-      return { ok: true, status: data.status || "subscribed" };
-    }
-
-    // Handle already existing member
-    if (data.title === "Member Exists" || data.status === 400) {
-      return { ok: true, status: "already_subscribed" };
-    }
-
-    console.warn("Mailchimp subscription warning:", data.detail || data.title);
-    return { ok: false, error: data.detail || data.title };
+    return result.ok ? { ok: true, status: "unsubscribed" } : { ok: false, error: result.error };
   } catch (err) {
-    console.warn("Failed to sync subscriber to Mailchimp:", err);
-    return {
-      ok: false,
-      error: err instanceof Error ? err.message : "Mailchimp sync failed",
-    };
+    return { ok: false, error: err instanceof Error ? err.message : "Mailchimp unsubscribe failed" };
   }
 }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { signMemberId } from "@/lib/member";
+import { mailchimpConfigured, syncToMailchimp } from "@/lib/mailchimp";
 
 export async function POST(req: NextRequest) {
   try {
@@ -41,6 +42,13 @@ export async function POST(req: NextRequest) {
       } catch (err) {
         console.warn("Could not increment blueprint unlock count:", err);
       }
+    }
+
+    // Unlocking joins the newsletter (the form says so); the tag records which page it came from.
+    if (mailchimpConfigured()) {
+      const tag = /^[a-z0-9-]{1,70}$/.test(slug) ? `${kind}:${slug}` : `${kind}_unlock`;
+      const result = await syncToMailchimp(email, { tags: [tag] });
+      if (!result.ok) console.warn("Mailchimp sync failed:", result.error);
     }
 
     const token = signMemberId(subscriberId);

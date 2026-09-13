@@ -21,6 +21,10 @@ export async function POST(req: Request) {
       })
       .parse(body);
 
+    const rawSource = (body as { source?: unknown } | null)?.source;
+    const source =
+      typeof rawSource === "string" && /^[a-z0-9:_-]{1,80}$/i.test(rawSource) ? rawSource : "website";
+
     const hasSmtp = emailConfigured();
     const hasMailchimp = mailchimpConfigured();
 
@@ -34,7 +38,7 @@ export async function POST(req: Request) {
         where: { email },
         create: {
           email,
-          source: (body as any)?.source || "website",
+          source,
           confirmedAt: hasSmtp ? null : new Date(),
         },
         update: {
@@ -44,11 +48,10 @@ export async function POST(req: Request) {
       });
     }
 
-    // Sync to Mailchimp if configured
+    // Awaited because serverless functions can stop before background promises finish.
     if (hasMailchimp) {
-      syncToMailchimp(email).catch((err) => {
-        console.warn("Mailchimp background sync error:", err);
-      });
+      const result = await syncToMailchimp(email, { tags: [source] });
+      if (!result.ok) console.warn("Mailchimp sync failed:", result.error);
     }
 
     // Send confirmation email via Zoho SMTP if configured

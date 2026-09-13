@@ -355,7 +355,7 @@
       "parameters": {
         "textBody": "=You can only send text messages",
         "operation": "send",
-        "phoneNumberId": "470271332838881",
+        "phoneNumberId": "",
         "requestOptions": {},
         "additionalFields": {},
         "recipientPhoneNumber": "={{ $('Respond').item.json.body.entry[0].changes[0].value.contacts[0].wa_id }}"
@@ -373,7 +373,7 @@
       "parameters": {
         "textBody": "={{ $json.output }}",
         "operation": "send",
-        "phoneNumberId": "470271332838881",
+        "phoneNumberId": "",
         "requestOptions": {},
         "additionalFields": {},
         "recipientPhoneNumber": "={{ $('Respond').item.json.body.entry[0].changes[0].value.contacts[0].wa_id }}"

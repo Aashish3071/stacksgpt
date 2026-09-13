@@ -63,6 +63,9 @@ function runTests() {
     const emails = raw.match(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g) ?? [];
     assert.ok(emails.every((e) => /@example\.(com|org)$/i.test(e)), `${where} workflow contains a real email address.`);
     assert.ok(!/sk-(?:proj-)?[A-Za-z0-9_-]{20,}|AIza[0-9A-Za-z_-]{30,}|xox[baprs]-[A-Za-z0-9-]{10,}/.test(raw), `${where} workflow contains an API key.`);
+    assert.ok(!/"phoneNumberId":\s*"\d+"/.test(raw), `${where} workflow still contains the author's WhatsApp phone number ID.`);
+    assert.ok(!/"value":\s*"app[A-Za-z0-9]{14}"/.test(raw), `${where} workflow still contains the author's Airtable base ID.`);
+    assert.ok(!/[0-9a-f]{32}:[0-9a-f]{32,}/.test(raw), `${where} workflow still contains encrypted sample data.`);
   }
 
   for (const template of listTemplates()) {

@@ -28,8 +28,13 @@ const RESOURCE_KEYS = new Set([
   "documentId", "sheetName", "fileId", "folderId", "driveId", "databaseId", "pageId",
   "blockId", "channelId", "base", "table", "calendar", "workflowId", "teamId",
   "projectId", "boardId", "listId", "spaceId", "workspaceId", "user", "assistantId",
-  "pineconeIndex", "qdrantCollection", "organizationId", "tableId",
+  "pineconeIndex", "qdrantCollection", "organizationId", "tableId", "baseId",
 ]);
+
+// Plain string parameters that hold the original author's account identifiers.
+const ACCOUNT_ID_KEYS = new Set(["phoneNumberId"]);
+const AIRTABLE_BASE_RE = /^app[A-Za-z0-9]{14}$/;
+const ENCRYPTED_SAMPLE_RE = /\b[0-9a-f]{32}:[0-9a-f]{32,}\b/g;
 
 const EMAIL_RE = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g;
 const GOOGLE_FILE_RE =
@@ -72,7 +77,11 @@ function parseFirstJsonObject(raw: string): Record<string, unknown> {
 function scrubString(value: string, isStickyNote: boolean): string {
   let out = value.replace(EMAIL_RE, (m) => (/@example\.(com|org)$/i.test(m) ? m : "you@example.com"));
   out = out.replace(LINKEDIN_PROFILE_RE, "linkedin.com/in/example-profile");
-  if (!isStickyNote) out = out.replace(GOOGLE_FILE_RE, "$1YOUR_FILE_ID");
+  out = out.replace(ENCRYPTED_SAMPLE_RE, "ENCRYPTED_EMAIL_ADDRESS");
+  if (!isStickyNote) {
+    out = out.replace(GOOGLE_FILE_RE, "$1YOUR_FILE_ID");
+    if (AIRTABLE_BASE_RE.test(out)) out = "";
+  }
   return out;
 }
 
@@ -82,6 +91,10 @@ function scrub(value: unknown, isStickyNote: boolean, key?: string): unknown {
     const out: Record<string, unknown> = {};
     for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
       if (k === "cachedResultName" || k === "cachedResultUrl") continue;
+      if (ACCOUNT_ID_KEYS.has(k) && typeof v === "string" && !v.startsWith("=")) {
+        out[k] = "";
+        continue;
+      }
       out[k] = scrub(v, isStickyNote, k);
     }
     if (out.__rl === true && key && RESOURCE_KEYS.has(key) && out.mode !== "name") {
