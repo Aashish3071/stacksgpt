@@ -1,0 +1,50 @@
+---
+type: "ANNOUNCEMENT"
+title: "Cohere Launches Parse: Multimodal Vision Model for Enterprise Document Automation"
+slug: "cohere-parse-enterprise-document-vlm"
+category: "Automation"
+summary: >
+  Cohere has released Cohere Parse, a specialized vision-language model engineered
+  to transform high-volume enterprise documents, scanned PDFs, and complex financial
+  tables into clean, structured Markdown for agentic retrieval and RAG pipelines.
+sourceName: "Cohere"
+sourceUrl: "https://cohere.com/blog/parse"
+toolName: "Cohere"
+publishedDate: "2026-08-27"
+retrievedAt: "2026-09-14T16:50:00Z"
+heroImage: "/images/articles/2026-08-27-cohere-parse-enterprise-document-vlm.png"
+heroImageAlt: "Cohere logo centered on warm sand backdrop with title Cohere Parse Multimodal Document Vision Model and document visual analysis icons."
+heroImageCredit: "Editorial composition for StacksGPT"
+keyPoints:
+  - "Cohere Parse extracts structured Markdown from messy documents across nine major world languages."
+  - "Scores 79.2 on ParseBench, outperforming Mistral OCR 4, Databricks AI Parse, and LlamaParse Cost Effective."
+  - "Achieves an 87.0 score on table extraction, preserving row and column hierarchies for financial and legal filings."
+  - "Priced at $1.50 per 1,000 pages via API, with dedicated private VPC deployment options in Model Vault."
+verdict: >
+  Cohere Parse offers an enterprise-grade OCR upgrade for teams building RAG pipelines. At $1.50 per 1,000 pages, it provides frontier parsing accuracy without the prohibitive cost of generalist vision models.
+seoTitle: "Cohere Parse: Vision Model for Document Automation"
+metaDescription: "Cohere launches Parse, a multimodal vision-language model converting complex enterprise documents and tables into structured Markdown."
+keywords:
+  - "cohere"
+  - "cohere parse"
+  - "document parsing"
+  - "ocr"
+  - "rag"
+  - "enterprise automation"
+---
+
+Cohere has launched Cohere Parse, a multimodal vision-language model engineered specifically for enterprise document extraction and downstream automation. While generic optical character recognition tools extract raw text without contextual layout awareness, Parse detects complex visual elements, embedded charts, and multi-page tables, outputting sanitized Markdown ready for vector indexing and agentic retrieval.
+
+The release addresses a longstanding structural bottleneck in enterprise AI adoption. Most enterprise data remains locked inside semi-structured PDF files, scanned contracts, regulatory filings, and complex financial spreadsheets. Traditional parser pipelines frequently scramble table cells and lose reading order, leading to severe retrieval hallucinations in retrieval-augmented generation (RAG) systems.
+
+### Specialized architecture and ParseBench performance
+
+Rather than relying on oversized frontier generalist models that incur unsustainable inference bills at scale, Cohere built Parse as a compact, high-throughput vision-language model. On ParseBench, an industry benchmark evaluating parsing accuracy for autonomous agents across table fidelity, content faithfulness, and semantic formatting, Parse achieved an aggregate score of 79.2.
+
+This benchmark result places Parse ahead of dedicated extraction tools, including LlamaParse Cost Effective at 78.3, Mistral OCR 4 at 74.5, and Databricks AI Parse at 72.4. In table extraction specifically, Parse scored 87.0, matching the capabilities of significantly larger general-purpose models while maintaining an over 20-point performance margin against legacy cloud services like AWS Textract and Google Document AI. The model supports documents across nine major languages out of the box.
+
+### Predictable economics and flexible private deployment
+
+Cohere priced Parse at \$1.50 per 1,000 pages through its standard developer API. For organizations with high-volume pipelines spanning millions of annual document pages, this pricing structure significantly reduces the operational overhead of ingesting unstructured corporate archives.
+
+For enterprises subject to strict regulatory compliance, data residency mandates, or zero-data-retention requirements, Cohere also made Parse available inside Model Vault. This single-tenant deployment option allows engineering teams to run Parse within private cloud VPC environments, lowering per-page processing costs further while ensuring proprietary data never leaves customer-controlled infrastructure. Developers can evaluate Parse through Cohere's hosted playground and public API starting today.
