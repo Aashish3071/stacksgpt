@@ -1,0 +1,55 @@
+---
+type: "ANNOUNCEMENT"
+title: "TypeSafe AI Launches System One Models and Jev for Fast, Deterministic Software Automation"
+slug: "typesafe-system-one-models-jev"
+category: "Automation"
+summary: >
+  TypeSafe AI has emerged from stealth with System One Models and its flagship
+  model Jev. By replacing token-by-token text generation with parallel probabilistic
+  decision-making, the model achieves frontier-level intelligence while cutting
+  latency and inference costs by over two orders of magnitude.
+sourceName: "TypeSafe AI"
+sourceUrl: "https://typesafe.ai/blog/introducing-system-one-models-and-jev"
+toolName: "TypeSafe AI"
+publishedDate: "2026-09-18"
+retrievedAt: "2026-09-19T11:45:00Z"
+heroImage: "/images/articles/2026-09-18-typesafe-system-one-models-jev.png"
+heroImageAlt: "TypeSafe AI logo and typography for System One Models Jev with visual badges for System One Models, Zero Hallucinations, and Parallel Decision Engine."
+heroImageCredit: "Editorial composition for StacksGPT"
+keyPoints:
+  - "Introduces System One Models, a new model category optimized for fast, structured program decisions rather than open-ended chat."
+  - "Trained using Reinforcement Learning for Calibrated Decisions (RLCD) to output calibrated probabilities and strict typed values."
+  - "Eliminates token-by-token sequential sampling, executing complex workflow graphs up to 193x faster and 444x cheaper than traditional LLMs."
+  - "Guarantees zero schema hallucinations and zero type errors, making AI reliable for production backend infrastructure."
+verdict: >
+  Jev strips away chat overhead to solve AI's biggest automation hurdle: non-deterministic output. If your backend needs fast, type-safe probabilistic decisions without token hallucinations, System One models represent a compelling architectural shift.
+seoTitle: "TypeSafe AI Launches System One Models and Jev"
+metaDescription: "TypeSafe AI introduces Jev, a non-generative System One model trained with RLCD to deliver fast, type-safe, hallucination-free software automation."
+keywords:
+  - "typesafe ai"
+  - "system one models"
+  - "jev"
+  - "rlcd"
+  - "software automation"
+  - "developer tools"
+---
+
+TypeSafe AI has launched its first public model, Jev, introducing a novel category of frontier architecture called System One Models. Founded by former OpenAI researcher Diogo Almeida, who contributed to early ChatGPT and instruction-following research, TypeSafe AI argues that the fundamental bottleneck preventing widespread software automation is not a lack of raw model intelligence, but the architectural mismatch of auto-regressive chat models.
+
+Standard large language models generate output sequentially, one string token at a time. While this auto-regressive decoding is ideal for conversational text and creative writing, it is poorly suited for mission-critical software pipelines. Traditional LLMs frequently suffer from runtime type errors, hallucinated function arguments, high latency, and unpredictable JSON parsing failures when embedded deep within software dependency graphs.
+
+### The System One architecture and RLCD training
+
+Drawing conceptual inspiration from Daniel Kahneman's framework of fast, intuitive System 1 thinking versus slow, deliberate System 2 reasoning, TypeSafe built an entirely non-generative stack. Named after economist William Stanley Jevons, whose namesake paradox observed that increased resource efficiency drastically accelerates total consumption, Jev aims to collapse the cost and latency of machine intelligence to unlock mass programmatic automation.
+
+Instead of human preference tuning through standard Reinforcement Learning with Human Feedback (RLHF), TypeSafe trains its models using Reinforcement Learning for Calibrated Decisions (RLCD). The system accepts unstructured program state as input and evaluates predefined output schemas simultaneously using a parallel sampler. Rather than outputting unpredictable text tokens, Jev produces strict, type-safe structured values paired with calibrated confidence probabilities.
+
+Because the possible return types are defined in code in advance, schema matching is mathematically guaranteed, reducing schema hallucinations and type mismatches to zero.
+
+### Workflow benchmarks and production economics
+
+To measure real-world performance within production code, TypeSafe introduced workflow compute graph evaluations. Rather than testing open-ended question answering, the benchmark measures how models execute multi-stage decision trees where independent, decomposed questions guide programmatic branching.
+
+On complex multi-step workflow graphs, Jev matches the decision accuracy of frontier reasoning models like GPT-6 Astra and Fable 5.1 while executing up to 193.6 times faster and 444.6 times cheaper. In real-time interactive demonstrations, such as playing Doom via structured state evaluation and navigating high-cardinality link trees in Wikiracing, Jev demonstrated continuous sub-second decision throughput without losing structural adherence.
+
+TypeSafe AI has opened early access for Jev starting today, providing developer SDKs and API endpoints for engineering teams looking to integrate deterministic AI decision nodes into production workflows.
