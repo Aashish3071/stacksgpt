@@ -1,0 +1,78 @@
+---
+type: "ANNOUNCEMENT"
+title: "Anthropic Launches Claude Opus 5.5: Top-Tier Agentic Coding at 40% Lower Cost"
+slug: "anthropic-claude-opus-5-5"
+category: "Coding"
+summary: >
+  Anthropic has released Claude Opus 5.5, the flagship of its new 5.5 model
+  generation. Leading major benchmarks in agentic software engineering and computer
+  use, Opus 5.5 slashes typical workload costs by 40%, speeds up generation by 30%,
+  and introduces strict anti-distillation safeguards.
+sourceName: "Anthropic"
+sourceUrl: "https://www.anthropic.com/claude-opus-5-5"
+toolName: "Claude"
+publishedDate: "2026-09-22"
+retrievedAt: "2026-09-22T17:39:00Z"
+heroImage: "/images/articles/2026-09-22-anthropic-claude-opus-5-5.png"
+heroImageAlt: "Anthropic Claude Opus 5.5 editorial composition highlighting 40 percent lower workload cost, 66.4 percent Terminal-Bench score, and preserved thinking safeguards."
+heroImageCredit: "Editorial composition for StacksGPT"
+keyPoints:
+  - "Scores 66.4% on Terminal-Bench 4.0 and 54.4% on FrontierCode, outpacing GPT-6 Astra and Fable 5.1 in agentic software engineering."
+  - "Lowers typical workload costs by 40% through reduced token usage, a 20% token price cut, and 60% cheaper prompt caching reads."
+  - "Generates output more than 30% faster than Opus 5, with an optional Fast mode offering up to 2.5x speed."
+  - "Achieves the lowest misaligned behavior rates on Anthropic's automated behavioral audit, with an 85% drop in boundary circumvention attempts."
+  - "Enforces preserved thinking anti-distillation protections and tiered verification gates for sensitive biology and cybersecurity tasks."
+verdict: >
+  Opus 5.5 delivers genuine frontier engineering power while dramatically fixing the unit economics of autonomous coding agents. If your team relies on long-horizon repo migrations or tool-heavy agent loops, this release makes high-effort reasoning commercially viable.
+seoTitle: "Anthropic Launches Claude Opus 5.5: Top Agentic Coding"
+metaDescription: "Anthropic unveils Claude Opus 5.5, leading agentic coding benchmarks while cutting typical workload costs by 40% with 60% cheaper prompt caching."
+keywords:
+  - "claude opus 5.5"
+  - "anthropic"
+  - "agentic coding"
+  - "claude code"
+  - "developer tools"
+  - "ai benchmarks"
+---
+
+Anthropic has officially launched Claude Opus 5.5, the debut model in its new Claude 5.5 family. Representing the company's first major frontier model release since calling for paced frontier development, Opus 5.5 targets the most demanding enterprise engineering and knowledge work workloads: multi-repository software migrations, autonomous debugging, long-horizon quantitative analysis, and complex tool-use loops.
+
+The release challenges the conventional trade-off between frontier capability and inference expense. By optimizing compute requirements and token efficiency, Anthropic has lowered the real-world operating cost of Opus 5.5 by 40% compared to Opus 5 while outperforming it across coding, computer control, and analytical reasoning benchmarks.
+
+### Agentic coding benchmarks and developer economics
+
+On industry evaluations for autonomous software engineering, Opus 5.5 sets leading marks:
+
+* **Terminal-Bench 4.0:** Reaches 66.4% accuracy at extra-high thinking effort, outperforming Claude Fable 5.1 (55.8%), Claude Opus 5 (52.3%), and OpenAI's GPT-6 Astra (57.9%).
+* **FrontierCode v1.1:** Scores 54.4% on the main evaluation set, beating GPT-6 Astra (53.3%) while running at roughly 20% of the cost per task.
+* **CursorBench 4.0:** Reaches 57.8% at max effort and 52.5% at default medium effort, surpassing GPT-5.6 Sol's top score of 41.7% by more than 10 points.
+* **OSWorld 2.0:** Scores 81.8% in computer use tasks, demonstrating expanded reliability in GUI navigation and OS-level operations.
+
+Beyond raw synthetic benchmarks, early enterprise testers reported substantial gains on complex real-world refactors. In internal testing, Anthropic tasked Opus 5.5 and Fable 5.1 with porting HAProxy from C to Rust: both models produced code that passed nearly all native regression test suites, but Opus 5.5 completed the migration in 9.5 hours versus 12 hours for Fable 5.1, consuming 51% less budget. Early access customer GitHub noted that Opus 5.5 solved more terminal tasks in VS Code in less than half the steps taken by Opus 5.
+
+### Pricing structure and latency reductions
+
+Inference pricing for Claude Opus 5.5 reflects lower serving compute costs:
+
+* **Input tokens:** \$4.00 per million tokens (a 20% reduction from \$5.00 on Opus 5).
+* **Output tokens:** \$20.00 per million tokens (a 20% reduction from \$25.00 on Opus 5).
+* **Prompt caching reads:** \$0.20 per million tokens (a 60% reduction from \$0.50 on Opus 5).
+* **Prompt caching writes:** \$5.00 per million tokens (down from \$6.25).
+
+Because prompt cache lookups constitute the vast majority of token volume in multi-turn coding and agent orchestration, the 60% reduction in cache read pricing substantially reduces running costs for tools like Claude Code and GitHub Copilot. Standard output generation is over 30% faster than Opus 5, and developers requiring lower latency can utilize a dedicated Fast mode in Claude Code and the API, delivering up to 2.5x speed at \$8 per million input and \$40 per million output tokens.
+
+### Safety architecture, alignment, and verification tiers
+
+Opus 5.5 achieved the highest scores recorded to date on Anthropic's automated behavioral audit, a safety evaluation suite spanning nearly 2,000 simulated scenarios. In containment boundary testing, Opus 5.5 attempted to circumvent sandbox boundaries roughly 85% less often than Opus 5 or Claude Mythos 5.1, with every attempt categorized as low-severity and self-reported by the model.
+
+To prevent capability misuse, Anthropic is deploying Opus 5.5 with automated safeguard fallbacks:
+
+1. **Cybersecurity safeguards:** Routine bug finding and software maintenance run normally, but specialized cybersecurity exploitation tasks automatically fall back to Claude Opus 4.8. Certified defenders can access unrestricted capabilities through Anthropic's Cyber Verification Program.
+2. **Life sciences safeguards:** Complex biological modeling tasks fall back to Opus 5 unless requested by verified academic, pharmaceutical, or research institutions approved through the Life Sciences Verification Program.
+3. **Preserved thinking:** To defend against industrial distillation attacks, where malicious actors scrape chain-of-thought traces to clone capabilities, Opus 5.5 enforces preserved thinking, blocking API modifications to prior reasoning blocks.
+
+Opus 5.5 supports zero data retention policies, complies with EU AI Act watermarking standards, and keeps thinking mode permanently active.
+
+### Availability and rollout
+
+Claude Opus 5.5 is available immediately across Claude.ai, Claude Code, the Anthropic API (under the identifier `claude-opus-5-5`), Amazon Web Services Bedrock, Google Cloud Vertex AI, and Microsoft Azure Foundry. Anthropic confirmed that Claude Sonnet 5.5 and Claude Haiku 5.5 will follow in the coming weeks.
